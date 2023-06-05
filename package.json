@@ -1,0 +1,50 @@
+{
+  "name": "dfx",
+  "version": "0.0.1",
+  "description": "TODO",
+  "author": "Cobra Technologies GmbH",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "TODO"
+  },
+  "keywords": [
+    "TODO"
+  ],
+  "scripts": {
+    "build": "hardhat compile",
+    "doc": "ts-node scripts/SetupDocs.ts && hardhat docgen",
+    "lint": "npm run lint-ts && npm run lint-sol",
+    "lint:fix": "npm run lint-ts:fix && npm run lint-sol:fix",
+    "lint-sol": "solhint -f table -c .solhint.json \"contracts/**/*.sol\"",
+    "lint-sol:fix": "solhint -f table -c .solhint.json \"contracts/**/*.sol\" --fix",
+    "lint-ts": "eslint . --format table",
+    "lint-ts:fix": "eslint . --format table --fix",
+    "test": "hardhat test",
+    "test:trace": "hardhat test --vvvv",
+    "test:coverage": "hardhat coverage",
+    "test:gas": "cross-env REPORT_GAS=true hardhat test --grep \"^((?!@compare|@skip-on-gas).)*$\"",
+    "deploy:testnet": "hardhat --network testnet deploy",
+    "verify:testnet": "hardhat --network testnet etherscan-verify --solc-input"
+  },
+  "devDependencies": {
+    "@hashgraph/sdk": "^2.26.0",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.40.0",
+    "eslint-formatter-table": "^7.32.1",
+    "hardhat": "^2.14.0",
+    "hardhat-abi-exporter": "^2.10.1",
+    "hardhat-contract-sizer": "^2.8.0",
+    "hardhat-deploy": "^0.11.30",
+    "solhint": "^3.4.1",
+    "solidity-docgen": "^0.6.0-beta.35"
+  },
+  "dependencies": {
+    "hardhat-tracer": "^2.3.2"
+  }
+}

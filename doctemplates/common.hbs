@@ -1,0 +1,30 @@
+{{h}} [xref:#{{anchor}}[{{name}}]]
+{{#if signature}}
+```solidity
+{{{signature}}}
+```
+{{/if}}
+{{#if natspec.notice}}
+{{{natspec.notice}}}
+{{/if}}
+{{#if natspec.dev}}
+<div class="dev" markdown="1">
+{{{smartJoinLines natspec.dev "_"}}}
+</div>
+{{/if}}
+
+{{#if natspec.params}}
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+{{#each params}}
+| {{name}} | {{type}} | {{{joinLines natspec}}} |
+{{/each}}
+{{/if}}
+
+{{#if natspec.returns}}
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+{{#each returns}}
+| {{#if name}}{{name}}{{else}}[{{@index}}]{{/if}} | {{type}} | {{{joinLines natspec}}} |
+{{/each}}
+{{/if}}

@@ -1,0 +1,67 @@
+{{fileHeader}}
+
+{{>common}}
+{{#if (directParents)}}
+
+***
+
+{{#hsection}}
+{{h}} Implements
+
+{{#each (directParents)}}
+- [{{this.name}}]({{this.docpath}})
+{{/each}}
+{{/hsection}}
+{{/if}}
+{{#if (allEvents)}}
+
+***
+
+{{#hsection}}
+{{h}} Events
+
+{{#each (allEvents)}}
+{{#hsection}}
+{{>item}}
+{{/hsection}}
+
+{{/each}}
+{{/hsection}}
+{{/if}}
+
+{{#if modifiers}}
+{{#hsection}}
+{{h}} Modifiers
+
+{{#each modifiers}}
+{{#hsection}}
+{{>item}}
+{{/hsection}}
+
+{{/each}}
+{{/hsection}}
+{{/if}}
+
+{{#if functions}}
+
+***
+
+{{#hsection}}
+{{h}} Functions
+
+{{#each functions}}
+{{#unless (eq visibility "internal")}}
+{{#hsection}}
+```solidity
+function {{name}}(
+{{#natspec.params}}
+{{#lookup ../args.types @index}}{{/lookup}} {{param}}{{#if @last}}{{else}},{{/if}}
+{{/natspec.params}}
+) {{visibility}}{{#if outputs}} returns ({{outputs}}){{/if}}
+```
+{{>item}}
+{{/hsection}}
+{{/unless}}
+{{/each}}
+{{/hsection}}
+{{/if}}
