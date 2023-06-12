@@ -4,11 +4,14 @@ import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import "hardhat-tracer";
 import "solidity-docgen";
-
 import * as dotenv from "dotenv";
+import { PageAssigner } from "solidity-docgen/dist/site";
+import { LoadNetworkSpecificValues } from "./scripts/DeployConstants";
+
 dotenv.config();
 
-import { PageAssigner } from "solidity-docgen/dist/site";
+const { accounts, deployer, dev } = LoadNetworkSpecificValues();
+
 const excludePath: RegExp[] = [/\/mocks\//, /\/compare\//];
 const pa: PageAssigner = (item, file, config) =>
 {
@@ -64,24 +67,32 @@ const config = {
 	namedAccounts:
 	{
 		deployer: {
-			default: process.env.OWNER ?? 0
+			default: deployer ?? 0
 		},
 		dev: {
 			// Default to 1
-			default: process.env.DEVELOPER ?? 1
+			default: dev ?? 1
 		}
 	},
 	networks: {
 		hedera:
 		{
 			url: "https://mainnet.hashio.io/api",
-			accounts: [process.env.MAINNET_PRIVATE_KEY ]
+			accounts
 		},
-		testnet:
+		hederaTestnet:
 		{
 			url: "https://testnet.hashio.io/api",
-			accounts: [process.env.TESTNET_PRIVATE_KEY],
+			accounts,
 			timeout: 100000
+		},
+		goerli: {
+			url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+			accounts
+		},
+		sepolia: {
+			url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+			accounts
 		}
 		// ,
 		// hardhat:
@@ -119,7 +130,31 @@ const config = {
 					}
 				}
 			}
-		]
+		],
+		overrides: {
+			"contracts/core/Vault.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 200
+					}
+				}
+			},
+			"contracts/libraries/hedera/SafeHTS.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 200
+					}
+				}
+			}
+		}
 	}
 };
 

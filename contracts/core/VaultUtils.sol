@@ -45,7 +45,7 @@ contract VaultUtils is IVaultUtils, Governable
         vault = _vault;
     }
 
-    function updateCumulativeFundingRate(address /* _collateralToken */, address /* _indexToken */) public override returns (bool)
+    function updateCumulativeFundingRate(address /* _collateralToken */, address /* _indexToken */) pure public override returns (bool)
     {
         return true;
     }

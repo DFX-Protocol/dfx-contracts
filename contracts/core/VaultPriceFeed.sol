@@ -83,7 +83,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
         _;
     }
 
-    constructor() public {
+    constructor() {
         gov = msg.sender;
     }
 
