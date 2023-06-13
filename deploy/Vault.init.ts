@@ -23,21 +23,21 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 
 	if (!isInitialized)
 	{
-		console.log(`\x1B[32m${initContract}\x1B[0m - Initializing contract with deployer \x1B[33m${deployer}\x1B[0m ...`);
-		console.log(`\x1B[32m${contract}\x1B[0m - Using init parameters \x1B[33m${router.address},${usdg.address},${vaultPriceFeed.address},${liquidationFeeUsd},${fundingRateFactor},${stableFundingRateFactor}\x1B[0m ...`);
-		await initContract.connect(depSign).initialize(
+		console.log(`\x1B[32m${initContractName}\x1B[0m - Initializing contract with deployer \x1B[33m${deployer}\x1B[0m ...`);
+		console.log(`\x1B[32m${initContractName}\x1B[0m - Using init parameters \x1B[33m${router.address},${usdg.address},${vaultPriceFeed.address},${liquidationFeeUsd},${fundingRateFactor},${stableFundingRateFactor}\x1B[0m ...`);
+		(await initContract.connect(depSign).initialize(
 			router.address,
 			usdg.address,
 			vaultPriceFeed.address,
 			liquidationFeeUsd,
 			fundingRateFactor,
 			stableFundingRateFactor
-		);
-		console.log(`\x1B[32m${initContract}\x1B[0m - initialized`);
+		)).wait();
+		console.log(`\x1B[32m${initContractName}\x1B[0m - initialized`);
 	}
 	else
 	{
-		console.log(`\x1B[32m${initContract}\x1B[0m - already initialized`);
+		console.log(`\x1B[32m${initContractName}\x1B[0m - already initialized`);
 	}
 };
 

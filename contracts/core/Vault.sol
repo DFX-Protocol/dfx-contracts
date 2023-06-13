@@ -347,7 +347,7 @@ contract Vault is ReentrancyGuard, IVault {
 
     function initialize(
         address router_,
-        address _usdg,
+        address usdg_,
         address _priceFeed,
         uint256 _liquidationFeeUsd,
         uint256 _fundingRateFactor,
@@ -358,7 +358,7 @@ contract Vault is ReentrancyGuard, IVault {
         isInitialized = true;
 
         router = router_;
-        usdg = _usdg;
+        usdg = usdg_;
         priceFeed = _priceFeed;
         liquidationFeeUsd = _liquidationFeeUsd;
         fundingRateFactor = _fundingRateFactor;
