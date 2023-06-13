@@ -77,21 +77,21 @@ const config = {
 	networks: {
 		hedera:
 		{
-			url: "https://mainnet.hashio.io/api",
+			url: `${process.env.HEDERA_RPC_URL}`,
 			accounts
 		},
 		hederaTestnet:
 		{
-			url: "https://testnet.hashio.io/api",
+			url: `${process.env.HEDERA_TESTNET_RPC_URL}`,
 			accounts,
 			timeout: 100000
 		},
 		goerli: {
-			url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+			url: `${process.env.GOERLI_RPC_URL}`,
 			accounts
 		},
 		sepolia: {
-			url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+			url: `${process.env.SEPOLIA_RPC_URL}`,
 			accounts
 		}
 		// ,
