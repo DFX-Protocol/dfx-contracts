@@ -143,7 +143,40 @@ const config = {
 					}
 				}
 			},
+			"contracts/core/OrderBook.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				}
+			},
+			"contracts/peripherals/Timelock.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				}
+			},
 			"contracts/libraries/hedera/SafeHTS.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 200
+					}
+				}
+			},
+			"contracts/staking/RewardRouterV2.sol": {
 				version: "0.8.20",
 				settings:
 				{
