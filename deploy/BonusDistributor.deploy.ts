@@ -1,7 +1,6 @@
-import { BigNumber } from "ethers";
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetBonusMultiplier, GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
+import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
 
 const contract = "BonusDistributor";
 const contractDependencies = ["MintableBaseToken", "RewardTracker[bonusGmxTracker]"];

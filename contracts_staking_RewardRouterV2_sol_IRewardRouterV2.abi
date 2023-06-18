@@ -1,0 +1,1 @@
+[{"inputs":[],"name":"feeGlpTracker","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"stakedGlpTracker","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}]

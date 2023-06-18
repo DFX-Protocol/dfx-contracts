@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+pragma abicoder v1;
 
 import { IERC20 } from "../libraries/token/ERC20.sol";
 import { SafeERC20 } from "../libraries/token/SafeERC20.sol";

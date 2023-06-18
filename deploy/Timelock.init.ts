@@ -1,9 +1,9 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetContractHandler, CallSetKeeper, CallSetShouldToggleIsLeverageEnabled, CallSignalApprove } from "../scripts/DeployHelper";
+import { CallSetContractHandler, CallSetKeeper, CallSetLiquidator2, CallSetShouldToggleIsLeverageEnabled, CallSignalApprove } from "../scripts/DeployHelper";
 
 const contract = "Timelock";
-const contractDependencies = [contract, "PositionRouter", "PositionManager", "GMX"];
+const contractDependencies = [contract, "PositionRouter", "PositionManager", "GMX", "Vault"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
@@ -14,6 +14,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	await CallSetContractHandler(hre, contract, "PositionManager");
 	await CallSetKeeper(hre, contract, deployer);
 	await CallSignalApprove(hre, contract, "GMX", deployer, "1000000000000000000");
+	await CallSetLiquidator2(hre, contract, "Vault", "PositionManager");
 };
 
 export default func;
