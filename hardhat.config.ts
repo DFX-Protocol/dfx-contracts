@@ -117,7 +117,8 @@ const config = {
 						enabled: true,
 						runs: 500000
 					}
-				}
+				},
+				viaIR: true
 			},
 			{
 				version: "0.6.12",
@@ -128,7 +129,8 @@ const config = {
 						enabled: true,
 						runs: 10
 					}
-				}
+				},
+				viaIR: false
 			}
 		],
 		overrides: {
@@ -141,7 +143,8 @@ const config = {
 						enabled: true,
 						runs: 200
 					}
-				}
+				},
+				viaIR: true
 			},
 			"contracts/core/OrderBook.sol": {
 				version: "0.8.20",
@@ -152,7 +155,8 @@ const config = {
 						enabled: true,
 						runs: 1000
 					}
-				}
+				},
+				viaIR: true
 			},
 			"contracts/peripherals/Timelock.sol": {
 				version: "0.8.20",
@@ -163,7 +167,8 @@ const config = {
 						enabled: true,
 						runs: 1000
 					}
-				}
+				},
+				viaIR: true
 			},
 			"contracts/libraries/hedera/SafeHTS.sol": {
 				version: "0.8.20",
@@ -174,7 +179,8 @@ const config = {
 						enabled: true,
 						runs: 200
 					}
-				}
+				},
+				viaIR: true
 			},
 			"contracts/staking/RewardRouterV2.sol": {
 				version: "0.8.20",
@@ -185,7 +191,8 @@ const config = {
 						enabled: true,
 						runs: 200
 					}
-				}
+				},
+				viaIR: true
 			}
 		}
 	}
