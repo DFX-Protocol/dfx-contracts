@@ -188,6 +188,18 @@ const config = {
 				},
 				viaIR: true
 			},
+			"contracts/peripherals/Reader.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				},
+				viaIR: true
+			},
 			"contracts/peripherals/Timelock.sol": {
 				version: "0.8.20",
 				settings:
