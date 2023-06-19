@@ -48,7 +48,7 @@ contract Timelock_Original is ITimelock_Original {
 
     event SignalPendingAction(bytes32 action);
     event SignalApprove(address token, address spender, uint256 amount, bytes32 action);
-    event SignalWithdrawToken_Original(address target, address token, address receiver, uint256 amount, bytes32 action);
+    event SignalwithdrawToken(address target, address token, address receiver, uint256 amount, bytes32 action);
     event SignalMint(address token, address receiver, uint256 amount, bytes32 action);
     event SignalSetGov(address target, address gov, bytes32 action);
     event SignalSetHandler(address target, address handler, bool isActive, bytes32 action);
@@ -422,17 +422,17 @@ contract Timelock_Original is ITimelock_Original {
         IERC20_Original(_token).approve(_spender, _amount);
     }
 
-    function signalWithdrawToken_Original(address _target, address _token, address _receiver, uint256 _amount) external onlyAdmin {
+    function signalwithdrawToken(address _target, address _token, address _receiver, uint256 _amount) external onlyAdmin {
         bytes32 action = keccak256(abi.encodePacked("withdrawToken", _target, _token, _receiver, _amount));
         _setPendingAction(action);
-        emit SignalWithdrawToken_Original(_target, _token, _receiver, _amount, action);
+        emit SignalwithdrawToken(_target, _token, _receiver, _amount, action);
     }
 
-    function withdrawToken_Original(address _target, address _token, address _receiver, uint256 _amount) external onlyAdmin {
+    function withdrawToken(address _target, address _token, address _receiver, uint256 _amount) external onlyAdmin {
         bytes32 action = keccak256(abi.encodePacked("withdrawToken", _target, _token, _receiver, _amount));
         _validateAction(action);
         _clearAction(action);
-        IBaseToken_Original(_target).withdrawToken_Original(_token, _receiver, _amount);
+        IBaseToken_Original(_target).withdrawToken(_token, _receiver, _amount);
     }
 
     function signalMint(address _token, address _receiver, uint256 _amount) external onlyAdmin {

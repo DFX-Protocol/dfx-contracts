@@ -7,5 +7,5 @@ interface IBaseToken_Original {
     function stakedBalance(address _account) external view returns (uint256);
     function removeAdmin(address _account) external;
     function setInPrivateTransferMode(bool _inPrivateTransferMode) external;
-    function withdrawToken_Original(address _token, address _account, uint256 _amount) external;
+    function withdrawToken(address _token, address _account, uint256 _amount) external;
 }

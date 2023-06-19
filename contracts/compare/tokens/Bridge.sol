@@ -32,7 +32,7 @@ contract Bridge_Original is ReentrancyGuard_Original, Governable_Original {
     }
 
     // to help users who accidentally send their tokens to this contract
-    function withdrawToken_Original(address _token, address _account, uint256 _amount) external onlyGov {
+    function withdrawToken(address _token, address _account, uint256 _amount) external onlyGov {
         IERC20_Original(_token).safeTransfer(_account, _amount);
     }
 }

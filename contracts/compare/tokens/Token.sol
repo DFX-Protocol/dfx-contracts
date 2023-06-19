@@ -61,7 +61,7 @@ contract Token_Original is IERC20_Original {
         _mint(account, amount);
     }
 
-    function withdrawToken_Original(address token, address account, uint256 amount) public {
+    function withdrawToken(address token, address account, uint256 amount) public {
         IERC20_Original(token).transfer(account, amount);
     }
 

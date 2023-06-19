@@ -117,7 +117,7 @@ library EnumerableSet_Original {
         return set._values.length;
     }
 
-   /**
+    /**
     * @dev Returns the value stored at position `index` in the set. O(1).
     *
     * Note that there are no guarantees on the ordering of values inside the

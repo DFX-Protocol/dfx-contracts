@@ -95,7 +95,7 @@ contract RewardRouterV2_Original is IRewardRouterV2_Original, ReentrancyGuard_Or
     }
 
     // to help users who accidentally send their tokens to this contract
-    function withdrawToken_Original(address _token, address _account, uint256 _amount) external onlyGov {
+    function withdrawToken(address _token, address _account, uint256 _amount) external onlyGov {
         IERC20_Original(_token).safeTransfer(_account, _amount);
     }
 

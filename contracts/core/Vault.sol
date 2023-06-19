@@ -348,9 +348,9 @@ contract Vault is ReentrancyGuard, IVault {
     function initialize(
         address router_,
         address usdg_,
-        address _priceFeed,
-        uint256 _liquidationFeeUsd,
-        uint256 _fundingRateFactor,
+        address priceFeed_,
+        uint256 liquidationFeeUsd_,
+        uint256 fundingRateFactor_,
         uint256 _stableFundingRateFactor
     ) external {
         _onlyGov();
@@ -359,9 +359,9 @@ contract Vault is ReentrancyGuard, IVault {
 
         router = router_;
         usdg = usdg_;
-        priceFeed = _priceFeed;
-        liquidationFeeUsd = _liquidationFeeUsd;
-        fundingRateFactor = _fundingRateFactor;
+        priceFeed = priceFeed_;
+        liquidationFeeUsd = liquidationFeeUsd_;
+        fundingRateFactor = fundingRateFactor_;
         stableFundingRateFactor = _stableFundingRateFactor;
     }
 

@@ -72,7 +72,13 @@ const config = {
 		dev: {
 			// Default to 1
 			default: dev ?? 1
-		}
+		},
+		signer1: { default: 2 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer2: { default: 3 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer3: { default: 4 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer4: { default: 5 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer5: { default: 6 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer6: { default: 7 } // Used in TokenManager.init.ts replace with real signers as soon as possible.
 	},
 	networks: {
 		hedera:
@@ -117,7 +123,8 @@ const config = {
 						enabled: true,
 						runs: 500000
 					}
-				}
+				},
+				viaIR: true
 			},
 			{
 				version: "0.6.12",
@@ -128,7 +135,8 @@ const config = {
 						enabled: true,
 						runs: 10
 					}
-				}
+				},
+				viaIR: false
 			}
 		],
 		overrides: {
@@ -141,7 +149,68 @@ const config = {
 						enabled: true,
 						runs: 200
 					}
-				}
+				},
+				viaIR: true
+			},
+			"contracts/core/OrderBook.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				},
+				viaIR: true
+			},
+			"contracts/core/PositionRouter.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				},
+				viaIR: true
+			},
+			"contracts/core/PositionManager.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				},
+				viaIR: true
+			},
+			"contracts/peripherals/Reader.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				},
+				viaIR: true
+			},
+			"contracts/peripherals/Timelock.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 1000
+					}
+				},
+				viaIR: true
 			},
 			"contracts/libraries/hedera/SafeHTS.sol": {
 				version: "0.8.20",
@@ -152,7 +221,20 @@ const config = {
 						enabled: true,
 						runs: 200
 					}
-				}
+				},
+				viaIR: true
+			},
+			"contracts/staking/RewardRouterV2.sol": {
+				version: "0.8.20",
+				settings:
+				{
+					optimizer:
+					{
+						enabled: true,
+						runs: 200
+					}
+				},
+				viaIR: true
 			}
 		}
 	}

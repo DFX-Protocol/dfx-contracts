@@ -184,7 +184,7 @@ contract BasePositionManager_Original is IBasePositionManager_Original, Reentran
     function _increasePosition(address _account, address _collateralToken, address _indexToken, uint256 _sizeDelta, bool _isLong, uint256 _price) internal {
         _validateMaxGlobalSize(_indexToken, _isLong, _sizeDelta);
 
-        PositionUtils.increasePosition(
+        PositionUtils_Original.increasePosition(
             vault,
             router,
             shortsTracker_Original,
@@ -266,7 +266,7 @@ contract BasePositionManager_Original is IBasePositionManager_Original, Reentran
         bool _isLong,
         uint256 _sizeDelta
     ) internal returns (uint256) {
-        bool shouldDeductFee = PositionUtils.shouldDeductFee(
+        bool shouldDeductFee = PositionUtils_Original.shouldDeductFee(
             vault,
             _account,
             _path,

@@ -153,7 +153,7 @@ contract Treasury_Original is ReentrancyGuard_Original, ITimelockTarget_Original
         IERC20_Original(busd).transfer(fund, fundAmount);
     }
 
-    function withdrawToken_Original(address _token, address _account, uint256 _amount) external override onlyGov nonReentrant {
+    function withdrawToken(address _token, address _account, uint256 _amount) external override onlyGov nonReentrant {
         require(block.timestamp > unlockTime, "Treasury: unlockTime not yet passed");
         IERC20_Original(_token).transfer(_account, _amount);
     }
