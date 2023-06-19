@@ -9,7 +9,7 @@ import "./interfaces/IVault.sol";
 import "./interfaces/IRouter.sol";
 import "./interfaces/IShortsTracker.sol";
 
-library PositionUtils {
+library PositionUtils_Original {
     using SafeMath_Original for uint256;
 
     uint256 public constant BASIS_POINTS_DIVISOR = 10000;

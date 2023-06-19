@@ -1,9 +1,9 @@
 import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { Deployment } from "hardhat-deploy/dist/types";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { HardhatRuntimeEnvironment, Libraries } from "hardhat/types";
 
-export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: string, constructorParameters: unknown[] | undefined = undefined): Promise<void>
+export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: string, constructorParameters: unknown[] | undefined = undefined, libraries?: Libraries): Promise<void>
 {
 	const { deployments, getNamedAccounts } = hre;
 	const { deploy } = deployments;
@@ -13,9 +13,13 @@ export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: st
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Using constuctor parameters \x1B[33m${JSON.stringify(constructorParameters)}\x1B[0m ...`);
 	}
+	if(libraries !== undefined)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Using external libraries \x1B[33m${JSON.stringify(libraries)}\x1B[0m ...`);
+	}
 	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
 	const artifactName = contract.substring(0, index);
-	const result = await deploy(contract, { from: deployer, args: constructorParameters, log: false, contract: artifactName });
+	const result = await deploy(contract, { from: deployer, args: constructorParameters, log: false, contract: artifactName, libraries:libraries });
 	console.log(`\x1B[32m${contract}\x1B[0m - ${result.newlyDeployed ? "deployed to" : "reused at"} \x1B[32m${result.address}\x1B[0m`);
 }
 
@@ -344,7 +348,7 @@ export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: st
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 	const newMinterContractData = await deployments.get(newMinterContractName);
 	
-	if (!await updateContract.isHandler(newMinterContractData.address))
+	if (!await updateContract.isMinter(newMinterContractData.address))
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setMinter(newMinterContractData.address, true)).wait();

@@ -28,14 +28,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			dependencies["EsGMX"].address,
 			dependencies["MintableBaseToken[bnGMX]"].address,
 			dependencies["GLP"].address,
-			dependencies["RewardTracker[stakedGmxTracker]"].address,
-			dependencies["RewardTracker[bonusGmxTracker]"].address,
-			dependencies["RewardTracker[feeGmxTracker]"].address,
-			dependencies["RewardTracker[feeGlpTracker]"].address,
-			dependencies["RewardTracker[stakedGlpTracker]"].address,
 			dependencies["GlpManager"].address,
-			dependencies["Vester[GmxVester]"].address,
-			dependencies["Vester[GlpVester]"].address
+			[
+				dependencies["RewardTracker[stakedGmxTracker]"].address,
+				dependencies["RewardTracker[stakedGlpTracker]"].address,
+				dependencies["RewardTracker[feeGmxTracker]"].address,
+				dependencies["RewardTracker[feeGlpTracker]"].address,
+				dependencies["RewardTracker[bonusGmxTracker]"].address
+			],
+			[
+				dependencies["Vester[GmxVester]"].address,
+				dependencies["Vester[GlpVester]"].address
+			]
 		]);
 };
 

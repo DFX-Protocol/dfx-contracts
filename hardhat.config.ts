@@ -72,7 +72,13 @@ const config = {
 		dev: {
 			// Default to 1
 			default: dev ?? 1
-		}
+		},
+		signer1: { default: 2 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer2: { default: 3 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer3: { default: 4 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer4: { default: 5 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer5: { default: 6 }, // Used in TokenManager.init.ts replace with real signers as soon as possible.
+		signer6: { default: 7 } // Used in TokenManager.init.ts replace with real signers as soon as possible.
 	},
 	networks: {
 		hedera:

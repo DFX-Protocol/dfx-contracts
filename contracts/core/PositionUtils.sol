@@ -2,21 +2,11 @@
 pragma solidity ^0.8.20;
 
 // Generates a stack to deep error
-// import { ITimelock } from "../peripherals/Timelock.sol";
+import { ITimelock } from "../peripherals/Timelock.sol";
 
 import { IVault } from "./Vault.sol";
 import { IRouter } from "./Router.sol";
 import { IShortsTracker } from "./ShortsTracker.sol";
-
-// Ugly workaround
-interface ITimelock {
-    function marginFeeBasisPoints() external returns (uint256);
-    function setAdmin(address _admin) external;
-    function enableLeverage(address _vault) external;
-    function disableLeverage(address _vault) external;
-    function setIsLeverageEnabled(address _vault, bool _isLeverageEnabled) external;
-    function signalSetGov(address _target, address _gov) external;
-}
 
 library PositionUtils {
     uint256 public constant BASIS_POINTS_DIVISOR = 10000;

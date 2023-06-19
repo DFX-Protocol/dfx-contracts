@@ -6,7 +6,7 @@ const contract = "PositionManager";
 const contractDependencies =
 	[
 		contract,
-		"ReferalStorage"
+		"ReferralStorage"
 	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -15,7 +15,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 
-	await CallSetReferralStorage(hre, contract, "ReferalStorage");
+	await CallSetReferralStorage(hre, contract, "ReferralStorage");
 	await CallSetShouldValidateIncreaseOrder(hre, contract, false);
 	await CallSetOrderKeeper(hre, contract, deployer);
 	await CallSetLiquidator(hre, contract, deployer);

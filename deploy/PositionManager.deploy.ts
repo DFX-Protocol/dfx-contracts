@@ -9,7 +9,8 @@ const contractDependencies =
 		"Router",
 		"Vault",
 		"ShortsTracker",
-		"OrderBook"
+		"OrderBook",
+		"PositionUtils"
 	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -25,7 +26,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		30, // 0.3%
 		dependencies["OrderBook"].address
 	];
-	await UnifiedDeploy(hre, contract, constructorParameters);
+	await UnifiedDeploy(hre, contract, constructorParameters, { "PositionUtils": dependencies["PositionUtils"].address });
 };
 
 export default func;
