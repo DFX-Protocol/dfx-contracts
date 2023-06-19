@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import { Context } from "../GSN/Context.sol";
-import { IERC165 } from "../introspection/ERC165.sol";
+import { ERC165, IERC165 } from "../introspection/ERC165.sol";
 import { Address } from "../utils/Address.sol";
 import { EnumerableSet } from "../utils/EnumerableSet.sol";
 import { EnumerableMap } from "../utils/EnumerableMap.sol";
@@ -196,7 +196,6 @@ interface IERC721Receiver {
  * @dev see https://eips.ethereum.org/EIPS/eip-721
  */
 contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable {
-    using SafeMath for uint256;
     using Address for address;
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableMap for EnumerableMap.UintToAddressMap;
@@ -267,9 +266,9 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor (string memory name, string memory symbol) public {
-        _name = name;
-        _symbol = symbol;
+    constructor (string memory name_, string memory symbol_) {
+        _name = name_;
+        _symbol = symbol_;
 
         // register the supported interfaces to conform to ERC721 via ERC165
         _registerInterface(_INTERFACE_ID_ERC721);
@@ -294,7 +293,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable 
      * @dev See {IERC721-ownerOf}.
      */
     function ownerOf(uint256 tokenId) public view override returns (address) {
-        return _tokenOwners.get(tokenId, "ERC721: owner query for nonexistent token");
+        return _tokenOwners.get(tokenId);
     }
 
     /**

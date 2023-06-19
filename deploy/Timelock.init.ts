@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetContractHandler, CallSetKeeper, CallSetLiquidator2, CallSetShouldToggleIsLeverageEnabled, CallSignalApprove } from "../scripts/DeployHelper";
+import { CallSetContractHandler, CallSetKeeper2, CallSetLiquidator2, CallSetShouldToggleIsLeverageEnabled, CallSignalApprove } from "../scripts/DeployHelper";
 
 const contract = "Timelock";
 const contractDependencies = [contract, "PositionRouter", "PositionManager", "GMX", "Vault"];
@@ -12,9 +12,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	await CallSetShouldToggleIsLeverageEnabled(hre, contract);
 	await CallSetContractHandler(hre, contract, "PositionRouter");
 	await CallSetContractHandler(hre, contract, "PositionManager");
-	await CallSetKeeper(hre, contract, deployer);
+	await CallSetKeeper2(hre, contract, deployer);
 	await CallSignalApprove(hre, contract, "GMX", deployer, "1000000000000000000");
-	await CallSetLiquidator2(hre, contract, "Vault", "PositionManager");
+	// TODO: Only gov can do that. And timelock seems to be needed gov for Vaul. Needs to be analyses
+	// await CallSetLiquidator2(hre, contract, "Vault", "PositionManager");
 };
 
 export default func;

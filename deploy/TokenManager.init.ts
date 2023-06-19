@@ -11,6 +11,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { signer1, signer2, signer3, signer4, signer5, signer6 } = await getNamedAccounts();
 
 	const initParameters =
+	[
 		[
 			signer1,
 			signer2,
@@ -18,7 +19,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			signer4,
 			signer5,
 			signer6
-		];
+		]
+	];
 	await UnifiedInitialize(hre, contract, initParameters);
 };
 

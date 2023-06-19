@@ -64,12 +64,12 @@ export async function CallSetShouldToggleIsLeverageEnabled(hre: HardhatRuntimeEn
 
 	if (!await updateContract.shouldToggleIsLeverageEnabled())
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.shouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setHandler(true)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setShouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setShouldToggleIsLeverageEnabled(true)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.shouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setShouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
 	}
 }
 
@@ -89,8 +89,15 @@ export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract
 	// TODO check bytecode pendingActions[_action]
 	if (true)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
-		await (await updateContract.connect(depSign).signalApprove(newHandlerContractData.address, admin, value)).wait();
+		try
+		{
+			await (await updateContract.connect(depSign).signalApprove(newHandlerContractData.address, admin, value)).wait();
+			console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
+		}
+		catch (e)
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
+		}
 	}
 	else
 	{
@@ -141,6 +148,28 @@ export async function CallSetReferralStorage(hre: HardhatRuntimeEnvironment, con
 	else
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setReferralStorage("${newStorageContractData.address}")\x1B[0m ...`);
+	}
+}
+
+export async function CallSetKeeper2(hre: HardhatRuntimeEnvironment, contract: string, address: string): Promise<void>
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+
+	if (!await updateContract.isKeeper(address))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setKeeper("${address}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setKeeper(address, true)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setKeeper("${address}", true)\x1B[0m ...`);
 	}
 }
 
@@ -249,7 +278,12 @@ export async function CallSetLiquidator2(hre: HardhatRuntimeEnvironment, contrac
 	const newHandlerContractData1 = await deployments.get(newLiquidatorContractName1);
 	const newHandlerContractData2 = await deployments.get(newLiquidatorContractName2);
 
-	if (!await updateContract.isLiquidator(newLiquidatorContractName2))
+	// The set Liquidator of newLiquidatorContractName1 is called inside the function.
+	const artifactName1 = newLiquidatorContractName1.substring(0, index);
+	const contractData1 = await deployments.get(newLiquidatorContractName1);
+	const updateContract1 = await ethers.getContractAt(artifactName1, contractData1.address);
+
+	if (!(await updateContract1.isLiquidator(newHandlerContractData2.address)))
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLiquidator("${newHandlerContractData1.address}", "${newHandlerContractData2.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setLiquidator(newHandlerContractData1.address, newHandlerContractData2.address, true)).wait();
