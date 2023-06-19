@@ -6,7 +6,6 @@ import { GetTokenAddress } from "../scripts/DeployConstants";
 const contract = "PositionManager";
 const contractDependencies =
 	[
-		contract,
 		"Router",
 		"Vault",
 		"ShortsTracker",

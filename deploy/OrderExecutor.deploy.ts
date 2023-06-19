@@ -5,7 +5,6 @@ import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
 const contract = "OrderExecutor";
 const contractDependencies =
 	[
-		contract,
 		"OrderBook",
 		"Vault"
 	];
