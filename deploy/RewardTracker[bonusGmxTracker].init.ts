@@ -3,7 +3,13 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallSetHandler, CallUpdateLastDistributionTime, GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
 
 const contract = "RewardTracker[bonusGmxTracker]";
-const contractDependencies = [contract, "RewardTracker[stakedGmxTracker]", "BonusDistributor", "RewardTracker[feeGmxTracker]", "RewardRouterV2"];
+const contractDependencies = [
+	contract,
+	"RewardTracker[stakedGmxTracker]",
+	"BonusDistributor",
+	"RewardTracker[feeGmxTracker]",
+	"RewardRouterV2",
+	"BonusDistributor_Init"]; // Modifies BonusDistributor and needs to do this before 
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
