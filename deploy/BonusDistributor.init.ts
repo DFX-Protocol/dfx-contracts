@@ -5,7 +5,8 @@ import { CallSetBonusMultiplier } from "../scripts/DeployHelper";
 
 const contract = "BonusDistributor";
 const contractDependencies = [
-	contract
+	contract,
+	"RewardTracker[stakedGmxTracker]_Init"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>

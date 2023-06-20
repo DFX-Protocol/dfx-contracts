@@ -8,8 +8,7 @@ const contractDependencies = [
 	"RewardTracker[stakedGmxTracker]",
 	"BonusDistributor",
 	"RewardTracker[feeGmxTracker]",
-	"RewardRouterV2",
-	"BonusDistributor_Init"]; // Modifies BonusDistributor and needs to do this before 
+	"RewardRouterV2"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
