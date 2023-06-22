@@ -14,6 +14,7 @@ interface IVaultPriceFeed {
     function setAdjustment(address _token, bool _isAdditive, uint256 _adjustmentBps) external;
     function setUseV2Pricing(bool _useV2Pricing) external;
     function setIsAmmEnabled(bool _isEnabled) external;
+    function setIsChainlinkEnabled(bool _isEnabled) external;
     function setIsSecondaryPriceEnabled(bool _isEnabled) external;
     function setSpreadBasisPoints(address _token, uint256 _spreadBasisPoints) external;
     function setSpreadThresholdBasisPoints(uint256 _spreadThresholdBasisPoints) external;
@@ -48,6 +49,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
     address public gov;
     address public chainlinkFlags;
 
+    bool public isChainlinkEnabled = true;
     bool public isAmmEnabled = true;
     bool public isSecondaryPriceEnabled = true;
     bool public useV2Pricing = false;
@@ -112,6 +114,10 @@ contract VaultPriceFeed is IVaultPriceFeed {
 
     function setIsAmmEnabled(bool _isEnabled) external override onlyGov {
         isAmmEnabled = _isEnabled;
+    }
+
+    function setIsChainlinkEnabled(bool _isEnabled) external override onlyGov {
+        isChainlinkEnabled = _isEnabled;
     }
 
     function setIsSecondaryPriceEnabled(bool _isEnabled) external override onlyGov {
@@ -307,6 +313,10 @@ contract VaultPriceFeed is IVaultPriceFeed {
     }
 
     function getPrimaryPrice(address _token, bool _maximise) public override view returns (uint256) {
+        if(!isChainlinkEnabled)
+        {
+            return _maximise ? 0 : type(uint256).max;
+        }
         address priceFeedAddress = priceFeeds[_token];
         require(priceFeedAddress != address(0), "VaultPriceFeed: invalid price feed");
 
