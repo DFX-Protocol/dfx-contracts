@@ -438,3 +438,16 @@ export async function GetDeployedContracts(hre: HardhatRuntimeEnvironment, contr
 
 	return map;
 }
+
+
+export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: string, amountToMint: BigNumber)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.mintMock(${deployer},${amountToMint})\x1B[0m ...`);
+	await (await updateContract.mockMint(deployer, amountToMint)).wait();
+}
