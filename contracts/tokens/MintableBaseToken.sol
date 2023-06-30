@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./BaseToken.sol";
+import {BaseToken} from "./BaseToken.sol";
 
 interface IMintable {
-    function isMinter(address _account) external returns (bool);
-    function setMinter(address _minter, bool _isActive) external;
-    function mint(address _account, uint256 _amount) external;
-    function burn(address _account, uint256 _amount) external;
+	function isMinter(address _account) external returns (bool);
+
+	function setMinter(address _minter, bool _isActive) external;
+
+	function mint(address _account, uint256 _amount) external;
+
+	function burn(address _account, uint256 _amount) external;
 }
 
 contract MintableBaseToken is BaseToken, IMintable {

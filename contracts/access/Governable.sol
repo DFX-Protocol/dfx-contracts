@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-error AccessForbidden(address violator, string check, string reason);
+error PermissionDenied(address violator, string check);
 
-contract Governable
+interface IGovernable
+{
+    function setGov(address _gov) external;
+
+    function gov() external view returns(address);
+}
+
+abstract contract Governable is IGovernable
 {
     address public gov;
 
@@ -13,7 +20,7 @@ contract Governable
 
     modifier onlyGov()
     {
-        if(msg.sender != gov) revert AccessForbidden(msg.sender, "Governable", "No permission.");
+        if(msg.sender != gov) revert PermissionDenied(msg.sender, "onlyGov");
         _;
     }
 

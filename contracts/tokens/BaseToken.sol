@@ -1,227 +1,265 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import { IERC20 } from "../libraries/token/ERC20.sol";
-import { SafeERC20 } from "../libraries/token/SafeERC20.sol";
+import {AmountExceedsBalance, ERC20, IERC20, IERC20Metadata, IERC20AltApprove, InvalidAddress} from "../libraries/token/ERC20.sol";
+import {SafeERC20} from "../libraries/token/SafeERC20.sol";
 
-import { IYieldTracker } from "./YieldTracker.sol";
+import {Governable, IGovernable, PermissionDenied} from "../access/Governable.sol";
+import {IYieldTracker} from "./YieldTracker.sol";
 
-interface IBaseToken {
-    function totalStaked() external view returns (uint256);
-    function stakedBalance(address _account) external view returns (uint256);
-    function removeAdmin(address _account) external;
-    function setInPrivateTransferMode(bool _inPrivateTransferMode) external;
-    function withdrawToken(address _token, address _account, uint256 _amount) external;
+error NonStakingAccountAlreadyMarked(address account);
+error NonStakingAccountNotMarked(address account);
+error SenderNotWhitelisted(address spender);
+
+interface IBaseToken is IGovernable, IERC20AltApprove, IERC20Metadata {
+	function addAdmin(address account) external;
+
+	function addNonStakingAccount(address account) external;
+
+	function claim(address receiver) external;
+
+	function recoverClaim(address account, address receiver) external;
+
+	function removeAdmin(address account) external;
+
+	function removeNonStakingAccount(address account) external;
+
+	function setHandler(address handler, bool isActive) external;
+
+	function setInfo(string memory name, string memory symbol) external;
+
+	function setInPrivateTransferMode(bool isActive) external;
+
+	function setYieldTrackers(IYieldTracker[] memory yieldTrackers) external;
+
+	function withdrawToken(address token, address account, uint256 amount) external;
+
+	function admins(address account) external view returns (bool);
+
+	function isHandler(address account) external view returns (bool);
+
+	function inPrivateTransferMode() external view returns (bool);
+
+	function nonStakingAccounts(address account) external view returns (bool);
+
+	function nonStakingSupply() external view returns (uint256);
+
+	function stakedBalance(address _account) external view returns (uint256);
+
+	function totalStaked() external view returns (uint256);
+
+	function yieldTrackers(uint256 index) external view returns (IYieldTracker);
 }
 
-contract BaseToken is IERC20, IBaseToken {
-	using SafeERC20 for IERC20;
+contract BaseToken is ERC20, Governable, IBaseToken {
+	using SafeERC20 for IERC20Metadata;
 
-	string public name;
-	string public symbol;
-	uint8 public constant decimals = 18;
-
-	uint256 public override totalSupply;
-	uint256 public nonStakingSupply;
-
-	address public gov;
-
-	mapping(address => uint256) public balances;
-	mapping(address => mapping(address => uint256)) public allowances;
-
-	address[] public yieldTrackers;
-	mapping(address => bool) public nonStakingAccounts;
-	mapping(address => bool) public admins;
-
-	bool public inPrivateTransferMode;
-	mapping(address => bool) public isHandler;
-
-	modifier onlyGov() {
-		require(msg.sender == gov, "BaseToken: forbidden");
-		_;
-	}
+	uint256 internal _nonStakingSupply;
+	IYieldTracker[] internal _yieldTrackers;
+	bool internal _inPrivateTransferMode;
+	mapping(address => bool) internal _nonStakingAccounts;
+	mapping(address => bool) internal _admins;
+	mapping(address => bool) internal _isHandler;
 
 	modifier onlyAdmin() {
-		require(admins[msg.sender], "BaseToken: forbidden");
+		address sender = _msgSender();
+		if (!_admins[sender]) revert PermissionDenied(sender, "onlyAdmin");
 		_;
 	}
 
-	constructor(string memory _name, string memory _symbol, uint256 _initialSupply) {
-		name = _name;
-		symbol = _symbol;
-		gov = msg.sender;
-		_mint(msg.sender, _initialSupply);
+	constructor(string memory _name, string memory _symbol, uint256 _initialSupply) ERC20(_name, _symbol) {
+		_mint(_msgSender(), _initialSupply);
 	}
 
-	function setGov(address _gov) external onlyGov {
-		gov = _gov;
+	function addAdmin(address account) external override onlyGov {
+		_admins[account] = true;
 	}
 
-	function setInfo(string memory _name, string memory _symbol) external onlyGov {
-		name = _name;
-		symbol = _symbol;
-	}
-
-	function setYieldTrackers(address[] memory _yieldTrackers) external onlyGov {
-		yieldTrackers = _yieldTrackers;
-	}
-
-	function addAdmin(address _account) external onlyGov {
-		admins[_account] = true;
-	}
-
-	function removeAdmin(address _account) external override onlyGov {
-		admins[_account] = false;
-	}
-
-	// to help users who accidentally send their tokens to this contract
-	function withdrawToken(address _token, address _account, uint256 _amount) external override onlyGov {
-		IERC20(_token).safeTransfer(_account, _amount);
-	}
-
-	function setInPrivateTransferMode(bool _inPrivateTransferMode) external override onlyGov {
-		inPrivateTransferMode = _inPrivateTransferMode;
-	}
-
-	function setHandler(address _handler, bool _isActive) external onlyGov {
-		isHandler[_handler] = _isActive;
-	}
-
-	function addNonStakingAccount(address _account) external onlyAdmin {
-		require(!nonStakingAccounts[_account], "BaseToken: _account already marked");
-		_updateRewards(_account);
-		nonStakingAccounts[_account] = true;
-		nonStakingSupply = nonStakingSupply+(balances[_account]);
-	}
-
-	function removeNonStakingAccount(address _account) external onlyAdmin {
-		require(nonStakingAccounts[_account], "BaseToken: _account not marked");
-		_updateRewards(_account);
-		nonStakingAccounts[_account] = false;
-		nonStakingSupply = nonStakingSupply-(balances[_account]);
-	}
-
-	function recoverClaim(address _account, address _receiver) external onlyAdmin {
-		for (uint256 i = 0; i < yieldTrackers.length; i++) {
-			address yieldTracker = yieldTrackers[i];
-			IYieldTracker(yieldTracker).claim(_account, _receiver);
+	function addNonStakingAccount(address account) external override onlyAdmin {
+		if (_nonStakingAccounts[account]) revert NonStakingAccountAlreadyMarked(account);
+		_updateRewards(account);
+		_nonStakingAccounts[account] = true;
+		unchecked {
+			// Can not be greater than totalSupply and therefore not overflow.
+			_nonStakingSupply = _nonStakingSupply + (_balances[account]);
 		}
 	}
 
-	function claim(address _receiver) external {
-		for (uint256 i = 0; i < yieldTrackers.length; i++) {
-			address yieldTracker = yieldTrackers[i];
-			IYieldTracker(yieldTracker).claim(msg.sender, _receiver);
+	function claim(address receiver) external override {
+		unchecked {
+			// i can not overflow
+			for (uint256 i = 0; i < _yieldTrackers.length; i++) {
+				IYieldTracker yieldTracker = _yieldTrackers[i];
+				yieldTracker.claim(_msgSender(), receiver);
+			}
 		}
+	}
+
+	function recoverClaim(address account, address receiver) external override onlyAdmin {
+		unchecked {
+			// i can not overflow
+			for (uint256 i = 0; i < _yieldTrackers.length; i++) {
+				IYieldTracker yieldTracker = _yieldTrackers[i];
+				yieldTracker.claim(account, receiver);
+			}
+		}
+	}
+
+	function removeAdmin(address account) external override onlyGov {
+		_admins[account] = false;
+	}
+
+	function removeNonStakingAccount(address account) external override onlyAdmin {
+		if (!_nonStakingAccounts[account]) revert NonStakingAccountNotMarked(account);
+		_updateRewards(account);
+		_nonStakingAccounts[account] = false;
+		unchecked {
+			// Can not underflow because _nonStakingSupply is at least _balances[account]
+			_nonStakingSupply = _nonStakingSupply - (_balances[account]);
+		}
+	}
+
+	function setHandler(address handler, bool isActive) external override onlyGov {
+		_isHandler[handler] = isActive;
+	}
+
+	function setInfo(string memory name, string memory symbol) external override onlyGov {
+		_name = name;
+		_symbol = symbol;
+	}
+
+	function setInPrivateTransferMode(bool isActive) external override onlyGov {
+		_inPrivateTransferMode = isActive;
+	}
+
+	function setYieldTrackers(IYieldTracker[] memory yieldTrackerArray) external override onlyGov {
+		_yieldTrackers = yieldTrackerArray;
+	}
+
+	function transferFrom(address from, address to, uint256 amount) external override(ERC20, IERC20) returns (bool) {
+		address sender = _msgSender();
+		if (!_isHandler[sender]) {
+			_spendAllowance(from, sender, amount);
+		}
+		_transfer(from, to, amount);
+		return true;
+	}
+
+	function withdrawToken(address token, address account, uint256 amount) external override onlyGov {
+		// to help users who accidentally send their tokens to this contract
+		IERC20Metadata(token).safeTransfer(account, amount);
+	}
+
+	function admins(address account) external view override returns (bool) {
+		return _admins[account];
+	}
+
+	function isHandler(address account) external view returns (bool) {
+		return _isHandler[account];
+	}
+
+	function inPrivateTransferMode() external view returns (bool) {
+		return _inPrivateTransferMode;
+	}
+
+	function nonStakingAccounts(address account) external view returns (bool) {
+		return _nonStakingAccounts[account];
+	}
+
+	function nonStakingSupply() external view returns (uint256) {
+		return _nonStakingSupply;
+	}
+
+	function stakedBalance(address account) external view override returns (uint256) {
+		if (_nonStakingAccounts[account]) {
+			return 0;
+		}
+		return _balances[account];
 	}
 
 	function totalStaked() external view override returns (uint256) {
-		return totalSupply-(nonStakingSupply);
-	}
-
-	function balanceOf(address _account) external view override returns (uint256) {
-		return balances[_account];
-	}
-
-	function stakedBalance(address _account) external view override returns (uint256) {
-		if (nonStakingAccounts[_account]) {
-			return 0;
+		unchecked {
+			return _totalSupply - _nonStakingSupply;
 		}
-		return balances[_account];
 	}
 
-	function transfer(address _recipient, uint256 _amount) external override returns (bool) {
-		_transfer(msg.sender, _recipient, _amount);
-		return true;
+	function yieldTrackers(uint256 index) external view override returns (IYieldTracker) {
+		return _yieldTrackers[index];
 	}
 
-	function allowance(address _owner, address _spender) external view override returns (uint256) {
-		return allowances[_owner][_spender];
-	}
+	function _burn(address account, uint256 amount) internal virtual override {
+		if (account == address(0)) revert InvalidAddress(account, "Can not burn from zero address.");
 
-	function approve(address _spender, uint256 _amount) external override returns (bool) {
-		_approve(msg.sender, _spender, _amount);
-		return true;
-	}
+		_updateRewards(account);
 
-	function transferFrom(address _sender, address _recipient, uint256 _amount) external override returns (bool) {
-		if (isHandler[msg.sender]) {
-			_transfer(_sender, _recipient, _amount);
-			return true;
-		}
-		uint256 nextAllowance = allowances[_sender][msg.sender]-(_amount);
-		_approve(_sender, msg.sender, nextAllowance);
-		_transfer(_sender, _recipient, _amount);
-		return true;
-	}
-
-	function _mint(address _account, uint256 _amount) internal {
-		require(_account != address(0), "BaseToken: mint to the zero address");
-
-		_updateRewards(_account);
-
-		totalSupply = totalSupply+(_amount);
-		balances[_account] = balances[_account]+(_amount);
-
-		if (nonStakingAccounts[_account]) {
-			nonStakingSupply = nonStakingSupply+(_amount);
+		uint256 accountBalance = _balances[account];
+		if (accountBalance < amount) revert AmountExceedsBalance(account, accountBalance, amount);
+		unchecked {
+			_balances[account] = accountBalance - amount;
+			_totalSupply -= amount;
+			if (_nonStakingAccounts[account]) {
+				_nonStakingSupply -= amount;
+			}
 		}
 
-		emit Transfer(address(0), _account, _amount);
+		emit Transfer(account, address(0), amount);
 	}
 
-	function _burn(address _account, uint256 _amount) internal {
-		require(_account != address(0), "BaseToken: burn from the zero address");
+	function _mint(address account, uint256 amount) internal virtual override {
+		if (account == address(0)) revert InvalidAddress(account, "Can not mint to zero address.");
 
-		_updateRewards(_account);
+		_updateRewards(account);
 
-		balances[_account] = balances[_account]-(_amount);
-		totalSupply = totalSupply-(_amount);
+		_totalSupply += amount;
+		unchecked {
+			// if _totalSupply did not overflow this can't overflow too.
+			_balances[account] += amount;
 
-		if (nonStakingAccounts[_account]) {
-			nonStakingSupply = nonStakingSupply-(_amount);
+			if (_nonStakingAccounts[account]) {
+				_nonStakingSupply += amount;
+			}
 		}
 
-		emit Transfer(_account, address(0), _amount);
+		emit Transfer(address(0), account, amount);
 	}
 
-	function _transfer(address _sender, address _recipient, uint256 _amount) private {
-		require(_sender != address(0), "BaseToken: transfer from the zero address");
-		require(_recipient != address(0), "BaseToken: transfer to the zero address");
+	function _transfer(address from, address to, uint256 amount) internal virtual override {
+		if (from == address(0)) revert InvalidAddress(from, "Can not transfer from zero address.");
+		if (to == address(0)) revert InvalidAddress(to, "Can not transfer to zero address.");
 
-		if (inPrivateTransferMode) {
-			require(isHandler[msg.sender], "BaseToken: msg.sender not whitelisted");
+		address sender = _msgSender();
+		if (_inPrivateTransferMode) {
+			if (!_isHandler[sender]) revert SenderNotWhitelisted(sender);
 		}
 
-		_updateRewards(_sender);
-		_updateRewards(_recipient);
+		uint256 fromBalance = _balances[from];
+		if (fromBalance < amount) revert AmountExceedsBalance(from, fromBalance, amount);
+		unchecked {
+			_balances[from] = fromBalance - amount;
+			_balances[to] += amount;
 
-		balances[_sender] = balances[_sender]-(_amount);
-		balances[_recipient] = balances[_recipient]+(_amount);
+			_updateRewards(from);
+			_updateRewards(to);
 
-		if (nonStakingAccounts[_sender]) {
-			nonStakingSupply = nonStakingSupply-(_amount);
+			if (_nonStakingAccounts[from]) {
+				_nonStakingSupply -= amount;
+			}
+
+			if (_nonStakingAccounts[to]) {
+				_nonStakingSupply += amount;
+			}
 		}
-		if (nonStakingAccounts[_recipient]) {
-			nonStakingSupply = nonStakingSupply+(_amount);
-		}
 
-		emit Transfer(_sender, _recipient, _amount);
+		emit Transfer(from, to, amount);
 	}
 
-	function _approve(address _owner, address _spender, uint256 _amount) private {
-		require(_owner != address(0), "BaseToken: approve from the zero address");
-		require(_spender != address(0), "BaseToken: approve to the zero address");
-
-		allowances[_owner][_spender] = _amount;
-
-		emit Approval(_owner, _spender, _amount);
-	}
-
-	function _updateRewards(address _account) private {
-		for (uint256 i = 0; i < yieldTrackers.length; i++) {
-			address yieldTracker = yieldTrackers[i];
-			IYieldTracker(yieldTracker).updateRewards(_account);
+	function _updateRewards(address account) private {
+		unchecked {
+			// i can not overflow
+			for (uint256 i = 0; i < _yieldTrackers.length; i++) {
+				IYieldTracker yieldTracker = _yieldTrackers[i];
+				yieldTracker.updateRewards(account);
+			}
 		}
 	}
 }

@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { assert, expect } from "chai";
 import { ethers } from "hardhat";
-import { ADDRESS_ZERO, AdvanceBlock, EmitOnlyThis, FormatTableColumn, FormatTableTitle, StartAutomine, StopAutomine, UINT256_MAX } from "../../helpers";
+import { ADDRESS_ZERO, EmitOnlyThis, FormatTableColumn, FormatTableTitle, UINT256_MAX } from "../../helpers";
 import { BigNumber } from "ethers";
 import { ERC20Mock_Original, IERC20Mock } from "../../../typechain-types";
 
@@ -29,9 +29,11 @@ describe("ERC20 Compare @compare", async () =>
 		{
 			// Arrange
 			const { erc20, erc20o, alice } = await loadFixture(deployERC20MockFixture);
+			const signerZero = await ethers.getImpersonatedSigner(ADDRESS_ZERO); // Fund the zero address to pay for the transaction
+			await alice.sendTransaction({ to: signerZero.address, value: ethers.utils.parseEther("1") }); // Send 1 ETH;
 			// Act
-			const result = erc20.mockApproveFromZeroAddress(alice.address, 10);
-			const resultOriginal = erc20o.mockApproveFromZeroAddress(alice.address, 10);
+			const result = erc20.connect(signerZero).approve(alice.address, 10);
+			const resultOriginal = erc20o.connect(signerZero).approve(alice.address, 10);
 			// Assert
 			await expect(result).to.be.revertedWithCustomError(erc20, "InvalidAddress").withArgs(ADDRESS_ZERO, "Can not approve from zero address.");
 			await expect(resultOriginal).to.be.revertedWith("ERC20: approve from the zero address");
@@ -95,11 +97,13 @@ describe("ERC20 Compare @compare", async () =>
 		{
 			// Arrange
 			const { erc20, erc20o, alice } = await loadFixture(deployERC20MockFixture);
+			const signerZero = await ethers.getImpersonatedSigner(ADDRESS_ZERO); // Fund the zero address to pay for the transaction
+			await alice.sendTransaction({ to: signerZero.address, value: ethers.utils.parseEther("1") }); // Send 1 ETH;
 			await erc20.mockMint(alice.address, 100);
 			await erc20o.mockMint(alice.address, 100);
 			// Act
-			const result = erc20.mockTransferFromZeroAddress(alice.address, 10);
-			const resultOriginal = erc20o.mockTransferFromZeroAddress(alice.address, 10);
+			const result = erc20.connect(signerZero).transfer(alice.address, 10);
+			const resultOriginal = erc20o.connect(signerZero).transfer(alice.address, 10);
 			// Assert
 			await expect(result).to.be.revertedWithCustomError(erc20, "InvalidAddress").withArgs(ADDRESS_ZERO, "Can not transfer from zero address.");
 			await expect(resultOriginal).to.be.revertedWith("ERC20: transfer from the zero address");

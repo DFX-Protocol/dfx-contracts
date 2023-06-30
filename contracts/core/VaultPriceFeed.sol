@@ -24,7 +24,7 @@ interface IVaultPriceFeed {
     function getPrice(address _token, bool _maximise, bool _includeAmmPrice, bool _useSwapPricing) external view returns (uint256);
     function getAmmPrice(address _token) external view returns (uint256);
     function getLatestPrimaryPrice(address _token) external view returns (uint256);
-    function getPrimaryPrice(address _token, bool _maximise) external view returns (uint256);
+    // function getPrimaryPrice(address _token, bool _maximise) external view returns (uint256);
     function setTokenConfig(
         address _token,
         address _priceFeed,
@@ -312,7 +312,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
         return uint256(price);
     }
 
-    function getPrimaryPrice(address _token, bool _maximise) public override view returns (uint256) {
+    function getPrimaryPrice(address _token, bool _maximise) private view returns (uint256) {
         if(!isChainlinkEnabled)
         {
             return _maximise ? 0 : type(uint256).max;

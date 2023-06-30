@@ -257,8 +257,8 @@ contract Reader is Governable {
             address token = _tokens[i];
             amounts[i * propsLength] = _priceFeed.getPrice(token, true, true, false);
             amounts[i * propsLength + 1] = _priceFeed.getPrice(token, false, true, false);
-            amounts[i * propsLength + 2] = _priceFeed.getPrimaryPrice(token, true);
-            amounts[i * propsLength + 3] = _priceFeed.getPrimaryPrice(token, false);
+            amounts[i * propsLength + 2] = _priceFeed.getPrice(token, true, true, false);
+            amounts[i * propsLength + 3] = _priceFeed.getPrice(token, false, true, false);
             amounts[i * propsLength + 4] = _priceFeed.isAdjustmentAdditive(token) ? 1 : 0;
             amounts[i * propsLength + 5] = _priceFeed.adjustmentBasisPoints(token);
         }
@@ -286,8 +286,8 @@ contract Reader is Governable {
             amounts[i * propsLength + 5] = vault.getMinPrice(token);
             amounts[i * propsLength + 6] = vault.getMaxPrice(token);
             amounts[i * propsLength + 7] = vault.guaranteedUsd(token);
-            amounts[i * propsLength + 8] = priceFeed.getPrimaryPrice(token, false);
-            amounts[i * propsLength + 9] = priceFeed.getPrimaryPrice(token, true);
+            amounts[i * propsLength + 8] = priceFeed.getPrice(token, false, true, false);
+            amounts[i * propsLength + 9] = priceFeed.getPrice(token, true, true, false);
         }
 
         return amounts;
@@ -315,8 +315,8 @@ contract Reader is Governable {
             amounts[i * propsLength + 7] = vault.getMinPrice(token);
             amounts[i * propsLength + 8] = vault.getMaxPrice(token);
             amounts[i * propsLength + 9] = vault.guaranteedUsd(token);
-            amounts[i * propsLength + 10] = priceFeed.getPrimaryPrice(token, false);
-            amounts[i * propsLength + 11] = priceFeed.getPrimaryPrice(token, true);
+            amounts[i * propsLength + 10] = priceFeed.getPrice(token, false, true, false);
+            amounts[i * propsLength + 11] = priceFeed.getPrice(token, true, true, false);
         }
 
         return amounts;
@@ -348,8 +348,8 @@ contract Reader is Governable {
             amounts[i * propsLength + 9] = vault.getMinPrice(token);
             amounts[i * propsLength + 10] = vault.getMaxPrice(token);
             amounts[i * propsLength + 11] = vault.guaranteedUsd(token);
-            amounts[i * propsLength + 12] = priceFeed.getPrimaryPrice(token, false);
-            amounts[i * propsLength + 13] = priceFeed.getPrimaryPrice(token, true);
+            amounts[i * propsLength + 12] = priceFeed.getPrice(token, false, true, false);
+            amounts[i * propsLength + 13] = priceFeed.getPrice(token, true, true, false);
         }
 
         return amounts;
