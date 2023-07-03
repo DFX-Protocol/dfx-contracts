@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallMockMint } from "../scripts/DeployHelper";
 import { BigNumber } from "ethers";
 
-const contract = "ERC20Mock[BTC]";
+const contract = "ERC20Mock[BUSD]";
 const contractDependencies =
 	[
 		contract,
