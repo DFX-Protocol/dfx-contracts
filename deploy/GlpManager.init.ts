@@ -6,12 +6,15 @@ const contract = "GlpManager";
 const contractDependencies = 
 [
 	contract,
-	"RewardRouterV2"
+	"RewardRouterV2",
+	"RewardRouterV2[GLP]"
+
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	await CallSetHandler(hre, contract, "RewardRouterV2");
+	await CallSetHandler(hre, contract, "RewardRouterV2[GLP]");
 };
 
 export default func;

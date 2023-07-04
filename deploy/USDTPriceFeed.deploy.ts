@@ -2,15 +2,14 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
 
-const contract = "WETH";
-
+const contract = "PriceFeed[USDT]";
+// TODO: Check if this needs to be deployed on mainnet
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	const constructorParameters = ["Wrapped Ether","WETH",18];
-	await UnifiedDeploy(hre, contract, constructorParameters);
+	await UnifiedDeploy(hre, contract);
 };
 
 export default func;
 
 func.id = `Deploy_${contract}`; // id required to prevent reexecution
-func.tags = [contract, "testnet"];
+func.tags = [`${contract}`, "testnet"];
