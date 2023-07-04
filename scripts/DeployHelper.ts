@@ -474,3 +474,18 @@ export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: str
 	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.mintMock(${deployer},${amountToMint})\x1B[0m ...`);
 	await (await updateContract.mockMint(deployer, amountToMint)).wait();
 }
+
+export async function CallSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const depSign = await ethers.getSigner(deployer);
+
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+	await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+}
+
