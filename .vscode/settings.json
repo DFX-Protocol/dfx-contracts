@@ -10,5 +10,7 @@
 	"mochaExplorer.parallel": false, // true does not work well with hardhat
 	"mochaExplorer.jobs": 1,
 	"mochaExplorer.fullTrace": true,
-	"mochaExplorer.exit": true
+	"mochaExplorer.exit": true,
+	"mochaExplorer.asyncOnly": true,
+	"mochaExplorer.multiFileSuites": true
 }
