@@ -1,21 +1,21 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetHandler } from "../scripts/DeployHelper";
+import { CallMockMint } from "../scripts/DeployHelper";
+import { BigNumber } from "ethers";
 
-const contract = "Vester[GlpVester]";
+const contract = "ERC20Mock[BUSD]";
 const contractDependencies =
 	[
 		contract,
-		"RewardRouterV2"
 	];
-
+const amountToMint: BigNumber = BigNumber.from("100000000000000000000000"); // 100,000 BUSD
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	await CallSetHandler(hre, contract, "RewardRouterV2");
+	await CallMockMint(hre, contract, amountToMint);
 };
 
 export default func;
 
 func.id = `Deploy_${contract}_Init`; // id required to prevent reexecution
-func.tags = [`${contract}_Init`, "testnet", "mainnet"];
+func.tags = [`${contract}_Init`, "testnet"];
 func.dependencies = [...contractDependencies];
