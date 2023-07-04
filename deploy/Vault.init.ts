@@ -1,10 +1,10 @@
 import { BigNumber } from "ethers";
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
+import { CallSetVaultUtils, GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
 
 const contract = "Vault";
-const contractDependencies = [contract, "Router", "USDG", "VaultPriceFeed"];
+const contractDependencies = [contract, "Router", "USDG", "VaultPriceFeed", "VaultUtils"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
@@ -21,6 +21,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			fundingRateFactor,
 			stableFundingRateFactor
 		]);
+	await CallSetVaultUtils(hre, contract, "VaultUtils");
 };
 
 export default func;

@@ -105,6 +105,29 @@ export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract
 	}
 }
 
+export async function CallSetVaultUtils(hre: HardhatRuntimeEnvironment, contract: string, vaultUtils: string): Promise<void>
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const vaultUtilsData = await deployments.get(vaultUtils);
+
+	if ((await updateContract.vaultUtils()) !== vaultUtilsData.address)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setVaultUtils(vaultUtilsData.address)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
+	}
+}
+
 export async function CallSetShouldValidateIncreaseOrder(hre: HardhatRuntimeEnvironment, contract: string, value: boolean): Promise<void>
 {
 	const { deployments, getNamedAccounts } = hre;
