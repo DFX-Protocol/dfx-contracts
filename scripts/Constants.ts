@@ -79,6 +79,7 @@ export const tokens = {
 			maxLiquidityThresholdLong: 20 * 1000 * 1000,
 			maxLiquidityThresholdShort: 12 * 1000 * 1000,
 			minLiquidityThresholdLong: 12 * 1000 * 1000,
-			minLiquidityThresholdShort: 5 * 1000 * 1000,		}
+			minLiquidityThresholdShort: 5 * 1000 * 1000,
+		}
 	}
 };

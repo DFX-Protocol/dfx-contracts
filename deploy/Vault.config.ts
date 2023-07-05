@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, CallSetTokenConfig } from "../scripts/DeployHelper";
+import { GetDeployedContracts, CallVaultSetTokenConfig } from "../scripts/DeployHelper";
 import { tokens } from "../scripts/Constants";
 
 const contract = "Vault";
@@ -20,7 +20,7 @@ const contractDependencies = [
 	tokens[chainId].WETH.priceFeedContractName,
 	"USDG",
 	"Reader",
-	"Timelock",
+	"Timelock_Init",
 	"Vault_Init"
 ];
 
@@ -30,7 +30,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const tokenNames = Object.keys(tokens[chainId]);
 	for(const token of tokenNames)
 	{
-		await CallSetTokenConfig(hre, contract,
+		await CallVaultSetTokenConfig(hre, contract,
 			[
 				chainId,
 				tokens[chainId].WETH.contractName, // TODO: Dynamically send native token address

@@ -322,18 +322,13 @@ export async function CallSetGov(hre: HardhatRuntimeEnvironment, contract: strin
 	const { deployments, getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
-
 	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
 	const artifactName = contract.substring(0, index);
 	const contractData = await deployments.get(contract);
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-
 	const govContractData = await deployments.get(govContractName);
-	const govIndex = govContractName.indexOf("[") === -1 ? undefined : govContractName.indexOf("[");
-	const govArtifactName = govContractName.substring(0, govIndex);
-	const govUpdateContract = await ethers.getContractAt(govArtifactName, govContractData.address);
+	const govAdr = govContractData.address;
 
-	const govAdr = await govUpdateContract.gov();
 	if ((await updateContract.gov()) !== govAdr)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setGov("${govAdr}")\x1B[0m ...`);
@@ -456,7 +451,8 @@ export async function GetDeployedContracts(hre: HardhatRuntimeEnvironment, contr
 	const map:{[index: string]: Deployment} = {};
 	for (const item of contracts)
 	{
-		map[item] = await deployments.get(item);
+		if(!item.endsWith("_Init") && !item.endsWith("_Config"))
+			map[item] = await deployments.get(item);
 	}
 
 	return map;
@@ -498,7 +494,7 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 	const updateContract = await ethers.getContractAt(contract, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
 
-	const timelockContract = await ethers.getContractAt("timelock", await updateContract.gov());
+	const timelockContract = await ethers.getContractAt("Timelock", await updateContract.gov());
 
 	const vaultPropsLength = 14;
 	
@@ -507,13 +503,15 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 	const reader = await ethers.getContractAt("Reader",readerData.address);
 
 	const vaultTokenInfo = await reader.getVaultTokenInfoV2(configParameters[2], nativeToken.address , 1, [configParameters[3]]);
+	console.log(`\x1B[32m Reader\x1B[0m - Call \x1B[Reader.getVaultTokenInfoV2(${configParameters[2]}, ${nativeToken.address}, 1, ${configParameters[3]})\x1B[0m ...`);
 
 	const token: any = {};
-	token.poolAmount = vaultTokenInfo[vaultPropsLength];
-	token.reservedAmount = vaultTokenInfo[vaultPropsLength + 1];
-	token.availableAmount = token.poolAmount.sub(token.reservedAmount);
-	token.usdgAmount = vaultTokenInfo[vaultPropsLength + 2];
-	token.redemptionAmount = vaultTokenInfo[vaultPropsLength + 3];
+	console.log(vaultTokenInfo);
+	token.poolAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength]);
+	token.reservedAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength + 1]);
+	token.availableAmount = BigNumber.from(token.poolAmount.sub(token.reservedAmount));
+	token.usdgAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength + 2]);
+	token.redemptionAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength + 3]);
 	token.weight = vaultTokenInfo[vaultPropsLength + 4];
 	token.bufferAmount = vaultTokenInfo[vaultPropsLength + 5];
 	token.maxUsdgAmount = vaultTokenInfo[vaultPropsLength + 6];
@@ -554,7 +552,8 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 		tokenItem.tokenWeight, 
 		tokenItem.minProfitBps, 
 		adjustedMaxUsdgAmount,
-		adjustedBufferAmount
+		adjustedBufferAmount,
+		usdgAmount
 	));
 }
 
