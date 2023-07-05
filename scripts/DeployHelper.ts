@@ -489,3 +489,77 @@ export async function CallSetTokenConfig(hre: HardhatRuntimeEnvironment, contrac
 	await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
 }
 
+
+export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(contract, contractData.address);
+	const depSign = await ethers.getSigner(deployer);
+
+	const timelockContract = await ethers.getContractAt("timelock", await updateContract.gov());
+
+	const vaultPropsLength = 14;
+	
+	const nativeToken = await deployments.get(configParameters[1]);
+	const readerData = await deployments.get("Reader");
+	const reader = await ethers.getContractAt("Reader",readerData.address);
+
+	const vaultTokenInfo = await reader.getVaultTokenInfoV2(configParameters[2], nativeToken.address , 1, [configParameters[3]]);
+
+	const token: any = {};
+	token.poolAmount = vaultTokenInfo[vaultPropsLength];
+	token.reservedAmount = vaultTokenInfo[vaultPropsLength + 1];
+	token.availableAmount = token.poolAmount.sub(token.reservedAmount);
+	token.usdgAmount = vaultTokenInfo[vaultPropsLength + 2];
+	token.redemptionAmount = vaultTokenInfo[vaultPropsLength + 3];
+	token.weight = vaultTokenInfo[vaultPropsLength + 4];
+	token.bufferAmount = vaultTokenInfo[vaultPropsLength + 5];
+	token.maxUsdgAmount = vaultTokenInfo[vaultPropsLength + 6];
+	token.globalShortSize = vaultTokenInfo[vaultPropsLength + 7];
+	token.maxGlobalShortSize = vaultTokenInfo[vaultPropsLength + 8];
+	token.minPrice = vaultTokenInfo[vaultPropsLength + 9];
+	token.maxPrice = vaultTokenInfo[vaultPropsLength + 10];
+	token.guaranteedUsd = vaultTokenInfo[vaultPropsLength + 11];
+
+	const tokenItem = configParameters[4];
+
+	token.availableUsd = tokenItem.isStable
+		? token.poolAmount
+			.mul(token.minPrice)
+			.div(expandDecimals(1, tokenItem.decimals))
+		: token.availableAmount
+			.mul(token.minPrice)
+			.div(expandDecimals(1, tokenItem.decimals));
+
+	token.managedUsd = token.availableUsd.add(token.guaranteedUsd);
+	token.managedAmount = token.managedUsd
+		.mul(expandDecimals(1, tokenItem.decimals))
+		.div(token.minPrice);
+
+	let usdgAmount = token.managedUsd.div(expandDecimals(1, 30 - 18));
+
+	const adjustedMaxUsdgAmount = expandDecimals(tokenItem.maxUsdgAmount, 18);
+	if (usdgAmount.gt(adjustedMaxUsdgAmount))
+	{
+		usdgAmount = adjustedMaxUsdgAmount;
+	}
+	const adjustedBufferAmount = expandDecimals(tokenItem.bufferAmount, tokenItem.decimals);
+	console.log(`\x1B[32m Timelock\x1B[0m - Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBp}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount})\x1B[0m ...`);
+
+	await (await timelockContract.connect(depSign).setTokenConfig(
+		updateContract.address, 
+		tokenItem.address,  
+		tokenItem.tokenWeight, 
+		tokenItem.minProfitBps, 
+		adjustedMaxUsdgAmount,
+		adjustedBufferAmount
+	));
+}
+
+function expandDecimals(n: number, decimals: number) 
+{
+	return BigNumber.from(n).mul(BigNumber.from(10).pow(decimals));
+}
+  

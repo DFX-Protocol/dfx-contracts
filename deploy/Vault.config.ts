@@ -1,9 +1,9 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, CallVaultSetTokenConfig } from "../scripts/DeployHelper";
+import { GetDeployedContracts, CallSetTokenConfig } from "../scripts/DeployHelper";
 import { tokens } from "../scripts/Constants";
 
-const contract = "VaultPriceFeed";
+const contract = "Vault";
 const chainId = 11155111;
 
 const contractDependencies = [
@@ -17,7 +17,11 @@ const contractDependencies = [
 	tokens[chainId].BUSD.contractName,
 	tokens[chainId].BUSD.priceFeedContractName,
 	tokens[chainId].WETH.contractName,
-	tokens[chainId].WETH.priceFeedContractName
+	tokens[chainId].WETH.priceFeedContractName,
+	"USDG",
+	"Reader",
+	"Timelock",
+	"Vault_Init"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -26,18 +30,19 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const tokenNames = Object.keys(tokens[chainId]);
 	for(const token of tokenNames)
 	{
-		await CallVaultSetTokenConfig(hre, contract,
+		await CallSetTokenConfig(hre, contract,
 			[
+				chainId,
+				tokens[chainId].WETH.contractName, // TODO: Dynamically send native token address
+				dependencies[contract].address,
 				dependencies[tokens[chainId][token].contractName].address,
-				dependencies[tokens[chainId][token].priceFeedContractName].address,
-				tokens[chainId][token].decimals,
-				tokens[chainId][token].isStrictStable	
+				tokens[chainId][token],
 			]);
 	}
 };
 
 export default func;
 
-func.id = `Deploy_${contract}_Init`; // id required to prevent reexecution
-func.tags = [`${contract}_Init`, "testnet"];
+func.id = `Deploy_${contract}_Config`; // id required to prevent reexecution
+func.tags = [`${contract}_Config`, "testnet"];
 func.dependencies = [...contractDependencies];
