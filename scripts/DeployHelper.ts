@@ -3,6 +3,8 @@ import { BigNumber } from "ethers";
 import { Deployment } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment, Libraries } from "hardhat/types";
 import { ADDRESS_ZERO } from "../tests/helpers";
+import { tokens } from "./Constants";
+import { GetTokenAddress } from "./DeployConstants";
 
 export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: string, constructorParameters: unknown[] | undefined = undefined, libraries?: Libraries): Promise<void>
 {
@@ -731,7 +733,7 @@ function expandDecimals(n: number, decimals: number)
 	}
 }
 
-export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment)
+export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network: string)
 {
 	// ContractName: UIContractName
 	const data = {
@@ -753,6 +755,10 @@ export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment)
 		const contractData = await deployments.get(contract);
 		console.log(`${data[contract]}: "${contractData.address}",`);
 	}
+	const weth = tokens[network].WETH.address;
+	console.log(`"NATIVE_TOKEN: ${weth}",`);
+	const { multicall3 } = await GetTokenAddress();
+	console.log(`"Multicall: ${multicall3}"`);
 }
 
 function convertToEther(value: number, decimals: number)

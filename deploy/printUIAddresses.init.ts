@@ -37,10 +37,11 @@ const contractDependencies =
 		"Timelock"
 
 	];
+const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	await PrintAllAddresses(hre);
+	await PrintAllAddresses(hre, chainId);
 };
 
 export default func;
