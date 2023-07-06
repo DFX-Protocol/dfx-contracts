@@ -1,16 +1,25 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
+import { tokens } from "../scripts/Constants";
+import { ethers } from "hardhat";
+
+const { AddressZero } = ethers.constants;
+
+const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
 const contract = "ERC20Mock[BTC]";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	const constructorParameters = ["Bitcoin","BTC"];
-	await UnifiedDeploy(hre, contract, constructorParameters);
+	if(tokens[chainId].BTC.address === AddressZero || tokens[chainId].BTC.address === undefined)
+	{
+		const constructorParameters = ["Bitcoin","BTC"];
+		await UnifiedDeploy(hre, contract, constructorParameters);
+	}
 };
 
 export default func;
 
 func.id = `Deploy_${contract}`; // id required to prevent reexecution
-func.tags = [contract, "testnet"];
+func.tags = [contract, "testnet", "mockTokens"];

@@ -1,10 +1,10 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, CallVaultSetTokenConfig } from "../scripts/DeployHelper";
+import { GetDeployedContracts, CallTimelockSetTokenConfig, CallSignalVaultSetTokenConfig, CallSetGov, CallVaultSetTokenConfig, CallSetLatestAnswer } from "../scripts/DeployHelper";
 import { tokens } from "../scripts/Constants";
 
 const contract = "Vault";
-const chainId = 11155111;
+const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
 const contractDependencies = [
 	contract, 
@@ -21,16 +21,45 @@ const contractDependencies = [
 	"USDG",
 	"Reader",
 	"Timelock_Init",
-	"Vault_Init"
+	"Vault_Init",
+	"VaultPriceFeed_Init",
+	"VaultErrorController_Init"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	const tokenNames = Object.keys(tokens[chainId]);
+	// Set Token price through PriceFeed contract
+	// TODO: This should STRICTLY happen in testnet
 	for(const token of tokenNames)
 	{
-		await CallVaultSetTokenConfig(hre, contract,
+		await CallSetLatestAnswer(hre, tokens[chainId][token].priceFeedContractName, tokens[chainId][token].price, tokens[chainId][token].priceDecimals);
+	}
+	// Signal Vault SetTokenConfig
+	for(const token of tokenNames)
+	{
+		await CallSignalVaultSetTokenConfig(hre, contract,
+			[
+				tokens[chainId][token]
+			]);
+	}
+	// Whitelist tokens
+	for(const token of tokenNames)
+	{
+		// TODO: Check if vault.gov is set to deployer, only then run below script
+		await CallVaultSetTokenConfig(
+			hre, 
+			contract, 
+			[tokens[chainId][token]]
+		);
+	}
+	// Make timelock as gov of vault
+	await CallSetGov(hre, "Vault", "Timelock");
+	// Add token configs using timelock
+	for(const token of tokenNames)
+	{
+		await CallTimelockSetTokenConfig(hre, contract,
 			[
 				chainId,
 				tokens[chainId].WETH.contractName, // TODO: Dynamically send native token address

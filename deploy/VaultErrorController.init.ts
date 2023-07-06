@@ -73,14 +73,17 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
+	// TODO: Check if error controller is not set and setGov of vault is set to deployer, only then run below scripts
 	const vaultContractData = await deployments.get("Vault");
 	const vaultContract = await ethers.getContractAt("Vault", vaultContractData.address);
 
+	console.log(`\x1B[32mVault\x1B[0m - Call \x1B[33mVault.setErrorController("${dependencies[contract].address}")\x1B[0m ...`);
 	await vaultContract.connect(depSign).setErrorController(dependencies[contract].address);
 
 	const vaultErrorControllerContractData = await deployments.get(contract);
 	const vaultErrorControllerContract = await ethers.getContractAt(contract, vaultErrorControllerContractData.address);
 
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setErrors("${vaultContractData.address}")\x1B[0m ...`);
 	await vaultErrorControllerContract.connect(depSign).setErrors(vaultContractData.address, errors);
 };
 

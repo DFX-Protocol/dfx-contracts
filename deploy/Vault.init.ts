@@ -21,6 +21,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			fundingRateFactor,
 			stableFundingRateFactor
 		]);
+	// TODO: Check if Vault.gov is set to deployer, only then run below script
 	await CallSetVaultUtils(hre, contract, "VaultUtils");
 };
 

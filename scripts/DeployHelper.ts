@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { Deployment } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment, Libraries } from "hardhat/types";
+import { ADDRESS_ZERO } from "../tests/helpers";
 
 export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: string, constructorParameters: unknown[] | undefined = undefined, libraries?: Libraries): Promise<void>
 {
@@ -72,6 +73,89 @@ export async function CallSetShouldToggleIsLeverageEnabled(hre: HardhatRuntimeEn
 		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setShouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
 	}
 }
+
+
+export async function CallSetTokens(hre: HardhatRuntimeEnvironment, contract: string, btc: string, weth: string, bnb: string)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokens(${btc}, ${weth}, ${bnb})\x1B[0m ...`);
+	await (await updateContract.connect(depSign).setTokens(btc, weth, bnb)).wait();
+}
+
+export async function CallCreatePair(hre: HardhatRuntimeEnvironment, contract: string, factoryAddress: string, tokenA: string, tokenB: string)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+	const updateContract = await ethers.getContractAt(contract, factoryAddress);
+
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.createPair(${tokenA}, ${tokenB})\x1B[0m ...`);
+	await (await updateContract.connect(depSign).createPair(tokenA, tokenB)).wait();
+}
+
+
+export async function CallSetPairs(hre: HardhatRuntimeEnvironment, contract: string, factory: string, factoryAddress: string, bnbAddress: string, busdAddress: string, btcAddress: string, wethAddress: string)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+	const factoryContract = await ethers.getContractAt(factory, factoryAddress);
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+
+	const bnbBusdPair = await factoryContract.getPair(bnbAddress,busdAddress);
+	const btcBnbPair = await factoryContract.getPair(btcAddress,bnbAddress);
+	const wethBnbPair = await factoryContract.getPair(wethAddress,bnbAddress);
+
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+	await (await updateContract.connect(depSign).setPairs(bnbBusdPair, wethBnbPair, btcBnbPair)).wait();
+}
+
+
+export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract: string, routerAddress: string, tokenA: string, tokenB: string, tokenAAmount: number, tokenBAmount: number, tokenADecimals: number, tokenBDecimals: number)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const updateContract = await ethers.getContractAt(artifactName, routerAddress);
+	const deadline = new Date(Date.now()).getTime() + 10000;
+	const tokenAAmountBN = convertToEther(tokenAAmount, tokenADecimals);
+	const tokenBAmountBN = convertToEther(tokenBAmount, tokenBDecimals);
+	// TODO: Check if there's already liquidity available then don't add more
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.addLiquidity(${tokenA}, ${tokenB}, ${tokenAAmountBN}, ${tokenBAmountBN}, 0, 0, ${deployer}, ${deadline})\x1B[0m ...`);
+	await (await updateContract.connect(depSign).addLiquidity(tokenA, tokenB, tokenAAmountBN, tokenBAmountBN, 0, 0, deployer, deadline)).wait();
+}
+
+
+
+export async function CallApprove(hre: HardhatRuntimeEnvironment, contract: string, tokenAddress: string, spender: string, amount: number, decimals: number)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const updateContract = await ethers.getContractAt(artifactName, tokenAddress);
+
+	const amountBN = convertToEther(amount, decimals);
+
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.approve("${spender}", "${amountBN}")\x1B[0m ...`);
+	await (await updateContract.connect(depSign).approve(spender, amountBN)).wait();
+}
+
 
 export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, admin: string, value: string): Promise<void>
 {
@@ -459,19 +543,18 @@ export async function GetDeployedContracts(hre: HardhatRuntimeEnvironment, contr
 }
 
 
-export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: string, amountToMint: BigNumber)
+export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: string, tokenAddress: string, amountToMint: BigNumber)
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
 	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const updateContract = await ethers.getContractAt(artifactName, tokenAddress);
 	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.mintMock(${deployer},${amountToMint})\x1B[0m ...`);
 	await (await updateContract.mockMint(deployer, amountToMint)).wait();
 }
 
-export async function CallSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
+export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
 {
 	const { deployments, getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
@@ -481,12 +564,94 @@ export async function CallSetTokenConfig(hre: HardhatRuntimeEnvironment, contrac
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
 
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
-	await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+	const priceFeed = await updateContract.priceFeeds(configParameters[0]);
+	if(priceFeed === undefined || priceFeed === ADDRESS_ZERO)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig()\x1B[0m ...`);
+	}
+	
+}
+
+
+export async function CallSignalVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const tokenItem = configParameters[0];
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(contract, contractData.address);
+	const depSign = await ethers.getSigner(deployer);
+
+	const timelockContract = await ethers.getContractAt("Timelock", await updateContract.gov());
+	
+	console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.signalVaultSetTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount,18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
+	// TODO: This needs to be checked first if `signalVaultSetTokenConfig` has already been called on given token
+	await (await timelockContract.connect(depSign).signalVaultSetTokenConfig(
+		updateContract.address, 
+		tokenItem.address,  
+		tokenItem.decimals, 
+		tokenItem.tokenWeight, 
+		tokenItem.minProfitBps,
+		expandDecimals(tokenItem.maxUsdgAmount,18),
+		tokenItem.isStable,
+		tokenItem.isShortable
+	));
 }
 
 
 export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const tokenItem = configParameters[0];
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const depSign = await ethers.getSigner(deployer);
+
+	const whitelisted = await updateContract.whitelistedTokens(tokenItem.address);
+	if(!whitelisted)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount, 18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setTokenConfig(
+			tokenItem.address, 
+			tokenItem.decimals, 
+			tokenItem.tokenWeight, 
+			tokenItem.minProfitBps,
+			expandDecimals(tokenItem.maxUsdgAmount, 18),
+			tokenItem.isStable,
+			tokenItem.isShortable)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig()\x1B[0m ...`);
+	}
+	
+}
+
+export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contract: string, seedValue: number, decimals: number)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const depSign = await ethers.getSigner(deployer);
+
+	const price = convertToEther(seedValue, decimals);
+	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
+	await (await updateContract.connect(depSign).setLatestAnswer(price)).wait();
+}
+
+
+export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
 {
 	const { deployments, getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
@@ -495,32 +660,28 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 	const depSign = await ethers.getSigner(deployer);
 
 	const timelockContract = await ethers.getContractAt("Timelock", await updateContract.gov());
-
-	const vaultPropsLength = 14;
 	
 	const nativeToken = await deployments.get(configParameters[1]);
 	const readerData = await deployments.get("Reader");
 	const reader = await ethers.getContractAt("Reader",readerData.address);
 
+	console.log(`\x1B[32mReader\x1B[0m - Call \x1B[33mReader.getVaultTokenInfoV2(${configParameters[2]}, ${nativeToken.address}, 1, ${configParameters[3]})\x1B[0m ...`);
 	const vaultTokenInfo = await reader.getVaultTokenInfoV2(configParameters[2], nativeToken.address , 1, [configParameters[3]]);
-	console.log(`\x1B[32m Reader\x1B[0m - Call \x1B[Reader.getVaultTokenInfoV2(${configParameters[2]}, ${nativeToken.address}, 1, ${configParameters[3]})\x1B[0m ...`);
 
 	const token: any = {};
-	console.log(vaultTokenInfo);
-	token.poolAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength]);
-	token.reservedAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength + 1]);
+	token.poolAmount = BigNumber.from(vaultTokenInfo[0]);
+	token.reservedAmount = BigNumber.from(vaultTokenInfo[1]);
 	token.availableAmount = BigNumber.from(token.poolAmount.sub(token.reservedAmount));
-	token.usdgAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength + 2]);
-	token.redemptionAmount = BigNumber.from(vaultTokenInfo[vaultPropsLength + 3]);
-	token.weight = vaultTokenInfo[vaultPropsLength + 4];
-	token.bufferAmount = vaultTokenInfo[vaultPropsLength + 5];
-	token.maxUsdgAmount = vaultTokenInfo[vaultPropsLength + 6];
-	token.globalShortSize = vaultTokenInfo[vaultPropsLength + 7];
-	token.maxGlobalShortSize = vaultTokenInfo[vaultPropsLength + 8];
-	token.minPrice = vaultTokenInfo[vaultPropsLength + 9];
-	token.maxPrice = vaultTokenInfo[vaultPropsLength + 10];
-	token.guaranteedUsd = vaultTokenInfo[vaultPropsLength + 11];
-
+	token.usdgAmount = BigNumber.from(vaultTokenInfo[2]);
+	token.redemptionAmount = BigNumber.from(vaultTokenInfo[3]);
+	token.weight = vaultTokenInfo[4];
+	token.bufferAmount = vaultTokenInfo[5];
+	token.maxUsdgAmount = vaultTokenInfo[6];
+	token.globalShortSize = vaultTokenInfo[7];
+	token.maxGlobalShortSize = vaultTokenInfo[8];
+	token.minPrice = vaultTokenInfo[9];
+	token.maxPrice = vaultTokenInfo[10];
+	token.guaranteedUsd = vaultTokenInfo[11];
 	const tokenItem = configParameters[4];
 
 	token.availableUsd = tokenItem.isStable
@@ -544,7 +705,7 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 		usdgAmount = adjustedMaxUsdgAmount;
 	}
 	const adjustedBufferAmount = expandDecimals(tokenItem.bufferAmount, tokenItem.decimals);
-	console.log(`\x1B[32m Timelock\x1B[0m - Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBp}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount})\x1B[0m ...`);
+	console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount}, ${usdgAmount})\x1B[0m ...`);
 
 	await (await timelockContract.connect(depSign).setTokenConfig(
 		updateContract.address, 
@@ -559,6 +720,43 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 
 function expandDecimals(n: number, decimals: number) 
 {
-	return BigNumber.from(n).mul(BigNumber.from(10).pow(decimals));
+	if(n !== undefined)
+	{
+		return BigNumber.from(n).mul(BigNumber.from(10).pow(decimals));
+	}
+	else
+	{
+		console.log("Warning: Expanding decimal of an undefined number. Be Careful");
+		return BigNumber.from(0);
+	}
+}
+
+export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment)
+{
+	// ContractName: UIContractName
+	const data = {
+		"Vault": "Vault", "Router": "Router", "VaultReader": "VaultReader", "Reader": "Reader", "GlpManager": "GlpManager",
+		"RewardRouterV2": "RewardRouter", "RewardRouterV2[GLP]": "GlpRewardRouter", "RewardReader": "RewardReader", "GLP": "GLP", 
+		"GMX": "GMX", "EsGMX": "ES_GMX", "MintableBaseToken[bnGMX]": "BN_GMX", "USDG": "USDG", "MintableBaseToken[esGMX_IOU]": "ES_GMX_IOU",
+		"RewardTracker[stakedGmxTracker]": "StakedGmxTracker", "RewardTracker[bonusGmxTracker]": "BonusGmxTracker", 
+		"RewardTracker[feeGmxTracker]": "FeeGmxTracker", "RewardTracker[stakedGlpTracker]": "StakedGlpTracker",
+		"RewardTracker[feeGlpTracker]": "FeeGlpTracker", "RewardDistributor[stakedGmxDistributor]": "StakedGmxDistributor", 
+		"RewardDistributor[stakedGlpDistributor]": "StakedGlpDistributor", "Vester[GmxVester]": "GmxVester", "Vester[GlpVester]": "GlpVester",
+		"OrderBook": "OrderBook", "OrderExecutor": "OrderExecutor", "OrderBookReader": "OrderBookReader", "PositionRouter": "PositionRouter", 
+		"PositionManager": "PositionManager", "ReferralStorage": "ReferralStorage", "ReferralReader": "ReferralReader", "Timelock": "Timelock"
+	};
+	const contracts = Object.keys(data);
+	const { deployments } = hre;
+    
+	for(const contract of contracts)
+	{
+		const contractData = await deployments.get(contract);
+		console.log(`${data[contract]}: "${contractData.address}",`);
+	}
+}
+
+function convertToEther(value: number, decimals: number)
+{
+	return ethers.utils.parseUnits( value.toString(), decimals);
 }
   
