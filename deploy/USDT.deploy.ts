@@ -16,6 +16,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		const constructorParameters = ["USDT Tether","USDT"];
 		await UnifiedDeploy(hre, contract, constructorParameters);
 	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - reused at ${tokens[chainId].USDT.address}\x1B[0m ...`);
+	}
 };
 
 export default func;

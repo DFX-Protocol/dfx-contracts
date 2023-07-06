@@ -2,9 +2,10 @@ import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { Deployment } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment, Libraries } from "hardhat/types";
-import { ADDRESS_ZERO } from "../tests/helpers";
 import { tokens } from "./Constants";
 import { GetTokenAddress } from "./DeployConstants";
+
+const { AddressZero } = ethers.constants;
 
 export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: string, constructorParameters: unknown[] | undefined = undefined, libraries?: Libraries): Promise<void>
 {
@@ -88,8 +89,18 @@ export async function CallSetTokens(hre: HardhatRuntimeEnvironment, contract: st
 	const contractData = await deployments.get(contract);
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokens(${btc}, ${weth}, ${bnb})\x1B[0m ...`);
-	await (await updateContract.connect(depSign).setTokens(btc, weth, bnb)).wait();
+	const prevBtc = await updateContract.btc();
+	const prevWeth = await updateContract.weth();
+	const prevBnb = await updateContract.bnb();
+	if(prevBtc !== btc || prevBnb !== bnb || prevWeth !== weth)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokens(${btc}, ${weth}, ${bnb})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setTokens(btc, weth, bnb)).wait();	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokens(${btc}, ${weth}, ${bnb})\x1B[0m ...`);
+	}
 }
 
 export async function CallCreatePair(hre: HardhatRuntimeEnvironment, contract: string, factoryAddress: string, tokenA: string, tokenB: string)
@@ -119,8 +130,18 @@ export async function CallSetPairs(hre: HardhatRuntimeEnvironment, contract: str
 	const btcBnbPair = await factoryContract.getPair(btcAddress,bnbAddress);
 	const wethBnbPair = await factoryContract.getPair(wethAddress,bnbAddress);
 
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
-	await (await updateContract.connect(depSign).setPairs(bnbBusdPair, wethBnbPair, btcBnbPair)).wait();
+	const prevBnbBusdPair = await updateContract.bnbBusd();
+	const prevBtcBnbPair = await updateContract.btcBnb();
+	const prevWethBnbPair = await updateContract.wethBnb();
+	if(prevBnbBusdPair !== bnbBusdPair || prevBtcBnbPair !== btcBnbPair|| prevWethBnbPair !== wethBnbPair)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setPairs(bnbBusdPair, wethBnbPair, btcBnbPair)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+	}
 }
 
 
@@ -153,9 +174,16 @@ export async function CallApprove(hre: HardhatRuntimeEnvironment, contract: stri
 	const updateContract = await ethers.getContractAt(artifactName, tokenAddress);
 
 	const amountBN = convertToEther(amount, decimals);
-
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.approve("${spender}", "${amountBN}")\x1B[0m ...`);
-	await (await updateContract.connect(depSign).approve(spender, amountBN)).wait();
+	const allowance = await updateContract.allowance(deployer, spender);
+	if(allowance.lt(amountBN))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.approve("${spender}", "${amountBN}")\x1B[0m ...`);
+		await (await updateContract.connect(depSign).approve(spender, amountBN)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.approve(${spender}, ${amountBN})\x1B[0m ...`);
+	}
 }
 
 
@@ -552,8 +580,16 @@ export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: str
 	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
 	const artifactName = contract.substring(0, index);
 	const updateContract = await ethers.getContractAt(artifactName, tokenAddress);
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.mintMock(${deployer},${amountToMint})\x1B[0m ...`);
-	await (await updateContract.mockMint(deployer, amountToMint)).wait();
+	const balance = await updateContract.balanceOf(deployer);
+	if(balance.lt(amountToMint))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.mintMock(${deployer}, ${amountToMint})\x1B[0m ...`);
+		await (await updateContract.mockMint(deployer, amountToMint)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already minted. Skip \x1B[33m${contract}.mintMock(${deployer}, ${amountToMint})\x1B[0m ...`);
+	}
 }
 
 export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
@@ -567,7 +603,7 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 	const depSign = await ethers.getSigner(deployer);
 
 	const priceFeed = await updateContract.priceFeeds(configParameters[0]);
-	if(priceFeed === undefined || priceFeed === ADDRESS_ZERO)
+	if(priceFeed === undefined || priceFeed === AddressZero)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
@@ -646,10 +682,17 @@ export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contra
 	const contractData = await deployments.get(contract);
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
-
+	const roundData = await updateContract.latestAnswer();
 	const price = convertToEther(seedValue, decimals);
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
-	await (await updateContract.connect(depSign).setLatestAnswer(price)).wait();
+	if(roundData.ne(price))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setLatestAnswer(price)).wait();	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
+	}
 }
 
 

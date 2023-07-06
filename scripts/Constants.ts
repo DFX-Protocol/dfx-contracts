@@ -2,8 +2,8 @@ export const tokens = {
 	"sepolia":{
 		USDT: {
 			contractName: "ERC20Mock[USDT]",
-			address: "0x74257cC7d25af25B781f7BEF26cf42B824Fb26d3",
-			decimals: 6,
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
 			price: 0.9995,
 			priceDecimals: 8,
 			isStrictStable: true,
@@ -17,7 +17,7 @@ export const tokens = {
 		},
 		BUSD: {
 			contractName: "ERC20Mock[BUSD]",
-			address: "0x32d53f43d70AfFc3852DDe6d7b20082cCfE92019",
+			address: "0x0000000000000000000000000000000000000000",
 			decimals: 18,
 			priceDecimals: 8,
 			price: 0.999962,
@@ -32,7 +32,7 @@ export const tokens = {
 		},
 		BTC: {
 			contractName: "ERC20Mock[BTC]",
-			address: "0x897E0073ADf0c1692423e1Ad2cD646Fb444eC872",
+			address: "0x0000000000000000000000000000000000000000",
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
@@ -61,7 +61,7 @@ export const tokens = {
 		},
 		BNB: {
 			contractName: "ERC20Mock[BNB]",
-			address: "0x349DfE6146b610F489be06B465c8C89b2C5D5DE0",
+			address: "0x0000000000000000000000000000000000000000",
 			decimals: 18,
 			priceDecimals: 8,
 			price: 244.4264,
@@ -77,7 +77,7 @@ export const tokens = {
 		},
 		WETH: {
 			contractName: "WETH",
-			address: "0x75F2848702596a50ae276E8f09912d14ffEff6FE",
+			address: "0x0000000000000000000000000000000000000000",
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,

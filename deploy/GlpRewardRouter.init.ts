@@ -36,7 +36,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 				AddressZero //Vester[GlpVester]
 			]
 		]);
-	await CallSetHandler(hre, "GlpManager", contract);
 };
 
 export default func;

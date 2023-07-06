@@ -77,14 +77,30 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const vaultContractData = await deployments.get("Vault");
 	const vaultContract = await ethers.getContractAt("Vault", vaultContractData.address);
 
-	console.log(`\x1B[32mVault\x1B[0m - Call \x1B[33mVault.setErrorController("${dependencies[contract].address}")\x1B[0m ...`);
-	await vaultContract.connect(depSign).setErrorController(dependencies[contract].address);
+	const errorController = await vaultContract.errorController();
+	if(errorController !==dependencies[contract].address)
+	{
+		console.log(`\x1B[32mVault\x1B[0m - Call \x1B[33mVault.setErrorController("${dependencies[contract].address}")\x1B[0m ...`);
+		await vaultContract.connect(depSign).setErrorController(dependencies[contract].address);	
+	}
+	else
+	{
+		console.log(`\x1B[32mVault\x1B[0m - Already set. Skip \x1B[33mVault.setErrorController(${dependencies[contract].address})\x1B[0m ...`);
+	}
 
-	const vaultErrorControllerContractData = await deployments.get(contract);
-	const vaultErrorControllerContract = await ethers.getContractAt(contract, vaultErrorControllerContractData.address);
-
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setErrors("${vaultContractData.address}")\x1B[0m ...`);
-	await vaultErrorControllerContract.connect(depSign).setErrors(vaultContractData.address, errors);
+	const error0 = await vaultContract.errors(0);
+	if(error0 === undefined || error0 === "")
+	{
+		const vaultErrorControllerContractData = await deployments.get(contract);
+		const vaultErrorControllerContract = await ethers.getContractAt(contract, vaultErrorControllerContractData.address);
+	
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setErrors("${vaultContractData.address}")\x1B[0m ...`);
+		await vaultErrorControllerContract.connect(depSign).setErrors(vaultContractData.address, errors);	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setErrorController(${vaultContractData.address}, errors...)\x1B[0m ...`);
+	}
 };
 
 export default func;

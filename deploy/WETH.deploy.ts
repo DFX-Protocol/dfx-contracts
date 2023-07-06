@@ -17,6 +17,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		const constructorParameters = ["Wrapped Ether","WETH",18];
 		await UnifiedDeploy(hre, contract, constructorParameters);
 	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - reused at ${tokens[chainId].WETH.address}\x1B[0m ...`);
+	}
 };
 
 export default func;
