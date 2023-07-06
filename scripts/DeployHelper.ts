@@ -755,8 +755,18 @@ export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network:
 		const contractData = await deployments.get(contract);
 		console.log(`${data[contract]}: "${contractData.address}",`);
 	}
-	const weth = tokens[network].WETH.address;
-	console.log(`"NATIVE_TOKEN: ${weth}",`);
+	const tokenNames = Object.keys(tokens[network]);
+	for(const token of tokenNames)
+	{
+		if(token === "WETH")
+		{
+			console.log(`"NATIVE_TOKEN: ${tokens[chainId][token].address}",`);
+		}
+		else
+		{
+			console.log(`${token}: "${tokens[chainId][token].address}",`);
+		}
+	}
 	const { multicall3 } = await GetTokenAddress();
 	console.log(`"Multicall: ${multicall3}"`);
 }
