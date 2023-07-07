@@ -18,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		dependencies["USDG"].address,
 		dependencies["GLP"].address,
 		dependencies["ShortsTracker"].address,
-		15 * 60
+		15 * 60 // 15 mins
 	];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 	const contractData = await deployments.get(contract);

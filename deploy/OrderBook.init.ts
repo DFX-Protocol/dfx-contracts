@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
+import { GetDeployedContracts, UnifiedInitialize, CallAddPlugin } from "../scripts/DeployHelper";
 import { GetTokenAddress } from "../scripts/DeployConstants";
 
 const contract = "OrderBook";
@@ -27,6 +27,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		BigNumber.from(10).pow(30), // min purchase token amount usd
 	];
 	await UnifiedInitialize(hre, contract, initParameters);
+	await CallAddPlugin(hre, "Router", contract);
 };
 
 export default func;

@@ -90,7 +90,7 @@ export async function CallSetTokens(hre: HardhatRuntimeEnvironment, contract: st
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 
 	const prevBtc = await updateContract.btc();
-	const prevWeth = await updateContract.weth();
+	const prevWeth = await updateContract.eth();
 	const prevBnb = await updateContract.bnb();
 	if(prevBtc !== btc || prevBnb !== bnb || prevWeth !== weth)
 	{
@@ -110,8 +110,16 @@ export async function CallCreatePair(hre: HardhatRuntimeEnvironment, contract: s
 	const depSign = await ethers.getSigner(deployer);
 	const updateContract = await ethers.getContractAt(contract, factoryAddress);
 
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.createPair(${tokenA}, ${tokenB})\x1B[0m ...`);
-	await (await updateContract.connect(depSign).createPair(tokenA, tokenB)).wait();
+	const pair = await updateContract.getPair(tokenA, tokenB);
+	if(pair === AddressZero)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.createPair(${tokenA}, ${tokenB})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).createPair(tokenA, tokenB)).wait();	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already created. Skip \x1B[33m${contract}.createPair(${tokenA}, ${tokenB})\x1B[0m ...`);
+	}
 }
 
 
@@ -132,7 +140,7 @@ export async function CallSetPairs(hre: HardhatRuntimeEnvironment, contract: str
 
 	const prevBnbBusdPair = await updateContract.bnbBusd();
 	const prevBtcBnbPair = await updateContract.btcBnb();
-	const prevWethBnbPair = await updateContract.wethBnb();
+	const prevWethBnbPair = await updateContract.ethBnb();
 	if(prevBnbBusdPair !== bnbBusdPair || prevBtcBnbPair !== btcBnbPair|| prevWethBnbPair !== wethBnbPair)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
@@ -145,7 +153,7 @@ export async function CallSetPairs(hre: HardhatRuntimeEnvironment, contract: str
 }
 
 
-export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract: string, routerAddress: string, tokenA: string, tokenB: string, tokenAAmount: number, tokenBAmount: number, tokenADecimals: number, tokenBDecimals: number)
+export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract: string, routerAddress: string, tokenA: any, tokenB: any, tokenAAmount: number, tokenBAmount: number)
 {
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
@@ -155,13 +163,63 @@ export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract:
 	const artifactName = contract.substring(0, index);
 	const updateContract = await ethers.getContractAt(artifactName, routerAddress);
 	const deadline = new Date(Date.now()).getTime() + 10000;
-	const tokenAAmountBN = convertToEther(tokenAAmount, tokenADecimals);
-	const tokenBAmountBN = convertToEther(tokenBAmount, tokenBDecimals);
-	// TODO: Check if there's already liquidity available then don't add more
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.addLiquidity(${tokenA}, ${tokenB}, ${tokenAAmountBN}, ${tokenBAmountBN}, 0, 0, ${deployer}, ${deadline})\x1B[0m ...`);
-	await (await updateContract.connect(depSign).addLiquidity(tokenA, tokenB, tokenAAmountBN, tokenBAmountBN, 0, 0, deployer, deadline)).wait();
+	const tokenAAmountBN = convertToEther(tokenAAmount, tokenA.decimals);
+	const tokenBAmountBN = convertToEther(tokenBAmount, tokenB.decimals);
+
+	const { uniswapV2Factory } = await GetTokenAddress();
+	const factory = await ethers.getContractAt("PancakeFactory",uniswapV2Factory);
+	const pairAddr = await factory.getPair(tokenA.address,tokenB.address);
+
+	let shouldAddLiq = false;
+	if(pairAddr!== AddressZero)
+	{
+		const pairERC20 = await ethers.getContractAt("ERC20", pairAddr);
+		const balance = await pairERC20.balanceOf(deployer);
+		if(!balance.gt(0))
+		{
+			shouldAddLiq = true;
+		}
+	}
+	else
+	{
+		shouldAddLiq = true;
+	}
+	if(shouldAddLiq)
+	{
+		await CallApprove(hre, tokenA.contractName, tokenA.address, routerAddress, tokenAAmount, tokenA.decimals);
+		await CallApprove(hre, tokenB.contractName, tokenB.address, routerAddress, tokenBAmount, tokenB.decimals);
+	
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.addLiquidity(${tokenA.address}, ${tokenB.address}, ${tokenAAmountBN}, ${tokenBAmountBN}, 0, 0, ${deployer}, ${deadline})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).addLiquidity(tokenA.address, tokenB.address, tokenAAmountBN, tokenBAmountBN, 0, 0, deployer, deadline)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already added. Skip \x1B[33m${contract}.addLiquidity(${tokenA.address}, ${tokenB.address}, ${tokenAAmountBN}, ${tokenBAmountBN},0 , 0,${deployer}, ${deadline})\x1B[0m ...`);
+	}	
 }
 
+
+export async function CallWethDeposit(hre: HardhatRuntimeEnvironment, weth: any, amount: number)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+	const contract = "WETH";
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const updateContract = await ethers.getContractAt(artifactName, weth.address);
+
+	const balance = await updateContract.balanceOf(deployer);
+	if(balance.lt(convertToEther(1, weth.decimals)))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.deposit(${amount})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).deposit({ value: ethers.utils.parseEther(amount.toString()) })).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.deposit(${amount})\x1B[0m ...`);
+	}
+}
 
 
 export async function CallApprove(hre: HardhatRuntimeEnvironment, contract: string, tokenAddress: string, spender: string, amount: number, decimals: number)
@@ -603,14 +661,14 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 	const depSign = await ethers.getSigner(deployer);
 
 	const priceFeed = await updateContract.priceFeeds(configParameters[0]);
-	if(priceFeed === undefined || priceFeed === AddressZero)
+	if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1])
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig()\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 	}
 	
 }
@@ -625,20 +683,53 @@ export async function CallSignalVaultSetTokenConfig(hre: HardhatRuntimeEnvironme
 	const updateContract = await ethers.getContractAt(contract, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
 
-	const timelockContract = await ethers.getContractAt("Timelock", await updateContract.gov());
-	
-	console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.signalVaultSetTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount,18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
-	// TODO: This needs to be checked first if `signalVaultSetTokenConfig` has already been called on given token
-	await (await timelockContract.connect(depSign).signalVaultSetTokenConfig(
-		updateContract.address, 
-		tokenItem.address,  
-		tokenItem.decimals, 
-		tokenItem.tokenWeight, 
-		tokenItem.minProfitBps,
-		expandDecimals(tokenItem.maxUsdgAmount,18),
-		tokenItem.isStable,
-		tokenItem.isShortable
-	));
+	const timelockData = await deployments.get("Timelock");
+	const timelockContract = await ethers.getContractAt("Timelock", timelockData.address);
+
+	const hash = getKeccak256(
+		[
+			"string",
+			"address",
+			"address",
+			"uint256",
+			"uint256",
+			"uint256",
+			"uint256",
+			"bool",
+			"bool"
+		],[
+			"vaultSetTokenConfig",
+			updateContract.address,
+			tokenItem.address,
+			tokenItem.decimals,
+			tokenItem.tokenWeight,
+			tokenItem.minProfitBps,
+			expandDecimals(tokenItem.maxUsdgAmount,18),
+			tokenItem.isStable,
+			tokenItem.isShortable
+		]
+	);
+
+	const actionTimestamp = await timelockContract.connect(depSign).pendingActions(hash);
+	if(actionTimestamp.eq(0))
+	{
+		console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.signalVaultSetTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount,18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
+		await (await timelockContract.connect(depSign).signalVaultSetTokenConfig(
+			updateContract.address, 
+			tokenItem.address,  
+			tokenItem.decimals, 
+			tokenItem.tokenWeight, 
+			tokenItem.minProfitBps,
+			expandDecimals(tokenItem.maxUsdgAmount,18),
+			tokenItem.isStable,
+			tokenItem.isShortable
+		));
+	}
+	else
+	{
+		console.log(`\x1B[32mTimelock\x1B[0m - Already set. Skip \x1B[33mTimelock.signalVaultSetTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount,18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
+	}
+
 }
 
 
@@ -668,7 +759,7 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig()\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}setTokenConfig(${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount, 18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
 	}
 	
 }
@@ -684,7 +775,8 @@ export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contra
 	const depSign = await ethers.getSigner(deployer);
 	const roundData = await updateContract.latestAnswer();
 	const price = convertToEther(seedValue, decimals);
-	if(roundData.ne(price))
+
+	if(!roundData.eq(price))
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setLatestAnswer(price)).wait();	
@@ -703,8 +795,9 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 	const contractData = await deployments.get(contract);
 	const updateContract = await ethers.getContractAt(contract, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
-
-	const timelockContract = await ethers.getContractAt("Timelock", await updateContract.gov());
+	
+	const timelockData = await deployments.get("Timelock");
+	const timelockContract = await ethers.getContractAt("Timelock", timelockData.address);
 	
 	const nativeToken = await deployments.get(configParameters[1]);
 	const readerData = await deployments.get("Reader");
@@ -751,7 +844,7 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 	}
 	const adjustedBufferAmount = expandDecimals(tokenItem.bufferAmount, tokenItem.decimals);
 	console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount}, ${usdgAmount})\x1B[0m ...`);
-
+	// TODO: Check if token config is already set and skip in that case
 	await (await timelockContract.connect(depSign).setTokenConfig(
 		updateContract.address, 
 		tokenItem.address,  
@@ -761,19 +854,6 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 		adjustedBufferAmount,
 		usdgAmount
 	));
-}
-
-function expandDecimals(n: number, decimals: number) 
-{
-	if(n !== undefined)
-	{
-		return BigNumber.from(n).mul(BigNumber.from(10).pow(decimals));
-	}
-	else
-	{
-		console.log("Warning: Expanding decimal of an undefined number. Be Careful");
-		return BigNumber.from(0);
-	}
 }
 
 export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network: string)
@@ -803,15 +883,15 @@ export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network:
 	{
 		if(token === "WETH")
 		{
-			console.log(`"NATIVE_TOKEN: ${tokens[chainId][token].address}",`);
+			console.log(`NATIVE_TOKEN: "${tokens[network][token].address}",`);
 		}
 		else
 		{
-			console.log(`${token}: "${tokens[chainId][token].address}",`);
+			console.log(`${token}: "${tokens[network][token].address}",`);
 		}
 	}
 	const { multicall3 } = await GetTokenAddress();
-	console.log(`"Multicall: ${multicall3}"`);
+	console.log(`Multicall: "${multicall3}"`);
 }
 
 function convertToEther(value: number, decimals: number)
@@ -819,3 +899,20 @@ function convertToEther(value: number, decimals: number)
 	return ethers.utils.parseUnits( value.toString(), decimals);
 }
   
+function getKeccak256(types: string[], values: any[])
+{
+	return ethers.utils.solidityKeccak256(types,values);
+}
+
+function expandDecimals(n: number, decimals: number) 
+{
+	if(n !== undefined)
+	{
+		return BigNumber.from(n).mul(BigNumber.from(10).pow(decimals));
+	}
+	else
+	{
+		console.log("Warning: Expanding decimal of an undefined number. Be Careful");
+		return BigNumber.from(0);
+	}
+}

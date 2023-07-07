@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, CallPriceFeedSetTokenConfig, CallSetTokens, CallSetPairs, CallApprove, CallAddLiquidity } from "../scripts/DeployHelper";
+import { GetDeployedContracts, CallPriceFeedSetTokenConfig, CallSetTokens, CallSetPairs, CallWethDeposit, CallAddLiquidity, CallCreatePair } from "../scripts/DeployHelper";
 import { GetTokenAddress } from "../scripts/DeployConstants";
 import { tokens } from "../scripts/Constants";
 
@@ -45,9 +45,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { uniswapV2Factory } = await GetTokenAddress();
 	const { uniswapV2Router } = await GetTokenAddress();
 
-	// await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, bnb, busd);
-	// await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, weth, bnb);
-	// await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, btc, bnb);
+	await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, bnb, busd);
+	await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, weth, bnb);
+	await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, btc, bnb);
 
 	await CallSetPairs(hre, contract,
 		"PancakeFactory",
@@ -57,18 +57,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		btc,
 		weth
 	);
-	// TODO: Check if pairs already exist and has some liquidity token(UNISWAP-V2 token) in deployer's address, then don't run below scripts
-	await CallApprove(hre, tokens[chainId].BNB.contractName, bnb, uniswapV2Router, 100, tokens[chainId].BNB.decimals);
-	await CallApprove(hre, tokens[chainId].BUSD.contractName, busd, uniswapV2Router, 24353.91, tokens[chainId].BUSD.decimals);
-	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, bnb, busd, 100, 24353.91, tokens[chainId].BNB.decimals, tokens[chainId].BUSD.decimals);
 
-	await CallApprove(hre, tokens[chainId].WETH.contractName, weth, uniswapV2Router, 1, tokens[chainId].WETH.decimals);
-	await CallApprove(hre, tokens[chainId].BNB.contractName, bnb, uniswapV2Router, 7.9586, tokens[chainId].BNB.decimals);
-	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, weth, bnb, 1, 7.9586, tokens[chainId].WETH.decimals, tokens[chainId].BNB.decimals);
+	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BNB, tokens[chainId].BUSD, 100, 24353.91);
+
+	await CallWethDeposit(hre, tokens[chainId].WETH, 1);
+	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].WETH, tokens[chainId].BNB, 1, 7.9586);
 	
-	await CallApprove(hre, tokens[chainId].BTC.contractName, btc, uniswapV2Router, 100, tokens[chainId].BTC.decimals);
-	await CallApprove(hre, tokens[chainId].BNB.contractName, bnb, uniswapV2Router, 12748, tokens[chainId].BNB.decimals);
-	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, btc, bnb, 100, 12748, tokens[chainId].BTC.decimals, tokens[chainId].BNB.decimals);
+	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BTC, tokens[chainId].BNB, 100, 12748);
 
 	for(const token of tokenNames)
 	{
