@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallAddPlugin } from "../scripts/DeployHelper";
+import { CallAddPlugin, CallSetHandler } from "../scripts/DeployHelper";
 
 const contract = "PositionRouter";
 const contractDependencies =
@@ -12,6 +12,7 @@ const contractDependencies =
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	await CallAddPlugin(hre, "Router", contract);
+	await CallSetHandler(hre, "ShortsTracker", contract);
 };
 
 export default func;

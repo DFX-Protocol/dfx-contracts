@@ -259,6 +259,7 @@ export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract
 	const newHandlerContractData = await deployments.get(newHandlerContractName);
 
 	// TODO check bytecode pendingActions[_action]
+	// CHECK CallSignalVaultSetTokenConfig function to calculate bytecode
 	if (true)
 	{
 		try
@@ -297,6 +298,42 @@ export async function CallSetVaultUtils(hre: HardhatRuntimeEnvironment, contract
 	else
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetErrorController(hre: HardhatRuntimeEnvironment, contract: string, errors: string[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const vaultContractData = await deployments.get("Vault");
+	const vaultContract = await ethers.getContractAt("Vault", vaultContractData.address);
+
+	const currentErrorController = await vaultContract.errorController();
+	const errorController = await deployments.get(contract);
+	if(currentErrorController !== errorController.address)
+	{
+		console.log(`\x1B[32mVault\x1B[0m - Call \x1B[33mVault.setErrorController("${errorController.address}")\x1B[0m ...`);
+		await vaultContract.connect(depSign).setErrorController(errorController.address);	
+	}
+	else
+	{
+		console.log(`\x1B[32mVault\x1B[0m - Already set. Skip \x1B[33mVault.setErrorController(${errorController.address})\x1B[0m ...`);
+	}
+
+	const error0 = await vaultContract.errors(0);
+	if(error0 === undefined || error0 === "")
+	{
+		const vaultErrorControllerContract = await ethers.getContractAt(contract, errorController.address);
+	
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setErrors("${vaultContractData.address}")\x1B[0m ...`);
+		await vaultErrorControllerContract.connect(depSign).setErrors(vaultContractData.address, errors);	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setErrors(${vaultContractData.address}, errors...)\x1B[0m ...`);
 	}
 }
 
@@ -723,7 +760,7 @@ export async function CallSignalVaultSetTokenConfig(hre: HardhatRuntimeEnvironme
 			expandDecimals(tokenItem.maxUsdgAmount,18),
 			tokenItem.isStable,
 			tokenItem.isShortable
-		));
+		)).wait();
 	}
 	else
 	{
@@ -853,7 +890,7 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 		adjustedMaxUsdgAmount,
 		adjustedBufferAmount,
 		usdgAmount
-	));
+	)).wait();
 }
 
 export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network: string)

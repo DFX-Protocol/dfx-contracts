@@ -47,7 +47,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	// Whitelist tokens
 	for(const token of tokenNames)
 	{
-		// TODO: Check if vault.gov is set to deployer, only then run below script
 		await CallVaultSetTokenConfig(
 			hre, 
 			contract, 

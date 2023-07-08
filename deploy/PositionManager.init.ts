@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetGov, CallSetLiquidator, CallSetOrderKeeper, CallSetReferralStorage, CallSetShouldValidateIncreaseOrder } from "../scripts/DeployHelper";
+import { CallSetGov, CallSetLiquidator, CallSetOrderKeeper, CallSetReferralStorage, CallSetShouldValidateIncreaseOrder, CallSetHandler } from "../scripts/DeployHelper";
 
 const contract = "PositionManager";
 const contractDependencies =
@@ -21,6 +21,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	await CallSetLiquidator(hre, contract, deployer);
 	//TODO? Maybe set Partner Contracts with .setPartner function
 	await CallSetGov(hre, contract, "Vault");
+	await CallSetHandler(hre, "ShortsTracker", contract);
 };
 
 export default func;
