@@ -10,7 +10,7 @@ const contractDependencies =
 	[
 		contract,
 	];
-const amountToMint: BigNumber = BigNumber.from("100000000000000000000000"); // 100,000 BNB
+const amountToMint: BigNumber = BigNumber.from("1000000000000000000000000000"); // 1,000,000,000 BNB
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	await CallMockMint(hre, contract, tokens[chainId].BNB.address, amountToMint);

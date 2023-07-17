@@ -2,7 +2,7 @@ export const tokens = {
 	"sepolia":{
 		USDT: {
 			contractName: "ERC20Mock[USDT]",
-			address: "0x24d4fA993A2D0685d9595e0890BCAf27fa657EdF",
+			address: "0x757221aeDDe3ECE6271D91C3E5f1aE305974022c",
 			decimals: 18,
 			price: 0.9995,
 			priceDecimals: 18,
@@ -17,7 +17,7 @@ export const tokens = {
 		},
 		BUSD: {
 			contractName: "ERC20Mock[BUSD]",
-			address: "0xcbA661188960cCbb788cDf7Cf6c570B6E253Df25",
+			address: "0x8577CcCD4cF71Dd23F4cf31Be940A07E89174d56",
 			decimals: 18,
 			priceDecimals: 18,
 			price: 0.999962,
@@ -32,7 +32,7 @@ export const tokens = {
 		},
 		BTC: {
 			contractName: "ERC20Mock[BTC]",
-			address: "0xE9a0d4ABcb3Ce3646a05c9bA56BcE3124967eAB9",
+			address: "0x0297783626F4dBDa1f21333c6A584447a9261a42",
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
@@ -61,10 +61,10 @@ export const tokens = {
 		},
 		BNB: {
 			contractName: "ERC20Mock[BNB]",
-			address: "0x64348dAA5b7fE6C39cF1F1EC1392923834702B1C",
+			address: "0xAeb6b50E347C22a95479A397f9a9aff6b26ECA2B",
 			decimals: 18,
 			priceDecimals: 18,
-			price: 248.4264,
+			price: 243.4264,
 			isStrictStable: false,
 			priceFeedContractName: "PriceFeed[BNB]",
 			tokenWeight: 18000,
@@ -72,15 +72,15 @@ export const tokens = {
 			maxUsdgAmount: 80 * 1000 * 1000,
 			bufferAmount: 8000,
 			isStable: false,
-			isShortable: false,
+			isShortable: true,
 
 		},
 		WETH: {
 			contractName: "WETH",
-			address: "0x492A51b6B0FdaBf7eF4a442011C4AB335e68D3b1",
+			address: "0x4f3fe6C943B2e501651164E293a24D5dDB62131e	",
 			decimals: 18,
 			isStrictStable: false,
-			price: 1919.08,
+			price: 1911.08,
 			priceFeedContractName: "PriceFeed[WETH]",
 			priceDecimals: 18,
 			fastPricePrecision: 1000,

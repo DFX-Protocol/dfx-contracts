@@ -374,25 +374,23 @@ contract VaultPriceFeed is IVaultPriceFeed {
     }
 
     function getAmmPrice(address _token) public override view returns (uint256) {
+        address token0BnbBusd = IPancakePair(bnbBusd).token0();
+        uint256 bnbBusdPrice = token0BnbBusd == bnb ? getPairPrice(bnbBusd, true) : getPairPrice(bnbBusd, false);
+
         if (_token == bnb) {
-            // for bnbBusd, reserve0: BNB, reserve1: BUSD
-            return getPairPrice(bnbBusd, true);
+            return bnbBusdPrice;
         }
 
         if (_token == eth) {
-            uint256 price0 = getPairPrice(bnbBusd, true);
-            // for ethBnb, reserve0: ETH, reserve1: BNB
-            uint256 price1 = getPairPrice(ethBnb, true);
-            // this calculation could overflow if (price0 / 10**30) * (price1 / 10**30) is more than 10**17
-            return (price0*(price1))/(PRICE_PRECISION);
+            address token0EthBnb = IPancakePair(ethBnb).token0();
+            uint256 ethBnbPrice = token0EthBnb == eth ? getPairPrice(ethBnb, true) : getPairPrice(ethBnb, false);
+            return (bnbBusdPrice*(ethBnbPrice))/(PRICE_PRECISION);
         }
 
         if (_token == btc) {
-            uint256 price0 = getPairPrice(bnbBusd, true);
-            // for btcBnb, reserve0: BTC, reserve1: BNB
-            uint256 price1 = getPairPrice(btcBnb, true);
-            // this calculation could overflow if (price0 / 10**30) * (price1 / 10**30) is more than 10**17
-            return (price0*(price1))/(PRICE_PRECISION);
+            address token0BtcBnb = IPancakePair(btcBnb).token0();
+            uint256 btcBnbPrice = token0BtcBnb == btc ? getPairPrice(btcBnb, true) : getPairPrice(btcBnb, false);
+            return (bnbBusdPrice*(btcBnbPrice))/(PRICE_PRECISION);
         }
 
         return 0;

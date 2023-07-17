@@ -7,6 +7,14 @@ import { tokens } from "../scripts/Constants";
 const contract = "VaultPriceFeed";
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
+const bnbBusdLPrice = 236.50233007902;
+const wethBnbPrice = 7.97;
+const btcBnbPrice = 129.05;
+
+const bnbBusdLiq = 10000;
+const wethBnbLiq = 1;
+const btcBnbLiq = 100;
+
 const contractDependencies = [
 	contract, 
 	tokens[chainId].USDT.contractName,
@@ -58,12 +66,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		weth
 	);
 
-	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BNB, tokens[chainId].BUSD, 100, 24353.91);
+	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BNB, tokens[chainId].BUSD, bnbBusdLiq, bnbBusdLiq * bnbBusdLPrice);
 
-	await CallWethDeposit(hre, tokens[chainId].WETH, 1);
-	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].WETH, tokens[chainId].BNB, 1, 7.9586);
+	await CallWethDeposit(hre, tokens[chainId].WETH, wethBnbLiq);
+	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].WETH, tokens[chainId].BNB, wethBnbLiq, wethBnbLiq * wethBnbPrice);
 	
-	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BTC, tokens[chainId].BNB, 100, 12748);
+	await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BTC, tokens[chainId].BNB, btcBnbLiq, btcBnbLiq * btcBnbPrice);
 
 	for(const token of tokenNames)
 	{

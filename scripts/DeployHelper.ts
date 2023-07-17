@@ -24,7 +24,7 @@ export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: st
 	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
 	const artifactName = contract.substring(0, index);
 	const result = await deploy(contract, { from: deployer, args: constructorParameters, log: false, contract: artifactName, libraries:libraries });
-	console.log(`\x1B[32m${contract}\x1B[0m - ${result.newlyDeployed ? "deployed to" : "reused at"} \x1B[32m${result.address}\x1B[0m`);
+	console.log(`\x1B[32m${contract}\x1B[0m - ${result.newlyDeployed ? "✅ deployed to" : "reused at"} \x1B[32m${result.address}\x1B[0m`);
 }
 
 export async function UnifiedInitialize(hre: HardhatRuntimeEnvironment, contract: string, initParameters: unknown[], postInit?: (deployer: string) => Promise<void>): Promise<void>
@@ -47,7 +47,7 @@ export async function UnifiedInitialize(hre: HardhatRuntimeEnvironment, contract
 		{
 			await postInit(deployer);
 		}
-		console.log(`\x1B[32m${contract}\x1B[0m - initialized`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ initialized`);
 	}
 	else
 	{
@@ -68,7 +68,7 @@ export async function CallSetShouldToggleIsLeverageEnabled(hre: HardhatRuntimeEn
 
 	if (!await updateContract.shouldToggleIsLeverageEnabled())
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setShouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setShouldToggleIsLeverageEnabled(true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setShouldToggleIsLeverageEnabled(true)).wait();
 	}
 	else
@@ -94,7 +94,7 @@ export async function CallSetTokens(hre: HardhatRuntimeEnvironment, contract: st
 	const prevBnb = await updateContract.bnb();
 	if(prevBtc !== btc || prevBnb !== bnb || prevWeth !== weth)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokens(${btc}, ${weth}, ${bnb})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokens(${btc}, ${weth}, ${bnb})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setTokens(btc, weth, bnb)).wait();	
 	}
 	else
@@ -113,7 +113,7 @@ export async function CallCreatePair(hre: HardhatRuntimeEnvironment, contract: s
 	const pair = await updateContract.getPair(tokenA, tokenB);
 	if(pair === AddressZero)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.createPair(${tokenA}, ${tokenB})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.createPair(${tokenA}, ${tokenB})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).createPair(tokenA, tokenB)).wait();	
 	}
 	else
@@ -143,7 +143,7 @@ export async function CallSetPairs(hre: HardhatRuntimeEnvironment, contract: str
 	const prevWethBnbPair = await updateContract.ethBnb();
 	if(prevBnbBusdPair !== bnbBusdPair || prevBtcBnbPair !== btcBnbPair|| prevWethBnbPair !== wethBnbPair)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setPairs(bnbBusdPair, wethBnbPair, btcBnbPair)).wait();
 	}
 	else
@@ -189,7 +189,7 @@ export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract:
 		await CallApprove(hre, tokenA.contractName, tokenA.address, routerAddress, tokenAAmount, tokenA.decimals);
 		await CallApprove(hre, tokenB.contractName, tokenB.address, routerAddress, tokenBAmount, tokenB.decimals);
 	
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.addLiquidity(${tokenA.address}, ${tokenB.address}, ${tokenAAmountBN}, ${tokenBAmountBN}, 0, 0, ${deployer}, ${deadline})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.addLiquidity(${tokenA.address}, ${tokenB.address}, ${tokenAAmountBN}, ${tokenBAmountBN}, 0, 0, ${deployer}, ${deadline})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).addLiquidity(tokenA.address, tokenB.address, tokenAAmountBN, tokenBAmountBN, 0, 0, deployer, deadline)).wait();
 	}
 	else
@@ -212,7 +212,7 @@ export async function CallWethDeposit(hre: HardhatRuntimeEnvironment, weth: any,
 	const balance = await updateContract.balanceOf(deployer);
 	if(balance.lt(convertToEther(1, weth.decimals)))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.deposit(${amount})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.deposit(${amount})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).deposit({ value: ethers.utils.parseEther(amount.toString()) })).wait();
 	}
 	else
@@ -235,7 +235,7 @@ export async function CallApprove(hre: HardhatRuntimeEnvironment, contract: stri
 	const allowance = await updateContract.allowance(deployer, spender);
 	if(allowance.lt(amountBN))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.approve("${spender}", "${amountBN}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.approve("${spender}", "${amountBN}")\x1B[0m ...`);
 		await (await updateContract.connect(depSign).approve(spender, amountBN)).wait();
 	}
 	else
@@ -265,7 +265,7 @@ export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract
 		try
 		{
 			await (await updateContract.connect(depSign).signalApprove(newHandlerContractData.address, admin, value)).wait();
-			console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
 		}
 		catch (e)
 		{
@@ -292,7 +292,7 @@ export async function CallSetVaultUtils(hre: HardhatRuntimeEnvironment, contract
 
 	if ((await updateContract.vaultUtils()) !== vaultUtilsData.address)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setVaultUtils(vaultUtilsData.address)).wait();
 	}
 	else
@@ -315,7 +315,7 @@ export async function CallSetErrorController(hre: HardhatRuntimeEnvironment, con
 	const errorController = await deployments.get(contract);
 	if(currentErrorController !== errorController.address)
 	{
-		console.log(`\x1B[32mVault\x1B[0m - Call \x1B[33mVault.setErrorController("${errorController.address}")\x1B[0m ...`);
+		console.log(`\x1B[32mVault\x1B[0m - ✅ Call \x1B[33mVault.setErrorController("${errorController.address}")\x1B[0m ...`);
 		await vaultContract.connect(depSign).setErrorController(errorController.address);	
 	}
 	else
@@ -328,7 +328,7 @@ export async function CallSetErrorController(hre: HardhatRuntimeEnvironment, con
 	{
 		const vaultErrorControllerContract = await ethers.getContractAt(contract, errorController.address);
 	
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setErrors("${vaultContractData.address}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setErrors("${vaultContractData.address}")\x1B[0m ...`);
 		await vaultErrorControllerContract.connect(depSign).setErrors(vaultContractData.address, errors);	
 	}
 	else
@@ -350,7 +350,7 @@ export async function CallSetShouldValidateIncreaseOrder(hre: HardhatRuntimeEnvi
 
 	if ((await updateContract.shouldValidateIncreaseOrder()) !== value)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setShouldValidateIncreaseOrder(${value})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setShouldValidateIncreaseOrder(${value})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setShouldValidateIncreaseOrder(value)).wait();
 	}
 	else
@@ -374,7 +374,7 @@ export async function CallSetReferralStorage(hre: HardhatRuntimeEnvironment, con
 
 	if ((await updateContract.referralStorage()) != newStorageContractData.address)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setReferralStorage("${newStorageContractData.address}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setReferralStorage("${newStorageContractData.address}")\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setReferralStorage(newStorageContractData.address)).wait();
 	}
 	else
@@ -396,7 +396,7 @@ export async function CallSetKeeper2(hre: HardhatRuntimeEnvironment, contract: s
 
 	if (!await updateContract.isKeeper(address))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setKeeper("${address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setKeeper("${address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setKeeper(address, true)).wait();
 	}
 	else
@@ -420,7 +420,7 @@ export async function CallSetKeeper(hre: HardhatRuntimeEnvironment, contract: st
 
 	if (!await updateContract.isKeeper(newHandlerContractData.address))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setKeeper("${newHandlerContractData.address}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setKeeper("${newHandlerContractData.address}")\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setKeeper(newHandlerContractData.address)).wait();
 	}
 	else
@@ -442,7 +442,7 @@ export async function CallSetOrderKeeper(hre: HardhatRuntimeEnvironment, contrac
 
 	if (!await updateContract.isOrderKeeper(newKeeperAddress))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setOrderKeeper("${newKeeperAddress}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setOrderKeeper("${newKeeperAddress}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setOrderKeeper(newKeeperAddress, true)).wait();
 	}
 	else
@@ -465,12 +465,12 @@ export async function CallAddPlugin(hre: HardhatRuntimeEnvironment, contract: st
 
 	if (!(await updateContract.plugins(pluginData.address)))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.addPlugin("${pluginData.address}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.addPlugin("${pluginData.address}")\x1B[0m ...`);
 		await (await updateContract.connect(depSign).addPlugin(pluginData.address)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.addPlugin("${pluginData}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${pluginData.address}.addPlugin("${pluginData}")\x1B[0m ...`);
 	}
 }
 
@@ -487,7 +487,7 @@ export async function CallSetLiquidator(hre: HardhatRuntimeEnvironment, contract
 
 	if (!await updateContract.isLiquidator(newLiquidatorAddress))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLiquidator("${newLiquidatorAddress}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLiquidator("${newLiquidatorAddress}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setLiquidator(newLiquidatorAddress, true)).wait();
 	}
 	else
@@ -517,7 +517,7 @@ export async function CallSetLiquidator2(hre: HardhatRuntimeEnvironment, contrac
 
 	if (!(await updateContract1.isLiquidator(newHandlerContractData2.address)))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLiquidator("${newHandlerContractData1.address}", "${newHandlerContractData2.address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLiquidator("${newHandlerContractData1.address}", "${newHandlerContractData2.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setLiquidator(newHandlerContractData1.address, newHandlerContractData2.address, true)).wait();
 	}
 	else
@@ -540,7 +540,7 @@ export async function CallSetGov(hre: HardhatRuntimeEnvironment, contract: strin
 
 	if ((await updateContract.gov()) !== govAdr)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setGov("${govAdr}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setGov("${govAdr}")\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setGov(govAdr)).wait();
 	}
 	else
@@ -564,7 +564,7 @@ export async function CallSetContractHandler(hre: HardhatRuntimeEnvironment, con
 
 	if (!await updateContract.isHandler(newHandlerContractData.address))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setContractHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setContractHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setContractHandler(newHandlerContractData.address, true)).wait();
 	}
 	else
@@ -588,7 +588,7 @@ export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: s
 	
 	if (!await updateContract.isHandler(newHandlerContractData.address))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setHandler(newHandlerContractData.address, true)).wait();
 	}
 	else
@@ -611,7 +611,7 @@ export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: st
 	
 	if (!await updateContract.isMinter(newMinterContractData.address))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setMinter(newMinterContractData.address, true)).wait();
 	}
 	else
@@ -632,7 +632,7 @@ export async function CallSetBonusMultiplier(hre: HardhatRuntimeEnvironment, con
 	const result: BigNumber = await updateContract.bonusMultiplierBasisPoints();
 	if (!value.eq(result))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setBonusMultipilier(${value})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setBonusMultipilier(${value})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setBonusMultiplier(value)).wait();
 	}
 	else
@@ -644,7 +644,7 @@ export async function CallSetBonusMultiplier(hre: HardhatRuntimeEnvironment, con
 export async function CallUpdateLastDistributionTime(hre: HardhatRuntimeEnvironment, contract: string, updateContractName: string, deployer: string) : Promise<void>
 {
 	const { deployments } = hre;
-	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${updateContractName}.updateLastDistributionTime()\x1B[0m ...`);
+	console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${updateContractName}.updateLastDistributionTime()\x1B[0m ...`);
 	const index = updateContractName.indexOf("[") === -1 ? undefined : updateContractName.indexOf("[");
 	const artifactName = updateContractName.substring(0, index);
 	const contractData = await deployments.get(updateContractName);
@@ -678,7 +678,7 @@ export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: str
 	const balance = await updateContract.balanceOf(deployer);
 	if(balance.lt(amountToMint))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.mintMock(${deployer}, ${amountToMint})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.mintMock(${deployer}, ${amountToMint})\x1B[0m ...`);
 		await (await updateContract.mockMint(deployer, amountToMint)).wait();
 	}
 	else
@@ -700,7 +700,7 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 	const priceFeed = await updateContract.priceFeeds(configParameters[0]);
 	if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1])
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
 	}
 	else
@@ -750,7 +750,7 @@ export async function CallSignalVaultSetTokenConfig(hre: HardhatRuntimeEnvironme
 	const actionTimestamp = await timelockContract.connect(depSign).pendingActions(hash);
 	if(actionTimestamp.eq(0))
 	{
-		console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.signalVaultSetTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount,18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
+		console.log(`\x1B[32mTimelock\x1B[0m - ✅ Call \x1B[33mTimelock.signalVaultSetTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount,18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
 		await (await timelockContract.connect(depSign).signalVaultSetTokenConfig(
 			updateContract.address, 
 			tokenItem.address,  
@@ -784,7 +784,7 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 	const whitelisted = await updateContract.whitelistedTokens(tokenItem.address);
 	if(!whitelisted)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setTokenConfig(${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount, 18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenConfig(${tokenItem.address}, ${tokenItem.decimals}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${expandDecimals(tokenItem.maxUsdgAmount, 18)}, ${tokenItem.isStable}, ${tokenItem.isShortable})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setTokenConfig(
 			tokenItem.address, 
 			tokenItem.decimals, 
@@ -815,7 +815,7 @@ export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contra
 
 	if(!roundData.eq(price))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLatestAnswer(${price})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setLatestAnswer(price)).wait();	
 	}
 	else
@@ -880,7 +880,7 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 		usdgAmount = adjustedMaxUsdgAmount;
 	}
 	const adjustedBufferAmount = expandDecimals(tokenItem.bufferAmount, tokenItem.decimals);
-	console.log(`\x1B[32mTimelock\x1B[0m - Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount}, ${usdgAmount})\x1B[0m ...`);
+	console.log(`\x1B[32mTimelock\x1B[0m - ✅ Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount}, ${usdgAmount})\x1B[0m ...`);
 	// TODO: Check if token config is already set and skip in that case
 	await (await timelockContract.connect(depSign).setTokenConfig(
 		updateContract.address, 
