@@ -37,10 +37,10 @@ export const tokens = {
 			isStrictStable: false,
 			price: 30443.90,
 			priceFeedContractName: "PriceFeed[BTC]",
-			tokenWeight: 23000,
+			tokenWeight: 23000, // tokenWeights allows customisation of index composition
 			minProfitBps: 0,
 			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
-			bufferAmount: 2500,
+			bufferAmount: 2500,  // Spare amount to keep in pool that should not be used by swaps but for leverage alone
 			priceDecimals: 18,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
@@ -77,7 +77,7 @@ export const tokens = {
 		},
 		WETH: {
 			contractName: "WETH",
-			address: "0x4f3fe6C943B2e501651164E293a24D5dDB62131e	",
+			address: "0x4f3fe6C943B2e501651164E293a24D5dDB62131e",
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,

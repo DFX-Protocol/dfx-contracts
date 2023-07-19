@@ -597,7 +597,7 @@ export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: s
 	}
 }
 
-export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: string, newMinterContractName: string): Promise<void>
+export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: string, newMinterContractName: string, isContract = true): Promise<void>
 {
 	const { deployments, getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
@@ -607,16 +607,31 @@ export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: st
 	const artifactName = contract.substring(0, index);
 	const contractData = await deployments.get(contract);
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-	const newMinterContractData = await deployments.get(newMinterContractName);
-	
-	if (!await updateContract.isMinter(newMinterContractData.address))
+	if(isContract)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setMinter(newMinterContractData.address, true)).wait();
+		const newMinterContractData = await deployments.get(newMinterContractName);
+	
+		if (!await updateContract.isMinter(newMinterContractData.address))
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setMinter(newMinterContractData.address, true)).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
+		}	
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setMinter("${newMinterContractData.address}", true)\x1B[0m ...`);
+		if (!await updateContract.isMinter(newMinterContractName))
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMinter("${newMinterContractName}", true)\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setMinter(newMinterContractName, true)).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setMinter("${newMinterContractName}", true)\x1B[0m ...`);
+		}	
 	}
 }
 
@@ -684,6 +699,52 @@ export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: str
 	else
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Already minted. Skip \x1B[33m${contract}.mintMock(${deployer}, ${amountToMint})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallMint(hre: HardhatRuntimeEnvironment, contract: string, receiver: string, amountToMint: BigNumber)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const balance = await updateContract.balanceOf(receiver);
+	const depSign = await ethers.getSigner(deployer);
+
+	if(balance.lt(amountToMint))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.mint(${receiver}, ${amountToMint})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).mint(receiver, amountToMint)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already minted. Skip \x1B[33m${contract}.mint(${receiver}, ${amountToMint})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetTokensPerInterval(hre: HardhatRuntimeEnvironment, contract: string, tokensPerInterval: BigNumber)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const depSign = await ethers.getSigner(deployer);
+	const oldTokensPerInterval = await updateContract.tokensPerInterval();
+
+	if(!oldTokensPerInterval.eq(tokensPerInterval))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokensPerInterval(${tokensPerInterval})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setTokensPerInterval(tokensPerInterval)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokensPerInterval(${tokensPerInterval})\x1B[0m ...`);
 	}
 }
 
@@ -941,7 +1002,7 @@ function getKeccak256(types: string[], values: any[])
 	return ethers.utils.solidityKeccak256(types,values);
 }
 
-function expandDecimals(n: number, decimals: number) 
+export function expandDecimals(n: number, decimals: number) 
 {
 	if(n !== undefined)
 	{
