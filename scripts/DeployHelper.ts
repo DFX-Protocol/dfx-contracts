@@ -329,11 +329,8 @@ export async function CallSetGov(hre: HardhatRuntimeEnvironment, contract: strin
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 
 	const govContractData = await deployments.get(govContractName);
-	const govIndex = govContractName.indexOf("[") === -1 ? undefined : govContractName.indexOf("[");
-	const govArtifactName = govContractName.substring(0, govIndex);
-	const govUpdateContract = await ethers.getContractAt(govArtifactName, govContractData.address);
 
-	const govAdr = await govUpdateContract.gov();
+	const govAdr = govContractData.address;
 	if ((await updateContract.gov()) !== govAdr)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33m${contract}.setGov("${govAdr}")\x1B[0m ...`);

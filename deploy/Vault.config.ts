@@ -20,7 +20,7 @@ const contractDependencies = [
 	tokens[chainId].WETH.priceFeedContractName,
 	"USDG",
 	"Reader",
-	"Timelock",
+	"Timelock_Init",
 	"Vault_Init"
 ];
 
