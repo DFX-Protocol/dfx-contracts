@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetHandler, CallUpdateLastDistributionTime, GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
+import { CallSetHandler, CallSetMinter, CallUpdateLastDistributionTime, GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
 
 const contract = "RewardTracker[feeGmxTracker]";
 const contractDependencies = [contract, "RewardTracker[bonusGmxTracker]", "MintableBaseToken[bnGMX]", "RewardDistributor[feeGmxDistributor]", "RewardRouterV2", "Vester[GmxVester]"];
@@ -17,8 +17,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		{
 			await CallUpdateLastDistributionTime(hre, contract, "RewardDistributor[feeGmxDistributor]", deployer);
 		});
+		
 	await CallSetHandler(hre, contract, "RewardRouterV2");
 	await CallSetHandler(hre, contract, "Vester[GmxVester]");
+	// allow feeGmxTracker to stake bnGmx
+	await CallSetHandler(hre, "MintableBaseToken[bnGMX]", contract);
+	// allow rewardRouter to burn bnGmx
+	await CallSetMinter(hre, "MintableBaseToken[bnGMX]", contract);
 };
 
 export default func;

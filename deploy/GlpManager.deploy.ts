@@ -18,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		dependencies["USDG"].address,
 		dependencies["GLP"].address,
 		dependencies["ShortsTracker"].address,
-		15 * 60
+		15 * 60 // 15 mins
 	];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 	const contractData = await deployments.get(contract);
@@ -32,37 +32,37 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33mglpManager.setInPrivateMode(true)\x1B[0m ...`);
 	}
-	// const vault = await ethers.getContractAt("Vault", dependencies["Vault"].address);
-	// const usdg = await ethers.getContractAt("USDG", dependencies["USDG"].address);
-	// const glp = await ethers.getContractAt("GLP", dependencies["GLP"].address);
-	// CHECK: Maybe not needed for GlpManager with 5 constructor parameters deployGlpManager vs deployGlpManagerV2.js https://github.com/gmx-io/gmx-contract
-	// if (!await glp.isMinter(glpManager.address))
-	// {
-	// 	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33mglp.setMinter("${glpManager.address}", true)\x1B[0m ...`);
-	// 	await (await glp.connect(depSign).setMinter(glpManager.address, true)).wait();
-	// }
-	// else
-	// {
-	// 	console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33mglp.setMinter("${glpManager.address}", true)\x1B[0m ...`);
-	// }
-	// if (!await usdg.vaults(glpManager.address))
-	// {
-	// 	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33musdg.addVault("${glpManager.address}")\x1B[0m ...`);
-	// 	await (await usdg.connect(depSign).addVault(glpManager.address)).wait();
-	// }
-	// else
-	// {
-	// 	console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33musdg.addVault("${glpManager.address}")\x1B[0m ...`);
-	// }
-	// if (!await vault.isManager(glpManager.address))
-	// {
-	// 	console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33mvault.setManager("${glpManager.address}", true)\x1B[0m ...`);
-	// 	await (await vault.connect(depSign).setManager(glpManager.address, true)).wait();
-	// }
-	// else
-	// {
-	// 	console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33mvault.setManager("${glpManager.address}", true)\x1B[0m ...`);
-	// }
+	const vault = await ethers.getContractAt("Vault", dependencies["Vault"].address);
+	const usdg = await ethers.getContractAt("USDG", dependencies["USDG"].address);
+	const glp = await ethers.getContractAt("GLP", dependencies["GLP"].address);
+
+	if (!await glp.isMinter(glpManager.address))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33mglp.setMinter("${glpManager.address}", true)\x1B[0m ...`);
+		await (await glp.connect(depSign).setMinter(glpManager.address, true)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33mglp.setMinter("${glpManager.address}", true)\x1B[0m ...`);
+	}
+	if (!await usdg.vaults(glpManager.address))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33musdg.addVault("${glpManager.address}")\x1B[0m ...`);
+		await (await usdg.connect(depSign).addVault(glpManager.address)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33musdg.addVault("${glpManager.address}")\x1B[0m ...`);
+	}
+	if (!await vault.isManager(glpManager.address))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Call \x1B[33mvault.setManager("${glpManager.address}", true)\x1B[0m ...`);
+		await (await vault.connect(depSign).setManager(glpManager.address, true)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33mvault.setManager("${glpManager.address}", true)\x1B[0m ...`);
+	}
 };
 
 export default func;

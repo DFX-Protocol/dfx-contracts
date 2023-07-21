@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
+import { GetDeployedContracts, UnifiedInitialize, CallSetHandler } from "../scripts/DeployHelper";
 import { ethers } from "hardhat";
 
 const contract = "RewardRouterV2[GLP]";

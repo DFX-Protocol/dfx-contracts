@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetContractHandler, CallSetKeeper2, CallSetLiquidator2, CallSetShouldToggleIsLeverageEnabled, CallSignalApprove } from "../scripts/DeployHelper";
+import { CallSetContractHandler, CallSetKeeper2, CallSetShouldToggleIsLeverageEnabled, CallSignalApprove } from "../scripts/DeployHelper";
 
 const contract = "Timelock";
 const contractDependencies = [contract, "PositionRouter", "PositionManager", "GMX", "Vault"];

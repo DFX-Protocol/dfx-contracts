@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallSetHandler, CallUpdateLastDistributionTime, GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
 
 const contract = "RewardTracker[feeGlpTracker]";
-const contractDependencies = [contract, "GLP", "RewardDistributor[feeGlpDistributor]", "RewardRouterV2", "RewardTracker[stakedGlpTracker]"];
+const contractDependencies = [contract, "GLP", "RewardDistributor[feeGlpDistributor]", "RewardRouterV2", "RewardRouterV2[GLP]", "RewardTracker[stakedGlpTracker]"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
@@ -18,6 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			await CallUpdateLastDistributionTime(hre, contract, "RewardDistributor[feeGlpDistributor]", deployer);
 		});
 	await CallSetHandler(hre, contract, "RewardRouterV2");
+	await CallSetHandler(hre, contract, "RewardRouterV2[GLP]");
 	await CallSetHandler(hre, contract, "RewardTracker[stakedGlpTracker]");
 };
 
