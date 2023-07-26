@@ -78,6 +78,258 @@ export async function CallSetShouldToggleIsLeverageEnabled(hre: HardhatRuntimeEn
 }
 
 
+export async function CallFastPriceFeedSetTokens(hre: HardhatRuntimeEnvironment, contract: string, tokensArr: string[], precisionArr: string[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	// TODO: Check if all given tokens are already set
+	let condition = true;
+	if (condition)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokens(${tokensArr},${precisionArr})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setTokens(tokensArr,precisionArr)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokens(${tokensArr},${precisionArr})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetMaxCumulativeDeltaDiffs(hre: HardhatRuntimeEnvironment, contract: string, tokensArr: string[], diffsArr: string[])
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	// TODO: Check if all given tokens are already set with maxCumulativeDiffs data
+	let condition = true;
+	if (condition)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMaxCumulativeDeltaDiffs(${tokensArr},${diffsArr})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setMaxCumulativeDeltaDiffs(tokensArr,diffsArr)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setMaxCumulativeDeltaDiffs(${tokensArr},${diffsArr})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetTokenManager(hre: HardhatRuntimeEnvironment, contract: string, tokenManager: string)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldTokenManager = await updateContract.tokenManager();
+	if (oldTokenManager!==tokenManager)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenManager(${tokenManager})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setTokenManager(tokenManager)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenManager(${tokenManager})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetIsPriceFeed(hre: HardhatRuntimeEnvironment, contract: string, priceFeed: string, isActive: boolean)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const isPriceFeed = await updateContract.isPriceFeed(priceFeed);
+	if (!isPriceFeed)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setIsPriceFeed(${priceFeed}, ${isActive})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setIsPriceFeed(priceFeed, isActive)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setIsPriceFeed(${priceFeed}, ${isActive})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetFastPriceEvents(hre: HardhatRuntimeEnvironment, contract: string, priceFeedEvents: string)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldPriceFeedEvents = await updateContract.fastPriceEvents();
+	if (oldPriceFeedEvents !== priceFeedEvents)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setFastPriceEvents(${priceFeedEvents})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setFastPriceEvents(priceFeedEvents)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setFastPriceEvents(${priceFeedEvents})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetPositionKeeper(hre: HardhatRuntimeEnvironment, contract: string, keeper: string, isActive: boolean)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const isKeeper = await updateContract.isPositionKeeper(keeper);
+	if (!isKeeper)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setPositionKeeper(${keeper}, ${isActive})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setPositionKeeper(keeper, isActive)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setPositionKeeper(${keeper}, ${isActive})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetPriceDataInterval(hre: HardhatRuntimeEnvironment, contract: string, intervalData: number)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldIntervalData = await updateContract.priceDataInterval();
+	if (oldIntervalData.toString() !== intervalData.toString())
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setPriceDataInterval(${intervalData})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setPriceDataInterval(intervalData)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setPriceDataInterval(${intervalData})\x1B[0m ...`);
+	}
+}
+
+export async function CallSetSpreadBasisPointsIfChainError(hre: HardhatRuntimeEnvironment, contract: string, basisPoints: number)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldBasisPoints = await updateContract.spreadBasisPointsIfChainError();
+	if (oldBasisPoints.toString() !== basisPoints.toString())
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setSpreadBasisPointsIfChainError(${basisPoints})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setSpreadBasisPointsIfChainError(basisPoints)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setSpreadBasisPointsIfChainError(${basisPoints})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetSpreadBasisPointsIfInactive(hre: HardhatRuntimeEnvironment, contract: string, basisPoints: number)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldBasisPoints = await updateContract.spreadBasisPointsIfInactive();
+	if (oldBasisPoints.toString() !== basisPoints.toString())
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setSpreadBasisPointsIfInactive(${basisPoints})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setSpreadBasisPointsIfInactive(basisPoints)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setSpreadBasisPointsIfInactive(${basisPoints})\x1B[0m ...`);
+	}
+}
+
+export async function CallSetMaxTimeDeviation(hre: HardhatRuntimeEnvironment, contract: string, deviation: number)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldMaxTimeDeviation = await updateContract.maxTimeDeviation();
+	if (oldMaxTimeDeviation.toString() !== deviation.toString())
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMaxTimeDeviation(${deviation})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setMaxTimeDeviation(deviation)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setMaxTimeDeviation(${deviation})\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSetVaultPriceFeed(hre: HardhatRuntimeEnvironment, contract: string, priceFeed: string)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const oldPriceFeed = await updateContract.vaultPriceFeed();
+	if (oldPriceFeed !== priceFeed)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setVaultPriceFeed(${priceFeed})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setVaultPriceFeed(priceFeed)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultPriceFeed(${priceFeed})\x1B[0m ...`);
+	}
+}
+
 export async function CallSetTokens(hre: HardhatRuntimeEnvironment, contract: string, btc: string, weth: string, bnb: string)
 {
 	const { deployments, getNamedAccounts } = hre;
@@ -218,6 +470,28 @@ export async function CallWethDeposit(hre: HardhatRuntimeEnvironment, weth: any,
 	else
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.deposit(${amount})\x1B[0m ...`);
+	}
+}
+
+export async function CallSetSecondaryPriceFeed(hre: HardhatRuntimeEnvironment, contract: string, address: string)
+{
+	const { deployments, getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
+	const artifactName = contract.substring(0, index);
+	const contractData = await deployments.get(contract);
+	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const secondaryPriceFeedAddress = await updateContract.secondaryPriceFeed();
+
+	if(secondaryPriceFeedAddress !== address)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setSecondaryPriceFeed("${address}")\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setSecondaryPriceFeed(address)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setSecondaryPriceFeed(${address})\x1B[0m ...`);
 	}
 }
 
