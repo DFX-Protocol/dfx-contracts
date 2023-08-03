@@ -1,8 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, CallPriceFeedSetTokenConfig, CallSetTokens, CallSetPairs, CallWethDeposit, CallAddLiquidity, CallCreatePair } from "../scripts/DeployHelper";
-import { GetTokenAddress } from "../scripts/DeployConstants";
-import { tokens } from "../scripts/Constants";
+import { GetTokenAddress } from "../config/DeployConstants";
+import { tokens } from "../config/Constants";
 
 const contract = "VaultPriceFeed";
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";

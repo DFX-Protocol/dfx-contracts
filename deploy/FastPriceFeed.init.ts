@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { BigNumber } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { tokens } from "../scripts/Constants";
+import { tokens } from "../config/Constants";
 import { 
 	GetDeployedContracts, 
 	CallSetSecondaryPriceFeed, 

@@ -2,8 +2,8 @@ import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { Deployment } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment, Libraries } from "hardhat/types";
-import { tokens } from "./Constants";
-import { GetTokenAddress } from "./DeployConstants";
+import { tokens } from "../config/Constants";
+import { GetTokenAddress } from "../config/DeployConstants";
 
 const { AddressZero } = ethers.constants;
 

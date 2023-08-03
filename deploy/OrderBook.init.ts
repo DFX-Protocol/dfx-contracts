@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedInitialize, CallAddPlugin } from "../scripts/DeployHelper";
-import { GetTokenAddress } from "../scripts/DeployConstants";
+import { GetTokenAddress } from "../config/DeployConstants";
 
 const contract = "OrderBook";
 const contractDependencies =

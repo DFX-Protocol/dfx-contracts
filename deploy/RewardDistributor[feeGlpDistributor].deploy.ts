@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
-import { GetTokenAddress } from "../scripts/DeployConstants";
+import { GetTokenAddress } from "../config/DeployConstants";
 
 const contract = "RewardDistributor[feeGlpDistributor]";
 const contractDependencies = ["RewardTracker[feeGlpTracker]"];

@@ -2,7 +2,7 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallMockMint } from "../scripts/DeployHelper";
 import { BigNumber } from "ethers";
-import { tokens } from "../scripts/Constants";
+import { tokens } from "../config/Constants";
 
 const contract = "ERC20Mock[BNB]";
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";

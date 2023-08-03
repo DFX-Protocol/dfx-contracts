@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
-import { tokens } from "../scripts/Constants";
+import { tokens } from "../config/Constants";
 import { ethers } from "hardhat";
 
 

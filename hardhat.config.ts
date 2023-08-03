@@ -6,7 +6,7 @@ import "hardhat-tracer";
 import "solidity-docgen";
 import * as dotenv from "dotenv";
 import { PageAssigner } from "solidity-docgen/dist/site";
-import { LoadNetworkSpecificValues } from "./scripts/DeployConstants";
+import { LoadNetworkSpecificValues } from "./config/DeployConstants";
 
 dotenv.config();
 

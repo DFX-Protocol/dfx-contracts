@@ -17,9 +17,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 
 	await CallSetReferralStorage(hre, contract, "ReferralStorage");
 	await CallSetShouldValidateIncreaseOrder(hre, contract, false);
+	// TODO:[MAINNET] Set order keeper addresses here with real order keepers
 	await CallSetOrderKeeper(hre, contract, deployer);
+	// TODO:[MAINNET] Set liquidator's addresses here with real position liquidators
 	await CallSetLiquidator(hre, contract, deployer);
-	//TODO? Maybe set Partner Contracts with .setPartner function
 	await CallSetGov(hre, contract, "Vault");
 	await CallSetHandler(hre, "ShortsTracker", contract);
 };
