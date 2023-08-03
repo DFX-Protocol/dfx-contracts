@@ -83,6 +83,8 @@ const config = {
 		updater2: { default: 3 }, // Used in TokenManager.init.ts,FastPriceFeed.init.ts replace with real updater as soon as possible.
 		updater3: { default: 4 }, // Used in TokenManager.init.ts,FastPriceFeed.init.ts replace with real updater as soon as possible.
 		updater4: { default: 5 }, // Used in TokenManager.init.ts,FastPriceFeed.init.ts replace with real updater as soon as possible.
+		shortsKeeper: { default: 2 }, // Used in ShortsTrackerTimelock.init.ts, UPDATE
+		capKeeper: { default: 3 } // Used in PositionRouter.init.ts, UPDATE
 	},
 	networks: {
 		hedera:
