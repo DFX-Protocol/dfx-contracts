@@ -28,10 +28,10 @@ export async function UnifiedDeploy(hre: HardhatRuntimeEnvironment, contract: st
 
 export async function UnifiedInitialize(hre: HardhatRuntimeEnvironment, contract: string, initParameters: unknown[], postInit?: (deployer: string) => Promise<void>): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
-	const contractData = await deployments.get(contract);
+	const contractData = await getContractData(hre, contract);
 	const artifactName = getArtifactName(contract);
 	const initContract = await ethers.getContractAt(artifactName, contractData.address);
 	const isInitialized = await initContract.isInitialized();
@@ -77,10 +77,17 @@ export async function CallFastPriceFeedSetTokens(hre: HardhatRuntimeEnvironment,
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
+	
 	const updateContract = await getContract(hre, contract);
-	// TODO: Check if all given tokens are already set
-	let condition = true;
-	if (condition)
+	const gov = await getContractGov(hre, contract);
+	if(gov !== deployer)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because deployer is not governer. Skip \x1B[33m${contract}.setTokens(${tokensArr},${precisionArr})\x1B[0m ...`);
+		return;
+	}
+	// TODO: fix condition below
+	const shouldUpdate = true;
+	if (shouldUpdate)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokens(${tokensArr},${precisionArr})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setTokens(tokensArr,precisionArr)).wait();
@@ -123,7 +130,7 @@ export async function CallSetMaxCumulativeDeltaDiffs(hre: HardhatRuntimeEnvironm
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because token manager is set. Skip \x1B[33m${contract}.setMaxCumulativeDeltaDiffs(${tokensArr},${diffsArr})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because token manager is not deployer. Skip \x1B[33m${contract}.setMaxCumulativeDeltaDiffs(${tokensArr},${diffsArr})\x1B[0m ...`);
 	}
 	
 }
@@ -516,36 +523,38 @@ export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract
 
 export async function CallSetVaultUtils(hre: HardhatRuntimeEnvironment, contract: string, vaultUtils: string): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
-	const vaultUtilsData = await deployments.get(vaultUtils);
+	const vaultUtilsData = await getContractData(hre, vaultUtils);
+	const vaultData = await getContractData(hre, "Vault");
+	const vaultContract = await getContract(hre, "Vault");
 
-	if ((await updateContract.vaultUtils()) !== vaultUtilsData.address)
+	if ((await vaultContract.vaultUtils()) !== vaultUtilsData.address)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setVaultUtils(vaultUtilsData.address)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setVaultUtils(Vault: "${vaultData.address}", VaultUtils: "${vaultUtilsData.address}")\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setVaultUtils(vaultData.address, vaultUtilsData.address)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultUtils(${vaultUtilsData.address})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultUtils(Vault: "${vaultData.address}", VaultUtils: "${vaultUtilsData.address}")\x1B[0m ...`);
 	}
 }
 
 
 export async function CallSetErrorController(hre: HardhatRuntimeEnvironment, contract: string, errors: string[])
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
-	const vaultContractData = await deployments.get("Vault");
+	const vaultContractData = await getContractData(hre, "Vault");
 	const vaultContract = await ethers.getContractAt("Vault", vaultContractData.address);
 
 	const currentErrorController = await vaultContract.errorController();
-	const errorController = await deployments.get(contract);
+	const errorController = await getContractData(hre, contract);
 	if(currentErrorController !== errorController.address)
 	{
 		console.log(`\x1B[32mVault\x1B[0m - ✅ Call \x1B[33mVault.setErrorController("${errorController.address}")\x1B[0m ...`);
@@ -590,12 +599,12 @@ export async function CallSetShouldValidateIncreaseOrder(hre: HardhatRuntimeEnvi
 
 export async function CallSetReferralStorage(hre: HardhatRuntimeEnvironment, contract: string, newStorageContractName: string): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
-	const newStorageContractData = await deployments.get(newStorageContractName);
+	const newStorageContractData = await getContractData(hre, newStorageContractName);
 
 	if ((await updateContract.referralStorage()) != newStorageContractData.address)
 	{
@@ -678,12 +687,12 @@ export async function CallSetOrderKeeper(hre: HardhatRuntimeEnvironment, contrac
 
 export async function CallAddPlugin(hre: HardhatRuntimeEnvironment, contract: string, pluginContractName: string): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
-	const pluginData = await deployments.get(pluginContractName);
+	const pluginData = await getContractData(hre, pluginContractName);
 
 	if (!(await updateContract.plugins(pluginData.address)))
 	{
@@ -823,7 +832,7 @@ export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: st
 
 	if(isContract)
 	{
-		const newMinterContractData = await deployments.get(newMinterContractName);
+		const newMinterContractData = await getContractData(hre, newMinterContractName);
 	
 		if (!await updateContract.isMinter(newMinterContractData.address))
 		{
@@ -875,7 +884,7 @@ export async function CallUpdateLastDistributionTime(hre: HardhatRuntimeEnvironm
 	console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${updateContractName}.updateLastDistributionTime()\x1B[0m ...`);
 	const index = updateContractName.indexOf("[") === -1 ? undefined : updateContractName.indexOf("[");
 	const artifactName = updateContractName.substring(0, index);
-	const contractData = await deployments.get(updateContractName);
+	const contractData = await getContractData(hre, updateContractName);
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
 	await (await updateContract.connect(depSign).updateLastDistributionTime()).wait();
@@ -900,8 +909,7 @@ export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: str
 {
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
+	const artifactName = getArtifactName(contract);
 	const updateContract = await ethers.getContractAt(artifactName, tokenAddress);
 	const balance = await updateContract.balanceOf(deployer);
 	if(balance.lt(amountToMint))
@@ -988,14 +996,14 @@ export async function getContractGov(hre: HardhatRuntimeEnvironment, contract: s
 
 export async function CallSignalVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
 
 	const tokenItem = configParameters[0];
-	const timelockData = await deployments.get("Timelock");
+	const timelockData = await getContractData(hre, "Timelock");
 	const timelockContract = await ethers.getContractAt("Timelock", timelockData.address);
 
 	const hash = getKeccak256(
@@ -1099,16 +1107,16 @@ export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contra
 
 export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
 	
-	const timelockData = await deployments.get("Timelock");
+	const timelockData = await getContractData(hre, "Timelock");
 	const timelockContract = await ethers.getContractAt("Timelock", timelockData.address);
 	
-	const nativeToken = await deployments.get(configParameters[1]);
+	const nativeToken = await getContractData(hre, configParameters[1]);
 
 	const reader = await getContract(hre, "Reader");
 
@@ -1152,17 +1160,43 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 		usdgAmount = adjustedMaxUsdgAmount;
 	}
 	const adjustedBufferAmount = expandDecimals(tokenItem.bufferAmount, tokenItem.decimals);
-	console.log(`\x1B[32mTimelock\x1B[0m - ✅ Call \x1B[33mTimelock.setTokenConfig(${updateContract.address}, ${tokenItem.address}, ${tokenItem.tokenWeight}, ${tokenItem.minProfitBps}, ${adjustedMaxUsdgAmount}, ${adjustedBufferAmount}, ${usdgAmount})\x1B[0m ...`);
-	// TODO: Check if token config is already set and skip in that case
-	await (await timelockContract.connect(depSign).setTokenConfig(
-		updateContract.address, 
-		tokenItem.address,  
-		tokenItem.tokenWeight, 
-		tokenItem.minProfitBps, 
-		adjustedMaxUsdgAmount,
-		adjustedBufferAmount,
-		usdgAmount
-	)).wait();
+
+	const isWhitelisted = await updateContract.whitelistedTokens(tokenItem.address);
+	const oldTokenWeight = await updateContract.tokenWeights(tokenItem.address);
+	const oldMinProfitBps = await updateContract.minProfitBasisPoints(tokenItem.address);
+	const oldMaxUsdgAmount = await updateContract.maxUsdgAmounts(tokenItem.address);
+	const oldBufferAmounts = await updateContract.bufferAmounts(tokenItem.address);
+	const oldUsdgAmounts = await updateContract.usdgAmounts(tokenItem.address);
+
+	if(!isWhitelisted || 
+		oldTokenWeight != tokenItem.tokenWeight ||
+		oldMinProfitBps != tokenItem.minProfitBps ||
+		oldMaxUsdgAmount.toString() !== adjustedMaxUsdgAmount.toString() ||
+		oldBufferAmounts.toString() !== adjustedBufferAmount.toString() ||
+		oldUsdgAmounts.toString() !== usdgAmount.toString())
+	{
+		console.log(`\x1B[32mTimelock\x1B[0m - ✅ Call \x1B[33mTimelock.setTokenConfig(vault: ${updateContract.address}, token: ${tokenItem.address}, tokenWeight: ${tokenItem.tokenWeight}, minProfitBps: ${tokenItem.minProfitBps}, maxUsdgAmount: ${adjustedMaxUsdgAmount}, bufferAmount: ${adjustedBufferAmount}, usdgAmount: ${usdgAmount})\x1B[0m ...`);
+		await (await timelockContract.connect(depSign).setTokenConfig(
+			updateContract.address, 
+			tokenItem.address,  
+			tokenItem.tokenWeight, 
+			tokenItem.minProfitBps, 
+			adjustedMaxUsdgAmount,
+			adjustedBufferAmount,
+			usdgAmount
+		)).wait();	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33mTimelock.setTokenConfig(vault: ${updateContract.address}, token: ${tokenItem.address}, tokenWeight: ${tokenItem.tokenWeight}, minProfitBps: ${tokenItem.minProfitBps}, maxUsdgAmount: ${adjustedMaxUsdgAmount}, bufferAmount: ${adjustedBufferAmount}, usdgAmount: ${usdgAmount})\x1B[0m ...`);
+	}
+}
+
+export async function getAdmin(hre: HardhatRuntimeEnvironment, contract: string)
+{
+	const updateContract = await getContract(hre, contract);
+	const admin = await updateContract.admin();
+	return admin;
 }
 
 export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network: string)
@@ -1184,7 +1218,7 @@ export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network:
     
 	for(const contract of contracts)
 	{
-		const contractData = await deployments.get(contract);
+		const contractData = await getContractData(hre, contract);
 		console.log(`${data[contract]}: "${contractData.address}",`);
 	}
 	const tokenNames = Object.keys(tokens[network]);
@@ -1247,10 +1281,8 @@ function getArtifactName(contract: string)
 
 async function getContract(hre: HardhatRuntimeEnvironment, contractName: string)
 {
-	const { deployments } = hre;
 	const artifactName = getArtifactName(contractName);
-	const contractData = await deployments.get(contractName);
+	const contractData = await getContractData(hre, contractName);
 	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 	return updateContract;
 }
-

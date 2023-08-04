@@ -35,10 +35,11 @@ const contractDependencies =
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	const { getNamedAccounts } = hre;
-	const { deployer } = await getNamedAccounts();
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 
 	await CallSetSecondaryPriceFeed(hre, "VaultPriceFeed", dependencies[contract].address);
+	// updaters here are keepers. But these keepers are not position/order/liquidation/ShortsTracker/OpenInterest keepers but price feed keepers
+	// Note: The price feed keepers are not being used anymore
 	const { signer1, signer2, signer3, signer4, signer5, signer6, updater1, updater2, updater3, updater4 } = await getNamedAccounts();
 
 	const initParameters =
