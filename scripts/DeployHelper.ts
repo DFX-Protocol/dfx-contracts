@@ -487,33 +487,78 @@ export async function CallApprove(hre: HardhatRuntimeEnvironment, contract: stri
 	}
 }
 
-
-export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, admin: string, value: string): Promise<void>
+export async function CallSetFees(hre: HardhatRuntimeEnvironment, contract: string, feeParams: any)
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const updateContract = await getContract(hre, contract);
+	const vaultContract = await getContract(hre, "Vault");
+	const vaultData = await getContract(hre, "Vault");
 
-	const newHandlerContractData = await deployments.get(newHandlerContractName);
+	const taxBasisPoints = await vaultContract.taxBasisPoints();
+	const stableTaxBasisPoints = await vaultContract.stableTaxBasisPoints();
+	const mintBurnFeeBasisPoints = await vaultContract.mintBurnFeeBasisPoints();
+	const swapFeeBasisPoints = await vaultContract.swapFeeBasisPoints();
+	const stableSwapFeeBasisPoints = await vaultContract.stableSwapFeeBasisPoints();
+	const marginFeeBasisPoints = await updateContract.marginFeeBasisPoints();
+	const liquidationFeeUsd = await vaultContract.liquidationFeeUsd();
+	const minProfitTime = await vaultContract.minProfitTime();
+	const hasDynamicFees = await vaultContract.hasDynamicFees();
 
-	// TODO check bytecode pendingActions[_action]
-	// CHECK CallSignalVaultSetTokenConfig function to calculate bytecode
-	if (true)
+	if(
+		feeParams[0] != taxBasisPoints ||
+		feeParams[1] != stableTaxBasisPoints || 
+		feeParams[2] != mintBurnFeeBasisPoints || 
+		feeParams[3] != swapFeeBasisPoints || 
+		feeParams[4] != stableSwapFeeBasisPoints || 
+		feeParams[5] != marginFeeBasisPoints ||  
+		feeParams[6].toString() != liquidationFeeUsd.toString() ||  
+		feeParams[7] != minProfitTime || 
+		feeParams[8] != hasDynamicFees
+	)
 	{
-		try
-		{
-			await (await updateContract.connect(depSign).signalApprove(newHandlerContractData.address, admin, value)).wait();
-			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
-		}
-		catch (e)
-		{
-			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
-		}
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setFees(vault: "${vaultData.address}", fee: "${feeParams}")\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setFees(vaultData.address, ...feeParams)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setFees(vault: "${vaultData.address}", fee: "${feeParams}")\x1B[0m ...`);
+	}
+}
+
+
+
+export async function CallSignalApprove(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, admin: string, value: string): Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+	const newHandlerContractData = await getContractData(hre, newHandlerContractName);
+
+	const hash = getKeccak256(
+		[
+			"string",
+			"address",
+			"address",
+			"uint256",
+		],[
+			"approve",
+			newHandlerContractData.address, // token
+			admin, // spender
+			value
+		]
+	);
+
+	const isPending = await updateContract.connect(depSign).pendingActions(hash);
+
+	if (!isPending)
+	{
+		await (await updateContract.connect(depSign).signalApprove(newHandlerContractData.address, admin, value)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.signalApprove("${newHandlerContractData.address}", "${admin}", ${value})\x1B[0m ...`);
 	}
 	else
 	{
@@ -617,63 +662,42 @@ export async function CallSetReferralStorage(hre: HardhatRuntimeEnvironment, con
 	}
 }
 
-export async function CallSetKeeper2(hre: HardhatRuntimeEnvironment, contract: string, address: string): Promise<void>
+export async function CallSetKeeper(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, isContract = true): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const updateContract = await getContract(hre, contract);
+	let keeper;
 
-	if (!await updateContract.isKeeper(address))
+	if(isContract)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setKeeper("${address}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setKeeper(address, true)).wait();
+		keeper = (await getContractData(hre, newHandlerContractName)).address;
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setKeeper("${address}", true)\x1B[0m ...`);
+		keeper = newHandlerContractName;
 	}
-}
 
-export async function CallSetKeeper(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string): Promise<void>
-{
-	const { deployments, getNamedAccounts } = hre;
-	const { deployer } = await getNamedAccounts();
-	const depSign = await ethers.getSigner(deployer);
-
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-
-	const newHandlerContractData = await deployments.get(newHandlerContractName);
-
-	if (!await updateContract.isKeeper(newHandlerContractData.address))
+	if (!await updateContract.isKeeper(keeper))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setKeeper("${newHandlerContractData.address}")\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setKeeper(newHandlerContractData.address)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setKeeper("${keeper}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setKeeper(keeper, true)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setKeeper("${newHandlerContractData.address}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setKeeper("${keeper}", true)\x1B[0m ...`);
 	}
 }
 
 export async function CallSetOrderKeeper(hre: HardhatRuntimeEnvironment, contract: string, newKeeperAddress: string): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-
+	const updateContract = await getContract(hre, contract);
 	if (!await updateContract.isOrderKeeper(newKeeperAddress))
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setOrderKeeper("${newKeeperAddress}", true)\x1B[0m ...`);
@@ -724,7 +748,167 @@ export async function CallSetLiquidator(hre: HardhatRuntimeEnvironment, contract
 	}
 }
 
-export async function CallSetLiquidator2(hre: HardhatRuntimeEnvironment, contract: string, newLiquidatorContractName1: string, newLiquidatorContractName2: string): Promise<void>
+export async function CallSetLiquidatorTl(hre: HardhatRuntimeEnvironment, contract: string, vault: string, liquidator: string, isActive = true): Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+	const vaultContract = await getContract(hre, vault);
+
+	const liquidatorData = await getContractData(hre, liquidator);
+
+	if (!(await vaultContract.isLiquidator(liquidatorData.address)))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLiquidator("${vaultContract.address}", "${liquidatorData.address}", ${isActive})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setLiquidator(vaultContract.address, liquidatorData.address, isActive)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setLiquidator("${vaultContract.address}", "${liquidatorData.address}", ${isActive})\x1B[0m ...`);
+	}
+}
+
+export async function CallSetGov(hre: HardhatRuntimeEnvironment, contract: string, govContractName: string, isContract = true): Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+	
+	const updateContract = await getContract(hre, contract);
+	
+	let govAddr;
+	if(isContract)
+	{
+		const govContractData = await getContractData(hre, govContractName);
+		govAddr = govContractData.address;
+	}
+	else
+	{
+		govAddr = govContractName;
+	}	
+
+	if ((await updateContract.gov()) !== govAddr)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setGov("${govAddr}")\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setGov(govAddr)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setGov("${govAddr}")\x1B[0m ...`);
+	}
+}
+
+export async function CallSetContractHandler(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, isContract = true): Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+
+	let handler;
+	if(isContract)
+	{
+		handler = (await getContractData(hre, newHandlerContractName)).address;
+	}
+	else
+	{
+		handler = newHandlerContractName;
+	}
+
+	if (!await updateContract.isHandler(handler))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setContractHandler("${handler}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setContractHandler(handler, true)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setContractHandler("${handler}", true)\x1B[0m ...`);
+	}
+}
+
+export async function CallSetDelayValues(hre: HardhatRuntimeEnvironment, contract: string, minBlockDelayKeeper: number, minTimeDelayPublic: number, maxTimeDelay: number) : Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+	const admin = await getAdmin(hre, contract);
+	if(admin === deployer)
+	{
+		const oldMinBlockDelayKeeper = await updateContract.minBlockDelayKeeper();
+		const oldMinTimeDelayPublic = await updateContract.minTimeDelayPublic();
+		const oldMaxTimeDelay = await updateContract.maxTimeDelay();
+		if (oldMinBlockDelayKeeper !== minBlockDelayKeeper || oldMinTimeDelayPublic !== minTimeDelayPublic || oldMaxTimeDelay !== maxTimeDelay)
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setDelayValues("${minBlockDelayKeeper}","${minTimeDelayPublic}","${maxTimeDelay}")\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setDelayValues(minBlockDelayKeeper, minTimeDelayPublic, maxTimeDelay)).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setDelayValues("${minBlockDelayKeeper}","${minTimeDelayPublic}","${maxTimeDelay}")\x1B[0m ...`);
+		}
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because deployer is not admin. Skip \x1B[33m${contract}.setDelayValues(${minBlockDelayKeeper},${minTimeDelayPublic},"${maxTimeDelay}")\x1B[0m ...`);
+	}
+}
+
+export async function CallSetAdmin(hre: HardhatRuntimeEnvironment, contract: string, adminAddress: string) : Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+
+	if (await updateContract.admin() !== adminAddress)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setAdmin("${adminAddress}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setAdmin(adminAddress)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setAdmin("${adminAddress}", true)\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSignalSetHandler(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, isContract = true) : Promise<void>
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+
+	let handler;
+	if(isContract)
+	{
+		handler = (await getContractData(hre, newHandlerContractName)).address;
+	}
+	else
+	{
+		handler = newHandlerContractName;
+	}
+	
+	if (!await updateContract.isHandler(handler))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.signalSetHandler("${handler}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).signalSetHandler(handler, true)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.signalSetHandler("${handler}", true)\x1B[0m ...`);
+	}
+}
+
+
+export async function CallSignalSetHandlerTl(hre: HardhatRuntimeEnvironment, contract: string, targetContract: string, newHandlerContract: string, isActive: boolean) : Promise<void>
 {
 	const { deployments, getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
@@ -732,99 +916,102 @@ export async function CallSetLiquidator2(hre: HardhatRuntimeEnvironment, contrac
 
 	const updateContract = await getContract(hre, contract);
 
-	const newHandlerContractData1 = await deployments.get(newLiquidatorContractName1);
-	const newHandlerContractData2 = await deployments.get(newLiquidatorContractName2);
+	const targetContractData = await getContractData(hre, targetContract);
+	const newHandlerContractData = await getContractData(hre, newHandlerContract);
 
-	// The set Liquidator of newLiquidatorContractName1 is called inside the function.
-	const artifactName1 = newLiquidatorContractName1.substring(0, index);
-	const contractData1 = await deployments.get(newLiquidatorContractName1);
-	const updateContract1 = await ethers.getContractAt(artifactName1, contractData1.address);
-
-	if (!(await updateContract1.isLiquidator(newHandlerContractData2.address)))
+	const hash = getKeccak256(
+		[
+			"string",
+			"address",
+			"address",
+			"bool"
+		],[
+			"setHandler",
+			targetContractData.address,
+			newHandlerContractData.address,
+			isActive
+		]
+	);
+	const alreadyPending = await updateContract.pendingActions(hash);
+	if (!alreadyPending)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLiquidator("${newHandlerContractData1.address}", "${newHandlerContractData2.address}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setLiquidator(newHandlerContractData1.address, newHandlerContractData2.address, true)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.signalSetHandler("${targetContractData.address}", "${newHandlerContractData.address}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).signalSetHandler(targetContractData.address, newHandlerContractData.address, true)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setLiquidator("${newHandlerContractData1.address}", "${newHandlerContractData2.address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.signalSetHandler("${targetContractData.address}", "${newHandlerContractData.address}", true)\x1B[0m ...`);
 	}
 }
 
-export async function CallSetGov(hre: HardhatRuntimeEnvironment, contract: string, govContractName: string): Promise<void>
+export async function CallSetHandlerTl(hre: HardhatRuntimeEnvironment, contract: string, targetContract: string, newHandlerContract: string, isActive: boolean) : Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-	const govContractData = await deployments.get(govContractName);
-	const govAdr = govContractData.address;
 
-	if ((await updateContract.gov()) !== govAdr)
+	const updateContract = await getContract(hre, contract);
+
+	const targetContractData = await getContractData(hre, targetContract);
+	const newHandlerContractData = await getContractData(hre, newHandlerContract);
+
+	const hash = getKeccak256(
+		[
+			"string",
+			"address",
+			"address",
+			"bool"
+		],[
+			"setHandler",
+			targetContractData.address,
+			newHandlerContractData.address,
+			isActive
+		]
+	);
+	const alreadyPending = await updateContract.pendingActions(hash);
+	if (alreadyPending)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setGov("${govAdr}")\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setGov(govAdr)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${targetContractData.address}", "${newHandlerContractData.address}", ${isActive})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setHandler(targetContractData.address, newHandlerContractData.address, isActive)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setGov("${govAdr}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Can't set handler. Action not signalled. Skip \x1B[33m${contract}.setHandler("${targetContractData.address}", "${newHandlerContractData.address}", ${isActive})\x1B[0m ...`);
 	}
 }
 
-export async function CallSetContractHandler(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string): Promise<void>
+export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string, isContract = true) : Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+	const updateContract = await getContract(hre, contract);
 
-	const newHandlerContractData = await deployments.get(newHandlerContractName);
-
-	if (!await updateContract.isHandler(newHandlerContractData.address))
+	let handler;
+	if(isContract)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setContractHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setContractHandler(newHandlerContractData.address, true)).wait();
+		handler = (await getContractData(hre, newHandlerContractName)).address;
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setContractHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
+		handler = newHandlerContractName;
 	}
-}
-
-export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: string, newHandlerContractName: string) : Promise<void>
-{
-	const { deployments, getNamedAccounts } = hre;
-	const { deployer } = await getNamedAccounts();
-	const depSign = await ethers.getSigner(deployer);
-
-	const index = contract.indexOf("[") === -1 ? undefined : contract.indexOf("[");
-	const artifactName = contract.substring(0, index);
-	const contractData = await deployments.get(contract);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-
-	const newHandlerContractData = await deployments.get(newHandlerContractName);
 	
-	if (!await updateContract.isHandler(newHandlerContractData.address))
+	if (!await updateContract.isHandler(handler))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setHandler(newHandlerContractData.address, true)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${handler}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setHandler(handler, true)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setHandler("${newHandlerContractData.address}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setHandler("${handler}", true)\x1B[0m ...`);
 	}
 }
 
 export async function CallSetMinter(hre: HardhatRuntimeEnvironment, contract: string, newMinterContractName: string, isContract = true): Promise<void>
 {
-	const { deployments, getNamedAccounts } = hre;
+	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 

@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { BigNumber } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallMint, CallSetHandler, CallSetMinter, GetDeployedContracts, expandDecimals, CallSetTokensPerInterval } from "../scripts/DeployHelper";
+import { CallMint, CallSetHandler, CallSetMinter, GetDeployedContracts, expandDecimals, CallSetTokensPerInterval, CallUpdateLastDistributionTime } from "../scripts/DeployHelper";
 
 const contract = "EsGMX";
 const contractDependencies =
@@ -35,12 +35,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 
 	// mint esGmx for distributors
 	await CallSetMinter(hre, contract, deployer, false);
-	// TODO: Adjust the per month value for gmx below on mainnet
+	// TODO:[MAINNET] Adjust the per month value for gmx below
 	await CallMint(hre, 
 		contract, 
 		dependencies["RewardDistributor[stakedGmxDistributor]"].address, 
 		expandDecimals(50000 * 12, 18)); // ~50,000 GMX per month
-	// TODO: Adjust EsGMX/sec value on mainnet
+	await CallUpdateLastDistributionTime(hre, "RewardDistributor[stakedGmxDistributor]", "RewardDistributor[stakedGmxDistributor]", deployer);
+	// TODO:[MAINNET] Adjust EsGMX/sec value
 	await CallSetTokensPerInterval(hre, 
 		"RewardDistributor[stakedGmxDistributor]", 
 		BigNumber.from("20667989410000000")); // 0.02066798941 esGmx per second

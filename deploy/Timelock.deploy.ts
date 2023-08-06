@@ -32,5 +32,5 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 export default func;
 
 func.id = `Deploy_${contract}`; // id required to prevent reexecution
-func.tags = [contract, "testnet", "mainnet"];
+func.tags = [contract, "mainnet", "timelocks"];
 func.dependencies = [...contractDependencies];

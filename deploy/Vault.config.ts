@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, CallTimelockSetTokenConfig, CallSignalVaultSetTokenConfig, CallSetGov, CallVaultSetTokenConfig, CallSetLatestAnswer } from "../scripts/DeployHelper";
-import { tokens } from "../scripts/Constants";
+import { tokens } from "../config/Constants";
 
 const contract = "Vault";
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
