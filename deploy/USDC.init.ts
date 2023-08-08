@@ -6,17 +6,17 @@ import { tokens } from "../config/Constants";
 
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
-const contract = "ERC20Mock[USDT]";
+const contract = "ERC20Mock[USDC]";
 const contractDependencies =
 	[
 		contract,
 	];
-const amountToMint: BigNumber = BigNumber.from("100000000000000000000000"); // 100,000 USDT
+const amountToMint: BigNumber = BigNumber.from("100000000000000000000000"); // 100,000 USDC
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(tokens[chainId].USDT !== null && tokens[chainId].USDT !== undefined)
+	if(tokens[chainId].USDC !== null && tokens[chainId].USDC !== undefined)
 	{
-		await CallMockMint(hre, contract, tokens[chainId].USDT.address, amountToMint);
+		await CallMockMint(hre, contract, tokens[chainId].USDC.address, amountToMint);
 	}
 	else
 	{
@@ -27,5 +27,5 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 export default func;
 
 func.id = `Deploy_${contract}_Init`; // id required to prevent reexecution
-func.tags = [`${contract}_Init`, "testnet"];
+func.tags = [`${contract}_Init`, "mockTokens"];
 func.dependencies = [...contractDependencies];

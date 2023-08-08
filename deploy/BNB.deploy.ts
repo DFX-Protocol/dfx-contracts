@@ -11,18 +11,25 @@ const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(tokens[chainId].BNB.address === AddressZero || tokens[chainId].BNB.address === undefined)
+	if(tokens[chainId].BNB !== null && tokens[chainId].BNB !== undefined)
 	{
-		const constructorParameters = ["Binance Coin","BNB"];
-		await UnifiedDeploy(hre, contract, constructorParameters);
+		if(tokens[chainId].BNB.address === AddressZero || tokens[chainId].BNB.address === undefined)
+		{
+			const constructorParameters = ["Binance Coin","BNB"];
+			await UnifiedDeploy(hre, contract, constructorParameters);
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - reused at ${tokens[chainId].BNB.address}\x1B[0m ...`);
+		}
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - reused at ${tokens[chainId].BNB.address}\x1B[0m ...`);
-	}	
+		console.log(`\x1B[32m${contract}\x1B[0m - Cannot deploy ${contract} because it's not set in tokens constants\x1B[0m ...`);
+	}
 };
 
 export default func;
 
 func.id = `Deploy_${contract}`; // id required to prevent reexecution
-func.tags = [contract, "testnet", "mockTokens"];
+func.tags = [contract, "mockTokens"];

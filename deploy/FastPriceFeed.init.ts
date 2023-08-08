@@ -1,5 +1,4 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
-import { BigNumber } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { tokens } from "../config/Constants";
 import { 
@@ -24,8 +23,6 @@ const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia
 const contractDependencies =
 	[
 		contract,
-		tokens[chainId].BTC.contractName,
-		tokens[chainId].WETH.contractName,	
 		"FastPriceEvents",
 		"VaultPriceFeed",
 		"PositionRouter",
@@ -62,22 +59,21 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	];
 	await UnifiedInitialize(hre, contract, initParameters);
 
-	const tokensArr = 
-	[
-		tokens[chainId].BTC.address,
-		tokens[chainId].WETH.address,
-	];
-	const precisionArr = 
-	[
-		tokens[chainId].BTC.fastPricePrecision,
-		tokens[chainId].WETH.fastPricePrecision,
-	];
-	const maxCumulativeDeltaDiffArr = 
-	[
-		tokens[chainId].BTC.maxCumulativeDeltaDiff,
-		tokens[chainId].WETH.maxCumulativeDeltaDiff
-	];
+	const tokensArr = [];
+	const precisionArr = [];
+	const maxCumulativeDeltaDiffArr = [];
+	const tokenNames = Object.keys(tokens[chainId]);
 
+	for(const token of tokenNames)
+	{
+		if(!tokens[chainId][token].isStable)
+		{
+			tokensArr.push(tokens[chainId][token].address);
+			precisionArr.push(tokens[chainId][token].fastPricePrecision);
+			maxCumulativeDeltaDiffArr.push(tokens[chainId][token].maxCumulativeDeltaDiff);
+		}
+	}
+	
 	await CallFastPriceFeedSetTokens(hre, contract, tokensArr, precisionArr);
 	await CallSetVaultPriceFeed(hre, contract, dependencies["VaultPriceFeed"].address);
 	await CallSetMaxTimeDeviation(hre, contract, 60 * 60);

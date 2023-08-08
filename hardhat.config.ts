@@ -105,6 +105,10 @@ const config = {
 		sepolia: {
 			url: `${process.env.SEPOLIA_RPC_URL}`,
 			accounts
+		},
+		baseGoerli: {
+			url: `${process.env.BASE_GOERLI_RPC_URL}`,
+			accounts
 		}
 		// ,
 		// hardhat:

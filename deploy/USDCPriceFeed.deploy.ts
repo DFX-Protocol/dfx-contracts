@@ -5,12 +5,13 @@ import {  chainConfig, tokens } from "../config/Constants";
 
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
-const contract = "PriceFeed[BTC]";
+const contract = "PriceFeed[USDC]";
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	if(!chainConfig[chainId].isOracleAvailable)
 	{
-		if(tokens[chainId].BTC !== null && tokens[chainId].BTC !== undefined)
+		if(tokens[chainId].USDC !== null && tokens[chainId].USDC !== undefined)
 		{
 			await UnifiedDeploy(hre, contract);
 		}

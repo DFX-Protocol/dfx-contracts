@@ -155,6 +155,60 @@ export async function CallSetTokenManager(hre: HardhatRuntimeEnvironment, contra
 }
 
 
+export async function CallSetPriceSampleSpace(hre: HardhatRuntimeEnvironment, contract: string, priceSampleSpace: BigNumber)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+	const gov = await updateContract.gov();
+	if(gov == deployer)
+	{
+		const oldPriceSampleSpace = await updateContract.priceSampleSpace();
+		if (!oldPriceSampleSpace.eq(priceSampleSpace))
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setPriceSampleSpace(${priceSampleSpace})\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setPriceSampleSpace(priceSampleSpace)).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setPriceSampleSpace(${priceSampleSpace})\x1B[0m ...`);
+		}
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because deployer is not gov. Skip \x1B[33m${contract}.setPriceSampleSpace(${priceSampleSpace})\x1B[0m ...`);
+	}
+}
+
+export async function CallSetMaxStrictPriceDeviation(hre: HardhatRuntimeEnvironment, contract: string, maxStrictPriceDeviation: BigNumber)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+	const gov = await updateContract.gov();
+	if(gov == deployer)
+	{
+		const oldMaxStrictPriceDeviation = await updateContract.maxStrictPriceDeviation();
+		if (!oldMaxStrictPriceDeviation.eq(maxStrictPriceDeviation))
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setMaxStrictPriceDeviation(${maxStrictPriceDeviation})\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setMaxStrictPriceDeviation(maxStrictPriceDeviation)).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setMaxStrictPriceDeviation(${maxStrictPriceDeviation})\x1B[0m ...`);
+		}	
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because deployer is not gov. Skip \x1B[33m${contract}.setMaxStrictPriceDeviation(${maxStrictPriceDeviation})\x1B[0m ...`);
+	}
+}
+
 export async function CallSetIsPriceFeed(hre: HardhatRuntimeEnvironment, contract: string, priceFeed: string, isActive: boolean)
 {
 	const { getNamedAccounts } = hre;
@@ -368,17 +422,45 @@ export async function CallSetPairs(hre: HardhatRuntimeEnvironment, contract: str
 	const prevBnbBusdPair = await updateContract.bnbBusd();
 	const prevBtcBnbPair = await updateContract.btcBnb();
 	const prevWethBnbPair = await updateContract.ethBnb();
-	if(prevBnbBusdPair !== bnbBusdPair || prevBtcBnbPair !== btcBnbPair|| prevWethBnbPair !== wethBnbPair)
+	const gov = await updateContract.gov();
+	if(gov === deployer)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setPairs(bnbBusdPair, wethBnbPair, btcBnbPair)).wait();
+		if(prevBnbBusdPair !== bnbBusdPair || prevBtcBnbPair !== btcBnbPair|| prevWethBnbPair !== wethBnbPair)
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setPairs(bnbBusdPair, wethBnbPair, btcBnbPair)).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+		}
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because deployer is not gov. Skip \x1B[33m${contract}.setPairs(${bnbBusdPair}, ${wethBnbPair}, ${btcBnbPair})\x1B[0m ...`);
 	}
+
 }
 
+export async function CallSetIsAmmEnabled(hre: HardhatRuntimeEnvironment, contract: string, enabled: boolean)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, contract);
+	const isEnabled = await updateContract.isAmmEnabled();
+	if(isEnabled != enabled)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setIsAmmEnabled(${enabled})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setIsAmmEnabled(enabled)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setIsAmmEnabled(${enabled})\x1B[0m ...`);
+	}
+
+}
 
 export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract: string, routerAddress: string, tokenA: any, tokenB: any, tokenAAmount: number, tokenBAmount: number)
 {
@@ -414,7 +496,7 @@ export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract:
 	{
 		await CallApprove(hre, tokenA.contractName, tokenA.address, routerAddress, tokenAAmount, tokenA.decimals);
 		await CallApprove(hre, tokenB.contractName, tokenB.address, routerAddress, tokenBAmount, tokenB.decimals);
-	
+ 
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.addLiquidity(${tokenA.address}, ${tokenB.address}, ${tokenAAmountBN}, ${tokenBAmountBN}, 0, 0, ${deployer}, ${deadline})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).addLiquidity(tokenA.address, tokenB.address, tokenAAmountBN, tokenBAmountBN, 0, 0, deployer, deadline)).wait();
 	}
@@ -1163,14 +1245,23 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 	const updateContract = await getContract(hre, contract);
 
 	const priceFeed = await updateContract.priceFeeds(configParameters[0]);
-	if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1])
+	const gov = await updateContract.gov();
+
+	if(gov == deployer)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+		if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1])
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+		}
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - ❌ Cannot set because deployer is not gov. Skip \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 	}
 	
 }
@@ -1269,13 +1360,13 @@ export async function CallVaultSetTokenConfig(hre: HardhatRuntimeEnvironment, co
 	
 }
 
-export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contract: string, seedValue: number, decimals: number)
+export async function CallSetLatestAnswer(hre: HardhatRuntimeEnvironment, contractAddress: string, seedValue: number, decimals: number)
 {
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
-
-	const updateContract = await getContract(hre, contract);
+	const contract = "PriceFeed";
+	const updateContract = await getContract(hre, contract,contractAddress);
 	
 	const roundData = await updateContract.latestAnswer();
 	const price = convertToEther(seedValue, decimals);
@@ -1466,10 +1557,19 @@ function getArtifactName(contract: string)
 	return contract.substring(0, index);
 }
 
-async function getContract(hre: HardhatRuntimeEnvironment, contractName: string)
+async function getContract(hre: HardhatRuntimeEnvironment, contractName: string, contractAddress = AddressZero)
 {
 	const artifactName = getArtifactName(contractName);
-	const contractData = await getContractData(hre, contractName);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
-	return updateContract;
+
+	if(contractAddress != AddressZero)
+	{
+		const updateContract = await ethers.getContractAt(artifactName, contractAddress);
+		return updateContract;
+	}
+	else
+	{
+		const contractData = await getContractData(hre, contractName);
+		const updateContract = await ethers.getContractAt(artifactName, contractData.address);
+		return updateContract;	
+	}
 }

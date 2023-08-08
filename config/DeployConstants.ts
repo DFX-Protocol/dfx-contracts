@@ -52,6 +52,19 @@ export function LoadNetworkSpecificValues(): { accounts: string[] | { mnemonic: 
 					}, deployer: process.env.SEPOLIA_OWNER, dev: process.env.SEPOLIA_DEVELOPER
 				};
 			}
+		case "baseGoerli":
+			{
+				if (process.env.BASE_GOERLI_MNEMONIC === undefined) throw Error("Missing environment variable BASE_GOERLI_MNEMONIC");
+				if (process.env.BASE_GOERLI_OWNER === undefined) throw Error("Missing environment variable BASE_GOERLI_OWNER");
+				if (process.env.BASE_GOERLI_DEVELOPER === undefined) throw Error("Missing environment variable BASE_GOERLI_DEVELOPER");
+				return {
+					accounts: {
+						mnemonic: process.env.BASE_GOERLI_MNEMONIC
+						// accountsBalance: ethers.utils.parseEther("1");
+					}, deployer: process.env.BASE_GOERLI_OWNER, dev: process.env.BASE_GOERLI_DEVELOPER
+				};
+			}
+	
 		default:
 			throw Error(`Unknown network ${process.env.NETWORK}`);
 	}
@@ -67,7 +80,6 @@ export async function GetTokenAddress(): Promise<{ nativeToken: string, multical
 		// case "hedera":
 		// 	return "0x0";
 		case "goerli":
-			{
 				return {
 					nativeToken: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6", // WETH
 					multicall3: "0xcA11bde05977b3631167028862bE2a173976CA11", // https://www.multicall3.com/deployments
@@ -75,13 +87,20 @@ export async function GetTokenAddress(): Promise<{ nativeToken: string, multical
 					uniswapV2Factory: AddressZero
 
 				};
-			}
 		case "sepolia":
 			return {
 				nativeToken: tokens["sepolia"].WETH.address, // WETH
 				multicall3: "0xcA11bde05977b3631167028862bE2a173976CA11", // https://www.multicall3.com/deployments
 				uniswapV2Router: "0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008",
 				uniswapV2Factory: "0x7E0987E5b3a30e3f2828572Bb659A548460a3003"
+
+			};
+		case "baseGoerli":
+			return {
+				nativeToken: tokens["baseGoerli"].WETH.address, // WETH
+				multicall3: "0xcA11bde05977b3631167028862bE2a173976CA11", // https://www.multicall3.com/deployments
+				uniswapV2Router: "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d", // This is v3, taken from https://docs.base.org/contracts
+				uniswapV2Factory: "0x9323c1d6D800ed51Bd7C6B216cfBec678B7d0BC2" // This is v3, taken from https://docs.base.org/contracts
 
 			};
 		default:

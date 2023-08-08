@@ -11,15 +11,23 @@ const contract = "ERC20Mock[USDT]";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(tokens[chainId].USDT.address === AddressZero || tokens[chainId].USDT.address === undefined)
+	if(tokens[chainId].USDT !== null && tokens[chainId].USDT !== undefined)
 	{
-		const constructorParameters = ["USDT Tether","USDT"];
-		await UnifiedDeploy(hre, contract, constructorParameters);
+		if(tokens[chainId].USDT.address === AddressZero || tokens[chainId].USDT.address === undefined)
+		{
+			const constructorParameters = ["USDT Tether","USDT"];
+			await UnifiedDeploy(hre, contract, constructorParameters);
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - reused at ${tokens[chainId].USDT.address}\x1B[0m ...`);
+		}
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - reused at ${tokens[chainId].USDT.address}\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Cannot deploy ${contract} because it's not set in tokens constants\x1B[0m ...`);
 	}
+
 };
 
 export default func;

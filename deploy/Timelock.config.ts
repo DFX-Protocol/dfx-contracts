@@ -9,9 +9,6 @@ import {
 	toUsd, 
 	CallSetGov
 } from "../scripts/DeployHelper";
-import { tokens } from "../config/Constants";
-
-const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
 const contract = "Timelock";
 
@@ -26,18 +23,7 @@ const contractDependencies = [
 	"Vester[GmxVester]",
 	"Vester[GlpVester]",
 	"RewardTracker[stakedGlpTracker]",
-	"RewardTracker[feeGlpTracker]",
-	tokens[chainId].USDT.contractName,
-	tokens[chainId].USDT.priceFeedContractName,
-	tokens[chainId].BTC.contractName,
-	tokens[chainId].BTC.priceFeedContractName,
-	tokens[chainId].BNB.contractName,
-	tokens[chainId].BNB.priceFeedContractName,
-	tokens[chainId].BUSD.contractName,
-	tokens[chainId].BUSD.priceFeedContractName,
-	tokens[chainId].WETH.contractName,
-	tokens[chainId].WETH.priceFeedContractName,
-
+	"RewardTracker[feeGlpTracker]"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>

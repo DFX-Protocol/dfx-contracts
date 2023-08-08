@@ -1,23 +1,13 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, CallTimelockSetTokenConfig, CallSignalVaultSetTokenConfig, CallSetGov, CallVaultSetTokenConfig, CallSetLatestAnswer } from "../scripts/DeployHelper";
-import { tokens } from "../config/Constants";
+import { tokens, chainConfig } from "../config/Constants";
 
 const contract = "Vault";
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
 const contractDependencies = [
 	contract, 
-	tokens[chainId].USDT.contractName,
-	tokens[chainId].USDT.priceFeedContractName,
-	tokens[chainId].BTC.contractName,
-	tokens[chainId].BTC.priceFeedContractName,
-	tokens[chainId].BNB.contractName,
-	tokens[chainId].BNB.priceFeedContractName,
-	tokens[chainId].BUSD.contractName,
-	tokens[chainId].BUSD.priceFeedContractName,
-	tokens[chainId].WETH.contractName,
-	tokens[chainId].WETH.priceFeedContractName,
 	"USDG",
 	"Reader",
 	"Timelock_Init",
@@ -31,10 +21,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	const tokenNames = Object.keys(tokens[chainId]);
 	// Set Token price through PriceFeed contract
-	// TODO: This should STRICTLY happen in testnet
-	for(const token of tokenNames)
+	if(!chainConfig[chainId].isOracleAvailable)
 	{
-		await CallSetLatestAnswer(hre, tokens[chainId][token].priceFeedContractName, tokens[chainId][token].price, tokens[chainId][token].priceDecimals);
+		for(const token of tokenNames)
+		{
+			await CallSetLatestAnswer(hre, tokens[chainId][token].priceFeed, tokens[chainId][token].price, tokens[chainId][token].priceDecimals);
+		}
 	}
 	// Signal Vault SetTokenConfig
 	for(const token of tokenNames)
@@ -63,7 +55,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 				chainId,
 				tokens[chainId].WETH.contractName, // TODO: Dynamically send native token address
 				dependencies[contract].address,
-				dependencies[tokens[chainId][token].contractName].address,
+				tokens[chainId][token].address,
 				tokens[chainId][token],
 			]);
 	}
