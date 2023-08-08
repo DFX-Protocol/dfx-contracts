@@ -108,13 +108,13 @@ export const tokens = {
 	"baseGoerli":{
 		USDT: {
 			contractName: "ERC20Mock[USDT]",
-			address: "0x0000000000000000000000000000000000000000",
+			address: "0x110511f937A2fc94b51F2543337038fD73603c9c",
 			decimals: 18,
 			price: 0.9995,
 			priceDecimals: 18,
 			isStrictStable: true,
 			priceFeed: "0xd5973EB46D6fE54E82C5337dD9536B35D080912C",
-			tokenWeight: 2000,
+			tokenWeight: 15000,
 			minProfitBps: 0,
 			maxUsdgAmount: 5 * 1000 * 1000,
 			bufferAmount: 1 * 1000 * 1000,
@@ -123,12 +123,12 @@ export const tokens = {
 		},
 		USDC: {
 			name: "ERC20Mock[USDC]",
-			address: "0x0000000000000000000000000000000000000000",
+			address: "0xE3bD346D48D7D37A21fBfe84101Ec64269866b57",
 			decimals: 18,
 			priceFeed: "0xb85765935B4d9Ab6f841c9a00690Da5F34368bc0",
 			priceDecimals: 18,
 			isStrictStable: true,
-			tokenWeight: 38000,
+			tokenWeight: 20000,
 			minProfitBps: 0,
 			maxUsdgAmount: 255 * 1000 * 1000,
 			bufferAmount: 180 * 1000 * 1000,
@@ -137,12 +137,12 @@ export const tokens = {
 		},
 		DAI: {
 			name: "ERC20Mock[DAI]",
-			address: "0x0000000000000000000000000000000000000000",
+			address: "0x504a7e07d779bc0497E7496D32b5E0E099557568",
 			decimals: 18,
 			priceFeed: "0x440bD1535a02243d72E0fEED45B137efcC98bF7e",
 			priceDecimals: 18,
 			isStrictStable: true,
-			tokenWeight: 5000,
+			tokenWeight: 10000,
 			minProfitBps: 0,
 			maxUsdgAmount: 38.5 * 1000 * 1000,
 			bufferAmount: 7 * 1000 * 1000,
@@ -151,14 +151,14 @@ export const tokens = {
 		},
 		LINK: {
 			name: "ERC20Mock[LINK]",
-			address: "0x0000000000000000000000000000000000000000",
+			address: "0x2339eF937ca0e74AB287B156E5bace2783c3314C",
 			decimals: 18,
 			priceFeed: "0x907A947C5F34eC68F8D4eD87d4bac3FA6431a4D1",
 			priceDecimals: 18,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
 			isStrictStable: false,
-			tokenWeight: 1000,
+			tokenWeight: 5000,
 			minProfitBps: 0,
 			maxUsdgAmount: 6.1 * 1000 * 1000,
 			bufferAmount: 450000,
@@ -180,12 +180,12 @@ export const tokens = {
 		},
 		BTC: {
 			contractName: "ERC20Mock[BTC]",
-			address: "0x0000000000000000000000000000000000000000",
+			address: "0xf560224826949E6479b884bBf815C9413870997b",
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
 			priceFeed: "0xAC15714c08986DACC0379193e22382736796496f",
-			tokenWeight: 23000, // tokenWeights allows customisation of index composition
+			tokenWeight: 22000, // tokenWeights allows customisation of index composition
 			minProfitBps: 0,
 			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
 			bufferAmount: 2500,  // Spare amount to keep in pool that should not be used by swaps but for leverage alone
@@ -209,7 +209,7 @@ export const tokens = {
 		},
 		WETH: {
 			contractName: "WETH",
-			address: "0x0000000000000000000000000000000000000000",
+			address: "0x0d97c5403ED2A30578c7Fc62528069B0A02b3E38",
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,
@@ -246,7 +246,7 @@ export const chainConfig = {
 		isTestnet: true
 	},
 	"baseGoerli": {
-		isOracleAvailable: false,
+		isOracleAvailable: true,
 		isAmmEnabled: false,
 		isTestnet: true
 	}

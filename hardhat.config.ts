@@ -108,7 +108,8 @@ const config = {
 		},
 		baseGoerli: {
 			url: `${process.env.BASE_GOERLI_RPC_URL}`,
-			accounts
+			accounts,
+			gasPrice: 1000000000,
 		}
 		// ,
 		// hardhat:
@@ -128,6 +129,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -154,6 +156,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -166,6 +169,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -178,6 +182,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -190,6 +195,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -202,6 +208,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -214,6 +221,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -226,6 +234,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -238,6 +247,7 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
+					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,

@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetBonusMultiplier, CallSetMinter, CallMint, expandDecimals, GetDeployedContracts } from "../scripts/DeployHelper";
+import { CallUpdateLastDistributionTime, CallSetBonusMultiplier, CallSetMinter, CallMint, expandDecimals, GetDeployedContracts } from "../scripts/DeployHelper";
 
 const contract = "BonusDistributor";
 const contractDependencies = [
@@ -15,7 +15,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
-
+	await CallUpdateLastDistributionTime(hre, contract, contract, deployer);
 	await CallSetBonusMultiplier(hre, contract, BigNumber.from(10000));
 	// mint bnGmx for distributor
 	await CallSetMinter(hre, "MintableBaseToken[bnGMX]", deployer, false);
