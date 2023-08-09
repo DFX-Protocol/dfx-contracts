@@ -15,7 +15,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		],
 		async (deployer) =>
 		{
-			await CallUpdateLastDistributionTime(hre, contract, "RewardDistributor[stakedGmxDistributor]", deployer);
+			await CallUpdateLastDistributionTime(hre, "RewardDistributor[stakedGmxDistributor]", deployer);
 		});
 	await CallSetHandler(hre, contract, "RewardRouterV2");
 	await CallSetHandler(hre, contract, "RewardTracker[bonusGmxTracker]");

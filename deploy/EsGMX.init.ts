@@ -40,7 +40,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		contract, 
 		dependencies["RewardDistributor[stakedGmxDistributor]"].address, 
 		expandDecimals(50000 * 12, 18)); // ~50,000 GMX per month
-	await CallUpdateLastDistributionTime(hre, "RewardDistributor[stakedGmxDistributor]", "RewardDistributor[stakedGmxDistributor]", deployer);
+	await CallUpdateLastDistributionTime(hre, "RewardDistributor[stakedGmxDistributor]", deployer);
 	// TODO: Enable this after complete deployment.
 	// TODO:[MAINNET] Adjust EsGMX/sec value
 	// await CallSetTokensPerInterval(hre, 

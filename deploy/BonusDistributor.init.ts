@@ -15,7 +15,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
-	await CallUpdateLastDistributionTime(hre, contract, contract, deployer);
+	await CallUpdateLastDistributionTime(hre, contract, deployer);
 	await CallSetBonusMultiplier(hre, contract, BigNumber.from(10000));
 	// mint bnGmx for distributor
 	await CallSetMinter(hre, "MintableBaseToken[bnGMX]", deployer, false);

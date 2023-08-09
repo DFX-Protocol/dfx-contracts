@@ -1147,16 +1147,21 @@ export async function CallSetBonusMultiplier(hre: HardhatRuntimeEnvironment, con
 	}
 }
 
-export async function CallUpdateLastDistributionTime(hre: HardhatRuntimeEnvironment, contract: string, updateContractName: string, deployer: string) : Promise<void>
+export async function CallUpdateLastDistributionTime(hre: HardhatRuntimeEnvironment, contract: string, deployer: string) : Promise<void>
 {
-	const { deployments } = hre;
-	console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${updateContractName}.updateLastDistributionTime()\x1B[0m ...`);
-	const index = updateContractName.indexOf("[") === -1 ? undefined : updateContractName.indexOf("[");
-	const artifactName = updateContractName.substring(0, index);
-	const contractData = await getContractData(hre, updateContractName);
-	const updateContract = await ethers.getContractAt(artifactName, contractData.address);
 	const depSign = await ethers.getSigner(deployer);
-	await (await updateContract.connect(depSign).updateLastDistributionTime()).wait();
+	const updateContract = await getContract(hre, contract);
+	const lastDistributionTime = await updateContract.updateLastDistributionTime();
+	if(lastDistributionTime.toString() == "0")
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.updateLastDistributionTime()\x1B[0m ...`);
+		await (await updateContract.connect(depSign).updateLastDistributionTime()).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.updateLastDistributionTime()\x1B[0m ...`);
+	}
+
 }
 
 export async function GetDeployedContracts(hre: HardhatRuntimeEnvironment, contracts: string[]): Promise<{ [index: string]: Deployment }>
@@ -1238,18 +1243,25 @@ export async function CallSetTokensPerInterval(hre: HardhatRuntimeEnvironment, c
 
 export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment, contract: string, configParameters: any[])
 {
+	// configParam[0] = token address
+	// configParam[1] = price feed address
+	// configParam[2] = price decimals
+	// configParam[3] = isStrictStable
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
 
-	const priceFeed = await updateContract.priceFeeds(configParameters[0]);
 	const gov = await updateContract.gov();
 
 	if(gov == deployer)
 	{
-		if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1])
+		const priceFeed = await updateContract.priceFeeds(configParameters[0]);
+		const priceDecimals = await updateContract.priceDecimals(configParameters[0]);
+		const isStrictStable = await updateContract.strictStableTokens(configParameters[0]);
+
+		if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1] || priceDecimals != configParameters[2] || isStrictStable != configParameters[3])
 		{
 			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 			await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();

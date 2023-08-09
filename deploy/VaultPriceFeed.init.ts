@@ -74,7 +74,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			[
 				tokens[chainId][token].address,
 				tokens[chainId][token].priceFeed,
-				tokens[chainId][token].decimals,
+				tokens[chainId][token].priceDecimals,
 				tokens[chainId][token].isStrictStable	
 			]);
 	}

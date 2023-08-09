@@ -108,10 +108,10 @@ export const tokens = {
 	"baseGoerli":{
 		USDT: {
 			contractName: "ERC20Mock[USDT]",
-			address: "0x110511f937A2fc94b51F2543337038fD73603c9c",
+			address: "0x8f308fA2d2BfBBa98711D3A389f0De0FAedd4D05",
 			decimals: 18,
 			price: 0.9995,
-			priceDecimals: 18,
+			priceDecimals: 8,
 			isStrictStable: true,
 			priceFeed: "0xd5973EB46D6fE54E82C5337dD9536B35D080912C",
 			tokenWeight: 15000,
@@ -123,10 +123,10 @@ export const tokens = {
 		},
 		USDC: {
 			name: "ERC20Mock[USDC]",
-			address: "0xE3bD346D48D7D37A21fBfe84101Ec64269866b57",
+			address: "0xd90E35f5A3069BB330Aa6F4156B9607A7d8c78Bb",
 			decimals: 18,
 			priceFeed: "0xb85765935B4d9Ab6f841c9a00690Da5F34368bc0",
-			priceDecimals: 18,
+			priceDecimals: 8,
 			isStrictStable: true,
 			tokenWeight: 20000,
 			minProfitBps: 0,
@@ -137,10 +137,10 @@ export const tokens = {
 		},
 		DAI: {
 			name: "ERC20Mock[DAI]",
-			address: "0x504a7e07d779bc0497E7496D32b5E0E099557568",
+			address: "0x6332edba72D165dbB12403FC5Bd27863cd9FfACf",
 			decimals: 18,
 			priceFeed: "0x440bD1535a02243d72E0fEED45B137efcC98bF7e",
-			priceDecimals: 18,
+			priceDecimals: 8,
 			isStrictStable: true,
 			tokenWeight: 10000,
 			minProfitBps: 0,
@@ -151,10 +151,10 @@ export const tokens = {
 		},
 		LINK: {
 			name: "ERC20Mock[LINK]",
-			address: "0x2339eF937ca0e74AB287B156E5bace2783c3314C",
+			address: "0x08a1B7F1386C32548c3834cD4A18d7D50c9fb37f",
 			decimals: 18,
 			priceFeed: "0x907A947C5F34eC68F8D4eD87d4bac3FA6431a4D1",
-			priceDecimals: 18,
+			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
 			isStrictStable: false,
@@ -180,7 +180,7 @@ export const tokens = {
 		},
 		BTC: {
 			contractName: "ERC20Mock[BTC]",
-			address: "0xf560224826949E6479b884bBf815C9413870997b",
+			address: "0xD2b9c51287cf535E7B1A3Ce6cA1332EcFbD94Db7",
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
@@ -189,7 +189,7 @@ export const tokens = {
 			minProfitBps: 0,
 			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
 			bufferAmount: 2500,  // Spare amount to keep in pool that should not be used by swaps but for leverage alone
-			priceDecimals: 18,
+			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
 			isStable: false,
@@ -209,12 +209,12 @@ export const tokens = {
 		},
 		WETH: {
 			contractName: "WETH",
-			address: "0x0d97c5403ED2A30578c7Fc62528069B0A02b3E38",
+			address: "0xB2C2f29a52F8861cEEC9cf588E84F10F90d0c1EA",
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,
 			priceFeed: "0xcD2A119bD1F7DF95d706DE6F2057fDD45A0503E2",
-			priceDecimals: 18,
+			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
 			tokenWeight: 28000,

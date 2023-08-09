@@ -52,7 +52,23 @@ const config = {
 		pages: pa, // "files",
 		templates: "doctemplates"
 	},
-	etherscan: { apiKey: process.env.ETHERSCAN_API_KEY },
+	etherscan: { 
+		apiKey: {
+			baseGoerli: process.env.BASE_GOERLI_ETHERSCAN_API_KEY,
+			mainnet: process.env.ETHERSCAN_API_KEY,
+			sepolia: process.env.ETHERSCAN_API_KEY
+		},
+		customChains: [
+			{
+				network: "baseGoerli",
+				chainId: 84531,
+				urls: {
+					apiURL: "https://api-goerli.basescan.org",
+					browserURL: "https://goerli.basescan.org"
+				}
+			}
+		]
+	},
 	gasReporter:
 	{
 		enabled: process.env.REPORT_GAS === "true",
@@ -109,7 +125,7 @@ const config = {
 		baseGoerli: {
 			url: `${process.env.BASE_GOERLI_RPC_URL}`,
 			accounts,
-			gasPrice: 1000000000,
+			gasPrice: 100000000,
 		}
 		// ,
 		// hardhat:
