@@ -22,7 +22,7 @@ interface IVaultPriceFeed {
     function setPriceSampleSpace(uint256 _priceSampleSpace) external;
     function setMaxStrictPriceDeviation(uint256 _maxStrictPriceDeviation) external;
     function getPrice(address _token, bool _maximise, bool _includeAmmPrice, bool _useSwapPricing) external view returns (uint256);
-    function getAmmPrice(address _token) external view returns (uint256);
+    function getAmmPrice(address _token, bool _maximise) external view returns (uint256);
     function getLatestPrimaryPrice(address _token) external view returns (uint256);
     // function getPrimaryPrice(address _token, bool _maximise) external view returns (uint256);
     function setTokenConfig(
@@ -59,13 +59,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
     address public secondaryPriceFeed;
     uint256 public spreadThresholdBasisPoints = 30;
 
-    address public btc;
-    address public eth;
-    address public bnb;
-    address public bnbBusd;
-    address public ethBnb;
-    address public btcBnb;
-
+    mapping (address => address[]) public tokenPairs;
     mapping (address => address) public priceFeeds;
     mapping (address => uint256) public priceDecimals;
     mapping (address => uint256) public spreadBasisPoints;
@@ -128,16 +122,12 @@ contract VaultPriceFeed is IVaultPriceFeed {
         secondaryPriceFeed = _secondaryPriceFeed;
     }
 
-    function setTokens(address _btc, address _eth, address _bnb) external onlyGov {
-        btc = _btc;
-        eth = _eth;
-        bnb = _bnb;
+    function setPair(address _token, address _pair) external onlyGov {
+        tokenPairs[_token].push(_pair);
     }
 
-    function setPairs(address _bnbBusd, address _ethBnb, address _btcBnb) external onlyGov {
-        bnbBusd = _bnbBusd;
-        ethBnb = _ethBnb;
-        btcBnb = _btcBnb;
+    function setPairs(address _token, address[] memory _pairs) external onlyGov {
+        tokenPairs[_token] = _pairs;
     }
 
     function setSpreadBasisPoints(address _token, uint256 _spreadBasisPoints) external override onlyGov {
@@ -192,8 +182,8 @@ contract VaultPriceFeed is IVaultPriceFeed {
     function getPriceV1(address _token, bool _maximise, bool _includeAmmPrice) public view returns (uint256) {
         uint256 price = getPrimaryPrice(_token, _maximise);
 
-        if (_includeAmmPrice && isAmmEnabled) {
-            uint256 ammPrice = getAmmPrice(_token);
+        if (_includeAmmPrice && isAmmEnabled && isChainlinkEnabled) {
+            uint256 ammPrice = getAmmPrice(_token, _maximise);
             if (ammPrice > 0) {
                 if (_maximise && ammPrice > price) {
                     price = ammPrice;
@@ -276,7 +266,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
     }
 
     function getAmmPriceV2(address _token, bool _maximise, uint256 _primaryPrice) public view returns (uint256) {
-        uint256 ammPrice = getAmmPrice(_token);
+        uint256 ammPrice = getAmmPrice(_token, _maximise);
         if (ammPrice == 0) {
             return _primaryPrice;
         }
@@ -315,12 +305,13 @@ contract VaultPriceFeed is IVaultPriceFeed {
     function getPrimaryPrice(address _token, bool _maximise) private view returns (uint256) {
         if(!isChainlinkEnabled)
         {
-            return _maximise ? 0 : type(uint256).max;
+            return getAmmPrice(_token, _maximise);
         }
         address priceFeedAddress = priceFeeds[_token];
         require(priceFeedAddress != address(0), "VaultPriceFeed: invalid price feed");
 
         if (chainlinkFlags != address(0)) {
+            // TODO: Upate below flag to use flag for the specific blockchain
             bool isRaised = IChainlinkFlags(chainlinkFlags).getFlag(FLAG_ARBITRUM_SEQ_OFFLINE);
             if (isRaised) {
                     // If flag is raised we shouldn't perform any critical operations
@@ -373,27 +364,28 @@ contract VaultPriceFeed is IVaultPriceFeed {
         return ISecondaryPriceFeed(secondaryPriceFeed).getPrice(_token, _referencePrice, _maximise);
     }
 
-    function getAmmPrice(address _token) public override view returns (uint256) {
-        address token0BnbBusd = IPancakePair(bnbBusd).token0();
-        uint256 bnbBusdPrice = token0BnbBusd == bnb ? getPairPrice(bnbBusd, true) : getPairPrice(bnbBusd, false);
+    function getAmmPrice(address _token, bool _maximise) public override view returns (uint256) {
+        uint256 finalPrice = 0;
 
-        if (_token == bnb) {
-            return bnbBusdPrice;
+        for (uint80 i = 0; i < tokenPairs[_token].length; i++) {
+            address pair = tokenPairs[_token][i];
+            address token0 = IPancakePair(pair).token0();
+            uint256 tokenPrice = token0 == _token ? getPairPrice(pair, true) : getPairPrice(pair, false);
+            
+            if(i == 0) {
+                finalPrice = tokenPrice;
+            }
+            
+            if(_maximise && tokenPrice > finalPrice) {
+                finalPrice = tokenPrice;
+            } 
+            
+            if(!_maximise && tokenPrice < finalPrice) {
+                finalPrice = tokenPrice;
+            }
         }
-
-        if (_token == eth) {
-            address token0EthBnb = IPancakePair(ethBnb).token0();
-            uint256 ethBnbPrice = token0EthBnb == eth ? getPairPrice(ethBnb, true) : getPairPrice(ethBnb, false);
-            return (bnbBusdPrice*(ethBnbPrice))/(PRICE_PRECISION);
-        }
-
-        if (_token == btc) {
-            address token0BtcBnb = IPancakePair(btcBnb).token0();
-            uint256 btcBnbPrice = token0BtcBnb == btc ? getPairPrice(btcBnb, true) : getPairPrice(btcBnb, false);
-            return (bnbBusdPrice*(btcBnbPrice))/(PRICE_PRECISION);
-        }
-
-        return 0;
+        // Price precision is already been taken care of in getPairPrice
+        return finalPrice;
     }
 
     // if divByReserve0: calculate price as reserve1 / reserve0
