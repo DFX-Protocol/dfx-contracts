@@ -9,7 +9,7 @@ const contract = "PriceFeed[DAI]";
 // TODO: Check if this needs to be deployed on mainnet
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(!chainConfig[chainId].isOracleAvailable)
+	if(!chainConfig[chainId].isOracleAvailable && chainConfig[chainId].shouldConfigOracle)
 	{
 		if(tokens[chainId].DAI !== null && tokens[chainId].DAI !== undefined)
 		{
@@ -25,4 +25,4 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 export default func;
 
 func.id = `Deploy_${contract}`; // id required to prevent reexecution
-func.tags = [`${contract}`];
+func.tags = [`${contract}`, "mockTokens"];

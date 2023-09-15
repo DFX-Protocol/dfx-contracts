@@ -24,6 +24,7 @@ interface IVaultPriceFeed {
     function getPrice(address _token, bool _maximise, bool _includeAmmPrice, bool _useSwapPricing) external view returns (uint256);
     function getAmmPrice(address _token, bool _maximise) external view returns (uint256);
     function getLatestPrimaryPrice(address _token) external view returns (uint256);
+    function setWeight(address _tokenPair, uint256 _weight) external;
     // function getPrimaryPrice(address _token, bool _maximise) external view returns (uint256);
     function setTokenConfig(
         address _token,
@@ -74,6 +75,9 @@ contract VaultPriceFeed is IVaultPriceFeed {
     mapping (address => bool) public override isAdjustmentAdditive;
     mapping (address => uint256) public lastAdjustmentTimings;
 
+    // map(pair_address => weight))
+    mapping(address => uint256) public weights;
+
     modifier onlyGov() {
         require(msg.sender == gov, "VaultPriceFeed: forbidden");
         _;
@@ -106,6 +110,12 @@ contract VaultPriceFeed is IVaultPriceFeed {
         useV2Pricing = _useV2Pricing;
     }
 
+    function setWeight(address _tokenPair, uint256 _weight) external override onlyGov {
+        require(_weight > 0, "Weight must be greater than zero");
+        require(_weight > 100_000, "Weight cannot be greater than 100_000");
+        weights[_tokenPair] = _weight;
+    }
+
     function setIsAmmEnabled(bool _isEnabled) external override onlyGov {
         isAmmEnabled = _isEnabled;
     }
@@ -120,6 +130,10 @@ contract VaultPriceFeed is IVaultPriceFeed {
 
     function setSecondaryPriceFeed(address _secondaryPriceFeed) external onlyGov {
         secondaryPriceFeed = _secondaryPriceFeed;
+    }
+
+    function getTokenPairs(address _tokenAddress) external view returns (address[] memory){
+        return tokenPairs[_tokenAddress];
     }
 
     function setPair(address _token, address _pair) external onlyGov {
@@ -164,7 +178,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
     }
 
     function getPrice(address _token, bool _maximise, bool _includeAmmPrice, bool /* _useSwapPricing */) public override view returns (uint256) {
-        uint256 price = useV2Pricing ? getPriceV2(_token, _maximise, _includeAmmPrice) : getPriceV1(_token, _maximise, _includeAmmPrice);
+        uint256 price = useV2Pricing ? getPriceV2(_token, _maximise, _includeAmmPrice) : getPriceV1(_token, _maximise);
 
         uint256 adjustmentBps = adjustmentBasisPoints[_token];
         if (adjustmentBps > 0) {
@@ -179,20 +193,8 @@ contract VaultPriceFeed is IVaultPriceFeed {
         return price;
     }
 
-    function getPriceV1(address _token, bool _maximise, bool _includeAmmPrice) public view returns (uint256) {
+    function getPriceV1(address _token, bool _maximise) public view returns (uint256) {
         uint256 price = getPrimaryPrice(_token, _maximise);
-
-        if (_includeAmmPrice && isAmmEnabled && isChainlinkEnabled) {
-            uint256 ammPrice = getAmmPrice(_token, _maximise);
-            if (ammPrice > 0) {
-                if (_maximise && ammPrice > price) {
-                    price = ammPrice;
-                }
-                if (!_maximise && ammPrice < price) {
-                    price = ammPrice;
-                }
-            }
-        }
 
         if (isSecondaryPriceEnabled) {
             price = getSecondaryPrice(_token, price, _maximise);
@@ -364,28 +366,69 @@ contract VaultPriceFeed is IVaultPriceFeed {
         return ISecondaryPriceFeed(secondaryPriceFeed).getPrice(_token, _referencePrice, _maximise);
     }
 
-    function getAmmPrice(address _token, bool _maximise) public override view returns (uint256) {
-        uint256 finalPrice = 0;
-
-        for (uint80 i = 0; i < tokenPairs[_token].length; i++) {
+    function getMeanPrice(address _token) public view returns (uint256) {
+        uint256 mean = 0;
+        uint256 accumulatedWeight = 0;
+        // Calculate the arithmetic mean of all prices from all pairs
+        for (uint256 i = 0; i < tokenPairs[_token].length;) {
             address pair = tokenPairs[_token][i];
             address token0 = IPancakePair(pair).token0();
             uint256 tokenPrice = token0 == _token ? getPairPrice(pair, true) : getPairPrice(pair, false);
-            
-            if(i == 0) {
-                finalPrice = tokenPrice;
+            uint256 weight = weights[pair];
+            if(weight == 0) {
+                weight = 1;
             }
-            
-            if(_maximise && tokenPrice > finalPrice) {
-                finalPrice = tokenPrice;
-            } 
-            
-            if(!_maximise && tokenPrice < finalPrice) {
-                finalPrice = tokenPrice;
-            }
+
+            accumulatedWeight += weight;
+            mean = (tokenPrice * weight) + mean;
+            unchecked { i += 1; }
         }
-        // Price precision is already been taken care of in getPairPrice
-        return finalPrice;
+        
+        mean = mean / accumulatedWeight;
+        return mean;
+    }
+
+    function getAdjustedPrice(address _token, uint256 _mean, bool _maximise) public view returns (uint256) {
+        uint256 upperAccumulatedWeight = 0;
+        uint256 lowerAccumulatedWeight = 0;
+        uint256 upperMean = 0;
+        uint256 lowerMean = 0;
+
+        for (uint256 i = 0; i < tokenPairs[_token].length;) {
+            address pair = tokenPairs[_token][i];
+            address token0 = IPancakePair(pair).token0();
+            uint256 tokenPrice = token0 == _token ? getPairPrice(pair, true) : getPairPrice(pair, false);
+            uint256 weight = weights[pair];
+
+            if(weight == 0) {
+                weight = 1;
+            }
+
+            if(!_maximise && _mean >= tokenPrice) {
+                lowerAccumulatedWeight +=weight;
+                lowerMean = (tokenPrice * weight) + lowerMean;
+            }
+            else if(_maximise && _mean <= tokenPrice){
+                upperAccumulatedWeight += weight;
+                upperMean = (tokenPrice * weight) + upperMean;
+            }
+            unchecked { i += 1; }
+        }
+
+        if(_maximise && upperMean != 0) {
+            return upperMean / upperAccumulatedWeight;
+        }
+        else if (!_maximise && lowerMean != 0) {
+            return lowerMean / lowerAccumulatedWeight;
+        }
+        else {
+            return _mean;
+        }
+    }
+
+    function getAmmPrice(address _token, bool _maximise) public override view returns (uint256) {
+        uint256 mean = getMeanPrice(_token);
+        return getAdjustedPrice(_token, mean, _maximise);
     }
 
     // if divByReserve0: calculate price as reserve1 / reserve0

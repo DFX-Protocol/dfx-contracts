@@ -8,7 +8,7 @@ const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia
 const contract = "PriceFeed[BTC]";
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(!chainConfig[chainId].isOracleAvailable)
+	if(!chainConfig[chainId].isOracleAvailable && chainConfig[chainId].shouldConfigOracle)
 	{
 		if(tokens[chainId].BTC !== null && tokens[chainId].BTC !== undefined)
 		{
@@ -24,4 +24,4 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 export default func;
 
 func.id = `Deploy_${contract}`; // id required to prevent reexecution
-func.tags = [`${contract}`, "sepoliaTestnet"];
+func.tags = [`${contract}`, "mockTokens"];

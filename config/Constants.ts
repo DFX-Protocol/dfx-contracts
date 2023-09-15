@@ -2,46 +2,64 @@ export const tokens = {
 	"sepolia":{
 		USDT: {
 			contractName: "ERC20Mock[USDT]",
-			address: "0x757221aeDDe3ECE6271D91C3E5f1aE305974022c",
+			address: "0x278ce1e55BB6d32b4923b11a7D2bb94e5b446cbc",
 			decimals: 18,
 			price: 0.9995,
 			priceDecimals: 18,
 			isStrictStable: true,
-			priceFeed: "0x4f4F09AD0A1d05B612234Ea38019C0abda0c92E5",
+			priceFeed: "0x0000000000000000000000000000000000000000",
 			tokenWeight: 2000,
 			minProfitBps: 0,
 			maxUsdgAmount: 5 * 1000 * 1000,
 			bufferAmount: 1 * 1000 * 1000,
 			isStable: true,
 			isShortable: false,
+			mintAmount: "10000000000000",
 		},
-		BUSD: {
-			contractName: "ERC20Mock[BUSD]",
-			address: "0x8577CcCD4cF71Dd23F4cf31Be940A07E89174d56",
+		USDC: {
+			contractName: "ERC20Mock[USDC]",
+			address: "0x870ea900Ed521a26c37BfcA3b3Fa4437d193779C",
 			decimals: 18,
-			priceDecimals: 18,
-			price: 0.999962,
+			price: 1.0001,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			priceDecimals: 8,
 			isStrictStable: true,
-			priceFeed: "0x94e316c03A7a72aE8da7B9d449c9031E69BF9d56",
-			tokenWeight: 2000,
+			tokenWeight: 20000,
 			minProfitBps: 0,
-			maxUsdgAmount: 5 * 1000 * 1000,
-			bufferAmount: 1 * 1000 * 1000,
+			maxUsdgAmount: 255 * 1000 * 1000,
+			bufferAmount: 180 * 1000 * 1000,
 			isStable: true,
 			isShortable: false,
+			mintAmount: "10000000000000",
+		},
+		DAI: {
+			contractName: "ERC20Mock[DAI]",
+			address: "0x27679434AFC292eA8b109ecb2175122Ec8728883",
+			decimals: 18,
+			price: 1.00002,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			priceDecimals: 8,
+			isStrictStable: true,
+			tokenWeight: 10000,
+			minProfitBps: 0,
+			maxUsdgAmount: 38.5 * 1000 * 1000,
+			bufferAmount: 7 * 1000 * 1000,
+			isStable: true,
+			isShortable: false,
+			mintAmount: "10000000000000",
 		},
 		BTC: {
 			contractName: "ERC20Mock[BTC]",
-			address: "0x0297783626F4dBDa1f21333c6A584447a9261a42",
+			address: "0xe9F13d1C1DFC8791220a779622eec65F8FbAbb15",
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
-			priceFeed: "0xb94aCcF79Fe27510B3EB64A8320Bd35B99D72556",
+			priceFeed: "0x0000000000000000000000000000000000000000",
 			tokenWeight: 23000, // tokenWeights allows customisation of index composition
 			minProfitBps: 0,
 			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
 			bufferAmount: 2500,  // Spare amount to keep in pool that should not be used by swaps but for leverage alone
-			priceDecimals: 18,
+			priceDecimals: 18,  // Price feed data decimals
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
 			isStable: false,
@@ -58,30 +76,34 @@ export const tokens = {
 			maxLiquidityThresholdShort: 12 * 1000 * 1000,
 			minLiquidityThresholdLong: 12 * 1000 * 1000,
 			minLiquidityThresholdShort: 5 * 1000 * 1000,
+			mintAmount: "1000000000000",
 		},
 		BNB: {
 			contractName: "ERC20Mock[BNB]",
-			address: "0xAeb6b50E347C22a95479A397f9a9aff6b26ECA2B",
+			address: "0x3B1d2A15F7f153518ecB27a47F4464107596964a",
 			decimals: 18,
 			priceDecimals: 18,
+			fastPricePrecision: 1000,
 			price: 243.4264,
 			isStrictStable: false,
-			priceFeed: "0x32Cb79d075818945FE6B6fa12FDd3eca6D8136b9",
+			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
+			priceFeed: "0x0000000000000000000000000000000000000000",
 			tokenWeight: 18000,
 			minProfitBps: 0,
 			maxUsdgAmount: 80 * 1000 * 1000,
 			bufferAmount: 8000,
 			isStable: false,
 			isShortable: true,
+			mintAmount: "1000000000000",
 
 		},
 		WETH: {
 			contractName: "WETH",
-			address: "0x4f3fe6C943B2e501651164E293a24D5dDB62131e",
+			address: "0x9edB04b4d8Eb93B270198F142db8Ab32DC75F41e",
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,
-			priceFeed: "0xA2E29091259FECba41e4255D1901472514b952a7",
+			priceFeed: "0x0000000000000000000000000000000000000000",
 			priceDecimals: 18,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
@@ -120,13 +142,15 @@ export const tokens = {
 			bufferAmount: 1 * 1000 * 1000,
 			isStable: true,
 			isShortable: false,
+			mintAmount: "10000000000000",
 		},
 		USDC: {
-			name: "ERC20Mock[USDC]",
+			contractName: "ERC20Mock[USDC]",
 			address: "0xd90E35f5A3069BB330Aa6F4156B9607A7d8c78Bb",
 			decimals: 18,
 			priceFeed: "0xb85765935B4d9Ab6f841c9a00690Da5F34368bc0",
 			priceDecimals: 8,
+			price: 1.002,
 			isStrictStable: true,
 			tokenWeight: 20000,
 			minProfitBps: 0,
@@ -134,11 +158,13 @@ export const tokens = {
 			bufferAmount: 180 * 1000 * 1000,
 			isStable: true,
 			isShortable: false,
+			mintAmount: "10000000000000",
 		},
 		DAI: {
-			name: "ERC20Mock[DAI]",
+			contractName: "ERC20Mock[DAI]",
 			address: "0x6332edba72D165dbB12403FC5Bd27863cd9FfACf",
 			decimals: 18,
+			price: 1.0001,
 			priceFeed: "0x440bD1535a02243d72E0fEED45B137efcC98bF7e",
 			priceDecimals: 8,
 			isStrictStable: true,
@@ -148,13 +174,15 @@ export const tokens = {
 			bufferAmount: 7 * 1000 * 1000,
 			isStable: true,
 			isShortable: false,
+			mintAmount: "10000000000000",
 		},
 		LINK: {
-			name: "ERC20Mock[LINK]",
+			contractName: "ERC20Mock[LINK]",
 			address: "0x08a1B7F1386C32548c3834cD4A18d7D50c9fb37f",
 			decimals: 18,
 			priceFeed: "0x907A947C5F34eC68F8D4eD87d4bac3FA6431a4D1",
 			priceDecimals: 8,
+			price: 6.3456,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
 			isStrictStable: false,
@@ -177,6 +205,7 @@ export const tokens = {
 			maxLiquidityThresholdShort: 250 * 1000,
 			minLiquidityThresholdLong: 50 * 1000,
 			minLiquidityThresholdShort: 50 * 1000,
+			mintAmount: "1000000000000",
 		},
 		BTC: {
 			contractName: "ERC20Mock[BTC]",
@@ -206,6 +235,7 @@ export const tokens = {
 			maxLiquidityThresholdShort: 12 * 1000 * 1000,
 			minLiquidityThresholdLong: 12 * 1000 * 1000,
 			minLiquidityThresholdShort: 5 * 1000 * 1000,
+			mintAmount: "1000000000000",
 		},
 		WETH: {
 			contractName: "WETH",
@@ -236,18 +266,269 @@ export const tokens = {
 			minLiquidityThresholdLong: 12 * 1000 * 1000,
 			minLiquidityThresholdShort: 5 * 1000 * 1000,
 		}
+	},
+	"hederaTestnet":{
+		USDT: {
+			contractName: "ERC20Mock[USDT]",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			price: 0.9995,
+			priceDecimals: 8,
+			isStrictStable: true,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			tokenWeight: 15000,
+			minProfitBps: 0,
+			maxUsdgAmount: 5 * 1000 * 1000,
+			bufferAmount: 1 * 1000 * 1000,
+			isStable: true,
+			isShortable: false,
+			mintAmount: "10000000000000",
+		},
+		USDC: {
+			contractName: "ERC20Mock[USDC]",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			price: 1.002,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			priceDecimals: 8,
+			isStrictStable: true,
+			tokenWeight: 20000,
+			minProfitBps: 0,
+			maxUsdgAmount: 255 * 1000 * 1000,
+			bufferAmount: 180 * 1000 * 1000,
+			isStable: true,
+			isShortable: false,
+			mintAmount: "10000000000000",
+		},
+		DAI: {
+			contractName: "ERC20Mock[DAI]",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			price: 1.0001,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			priceDecimals: 8,
+			isStrictStable: true,
+			tokenWeight: 10000,
+			minProfitBps: 0,
+			maxUsdgAmount: 38.5 * 1000 * 1000,
+			bufferAmount: 7 * 1000 * 1000,
+			isStable: true,
+			isShortable: false,
+			mintAmount: "10000000000000",
+		},
+		LINK: {
+			contractName: "ERC20Mock[LINK]",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			price: 6.5455,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			priceDecimals: 8,
+			fastPricePrecision: 1000,
+			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
+			isStrictStable: false,
+			tokenWeight: 5000,
+			minProfitBps: 0,
+			maxUsdgAmount: 6.1 * 1000 * 1000,
+			bufferAmount: 450000,
+			isStable: false,
+			isShortable: true,
+			spreadBasisPoints: 0,
+			maxGlobalShortSize: 500 * 1000,
+			maxGlobalLongSize: 500 * 1000,
+			openInterestLimitLong: 500 * 1000,
+			openInterestLimitShort: 500 * 1000,
+			maxOpenInterestLong: 500 * 1000,
+			maxOpenInterestShort: 500 * 1000,
+			openInterestIncrementLong: 25 * 1000,
+			openInterestIncrementShort: 25 * 1000,
+			maxLiquidityThresholdLong: 250 * 1000,
+			maxLiquidityThresholdShort: 250 * 1000,
+			minLiquidityThresholdLong: 50 * 1000,
+			minLiquidityThresholdShort: 50 * 1000,
+			mintAmount: "1000000000000",
+		},
+		BTC: {
+			contractName: "ERC20Mock[BTC]",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			isStrictStable: false,
+			price: 30443.90,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			tokenWeight: 22000, // tokenWeights allows customisation of index composition
+			minProfitBps: 0,
+			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
+			bufferAmount: 2500,  // Spare amount to keep in pool that should not be used by swaps but for leverage alone
+			priceDecimals: 8,
+			fastPricePrecision: 1000,
+			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
+			isStable: false,
+			isShortable: true,
+			maxGlobalLongSize: 60 * 1000 * 1000,
+			maxGlobalShortSize: 25 * 1000 * 1000,
+			openInterestLimitLong: 80 * 1000 * 1000,
+			openInterestLimitShort: 50 * 1000 * 1000,
+			maxOpenInterestLong: 80 * 1000 * 1000,
+			maxOpenInterestShort: 50 * 1000 * 1000,
+			openInterestIncrementLong: 50 * 1000,
+			openInterestIncrementShort: 50 * 1000,
+			maxLiquidityThresholdLong: 20 * 1000 * 1000,
+			maxLiquidityThresholdShort: 12 * 1000 * 1000,
+			minLiquidityThresholdLong: 12 * 1000 * 1000,
+			minLiquidityThresholdShort: 5 * 1000 * 1000,
+			mintAmount: "1000000000000",
+		},
+		WETH: {
+			contractName: "WETH",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			isStrictStable: false,
+			price: 1911.08,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			priceDecimals: 8,
+			fastPricePrecision: 1000,
+			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
+			tokenWeight: 28000,
+			minProfitBps: 0,
+			maxUsdgAmount: 180 * 1000 * 1000,
+			bufferAmount: 60000,
+			isStable: false,
+			isShortable: true,
+			maxGlobalLongSize: 80 * 1000 * 1000,
+			maxGlobalShortSize: 30 * 1000 * 1000,
+			openInterestLimitLong: 110 * 1000 * 1000,
+			openInterestLimitShort: 70 * 1000 * 1000,
+			maxOpenInterestLong: 100 * 1000 * 1000,
+			maxOpenInterestShort: 60 * 1000 * 1000,
+			openInterestIncrementLong: 50 * 1000,
+			openInterestIncrementShort: 50 * 1000,
+			maxLiquidityThresholdLong: 20 * 1000 * 1000,
+			maxLiquidityThresholdShort: 12 * 1000 * 1000,
+			minLiquidityThresholdLong: 12 * 1000 * 1000,
+			minLiquidityThresholdShort: 5 * 1000 * 1000,
+			mintAmount: "1000000000000",
+		},
+		BNB: {
+			contractName: "ERC20Mock[BNB]",
+			address: "0x0000000000000000000000000000000000000000",
+			decimals: 18,
+			priceDecimals: 18,
+			price: 243.4264,
+			isStrictStable: false,
+			fastPricePrecision: 1000,
+			priceFeed: "0x0000000000000000000000000000000000000000",
+			tokenWeight: 18000,
+			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
+			minProfitBps: 0,
+			maxUsdgAmount: 80 * 1000 * 1000,
+			bufferAmount: 8000,
+			isStable: false,
+			isShortable: true,
+			mintAmount: "1000000000000",
+		}
 	}
+};
+
+export const tokenPairs = {
+	"hederaTestnet": {
+		"USDT": [
+			"DAI",
+			"USDC"
+		],
+		"USDC": [
+			"USDT",
+			"DAI"
+		],
+		"DAI": [
+			"USDT",
+			"USDC"
+		],
+		"BTC": [
+			"USDT",
+			"DAI",
+			"USDC"
+		],
+		"WETH": [
+			"USDT",
+			"DAI",
+			"USDC"
+		],
+		"BNB": [
+			"USDT",
+			"DAI",
+			"USDC"
+		],
+		"LINK": [
+			"USDT",
+			"DAI",
+			"USDC"
+		]
+	},
+	"sepolia": {
+		"USDT": [
+			"DAI",
+			"USDC"
+		],
+		"USDC": [
+			"USDT",
+			"DAI"
+		],
+		"DAI": [
+			"USDT",
+			"USDC"
+		],
+		"BTC": [
+			"USDT",
+			"USDC",
+			"DAI"
+		],
+		"WETH": [
+			"USDT"
+		],
+		"BNB": [
+			"USDT",
+			"USDC",
+			"DAI"
+		]
+	},
+	"baseGoerli": {
+		"BTC": [
+			"USDT",
+			"DAI",
+			"USDC"
+		],
+		"WETH": [
+			"USDT",
+			"DAI",
+			"USDC"
+		],
+		"LINK": [
+			"USDT",
+			"DAI",
+			"USDC"
+		]
+	},
 };
 
 export const chainConfig = {
 	"sepolia": {
-		isOracleAvailable: false,
-		isAmmEnabled: true,
-		isTestnet: true
+		isOracleAvailable: false, 	// Is oracles available on given chain?
+		isAmmEnabled: true, 		// Should we enable AMM or not for pricing?
+		isTestnet: true,			// Is it a testnet or mainnet?
+		shouldAddLiquidity: true,	// Should we add liquidity or not?
+		shouldConfigOracle: false	// Should we configure our own oracles using price feed contracts?
 	},
 	"baseGoerli": {
 		isOracleAvailable: true,
 		isAmmEnabled: false,
-		isTestnet: true
+		isTestnet: true,
+		shouldAddLiquidity: false,
+		shouldConfigOracle: false
+	},
+	"hederaTestnet": {
+		isOracleAvailable: false,
+		isAmmEnabled: true,
+		isTestnet: true,
+		shouldAddLiquidity: true,
+		shouldConfigOracle: false
 	}
 };

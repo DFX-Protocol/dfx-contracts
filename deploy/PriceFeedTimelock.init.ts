@@ -1,9 +1,11 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallSetContractHandler, CallSetKeeper, CallSetGov } from "../scripts/DeployHelper";
+import { chainConfig } from "../config/Constants";
 
 const contract = "PriceFeedTimelock";
 const contractDependencies = [contract, "VaultPriceFeed", "FastPriceFeed"];
+const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
@@ -16,7 +18,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	}
 	await CallSetKeeper(hre, contract, deployer, false);
 	await CallSetGov(hre, "VaultPriceFeed", contract);
-	await CallSetGov(hre, "FastPriceFeed", contract);  
+	if(chainConfig[chainId].isOracleAvailable)
+	{
+		await CallSetGov(hre, "FastPriceFeed", contract);  
+	}
 };
 
 export default func;

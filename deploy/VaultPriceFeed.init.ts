@@ -1,72 +1,139 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetMaxStrictPriceDeviation, CallSetPriceSampleSpace, CallPriceFeedSetTokenConfig, CallSetTokens, CallSetPairs, CallWethDeposit, CallAddLiquidity, CallCreatePair, CallSetIsAmmEnabled, expandDecimals } from "../scripts/DeployHelper";
+import { CallSetMaxStrictPriceDeviation, getPairAddress, CallSetPriceSampleSpace, CallSetIsChainlinkEnabled, CallPriceFeedSetTokenConfig, CallSetPairs, CallAddLiquidity, CallCreatePair, CallSetIsAmmEnabled, expandDecimals, CallWethDeposit } from "../scripts/DeployHelper";
 import { GetTokenAddress } from "../config/DeployConstants";
-import { tokens, chainConfig } from "../config/Constants";
+import { tokens, chainConfig, tokenPairs } from "../config/Constants";
 import { BigNumber } from "ethers";
 
 const contract = "VaultPriceFeed";
 const chainId = process.env.NETWORK !== undefined? process.env.NETWORK: "sepolia";
-
-const bnbBusdLPrice = 236.50233007902;
-const wethBnbPrice = 7.97;
-const btcBnbPrice = 129.05;
-
-const bnbBusdLiq = 10000;
-const wethBnbLiq = 1;
-const btcBnbLiq = 100;
+const baseLiquidity = 1000;
 
 const contractDependencies = [
 	contract
 ];
 
+interface TokenWithPairs {
+	Token: string,
+	Pairs: string[]
+}
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
+	// Enable chainlink when either chainlink oracles are available on given chain or if we are deploying our own oracles manually
+	if(!chainConfig[chainId].shouldConfigOracle && !chainConfig[chainId].isOracleAvailable)
+	{
+		await CallSetIsChainlinkEnabled(hre, contract, false);
+	}
+	
 	const tokenNames = Object.keys(tokens[chainId]);
 	if(chainConfig[chainId].isAmmEnabled)
 	{
 		await CallSetIsAmmEnabled(hre, contract, chainConfig[chainId].isAmmEnabled);
-
-		await CallSetTokens(hre, contract, 
-			tokens[chainId].BTC.address,
-			tokens[chainId].WETH.address,
-			tokens[chainId].BNB.address
-		);
-	
-		const bnb = tokens[chainId].BNB.address;
-		const busd = tokens[chainId].BUSD.address;
-		const btc = tokens[chainId].BTC.address;
-		const weth = tokens[chainId].WETH.address;
-	
+		
 		const { uniswapV2Factory } = await GetTokenAddress();
 		const { uniswapV2Router } = await GetTokenAddress();
+		const baseTokenKeys = Object.keys(tokenPairs[chainId]);
+
+		if(chainConfig[chainId].isTestnet)
+		{	
+			// Create pairs of each base token with all of its quote tokens on all given DEXs
+			for(let dex = 0; dex < uniswapV2Factory.length; dex++)
+			{
+				for(const baseToken of baseTokenKeys)
+				{
+					const quoteTokens = tokenPairs[chainId][baseToken];
 	
-		await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, bnb, busd);
-		await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, weth, bnb);
-		await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory, btc, bnb);
+					for( let i = 0; i < quoteTokens.length; i++)
+					{
+						await CallCreatePair(hre, "PancakeFactory", uniswapV2Factory[dex], tokens[chainId][baseToken].address, tokens[chainId][quoteTokens[i]].address);
+					}
+				}
+			}
+		}
+
+		// create objects of all base tokens with their pairs
+		const tokenWithPairs: TokenWithPairs[] = [];
+		for(let dex = 0; dex < uniswapV2Factory.length; dex++)
+		{
+			for(const baseToken of baseTokenKeys)
+			{
+				const pairs: string[] = [];
+				const quoteTokens = tokenPairs[chainId][baseToken];
 	
-		await CallSetPairs(hre, contract,
-			"PancakeFactory",
-			uniswapV2Factory,
-			bnb,
-			busd,
-			btc,
-			weth
-		);
+				for( let i = 0; i < quoteTokens.length; i++)
+				{
+					const pairAddr = await getPairAddress("PancakeFactory", uniswapV2Factory[dex], tokens[chainId][baseToken].address, tokens[chainId][quoteTokens[i]].address);
+					pairs.push(pairAddr);
+				}
 	
-		await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BNB, tokens[chainId].BUSD, bnbBusdLiq, bnbBusdLiq * bnbBusdLPrice);
-	
-		await CallWethDeposit(hre, tokens[chainId].WETH, wethBnbLiq);
-		await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].WETH, tokens[chainId].BNB, wethBnbLiq, wethBnbLiq * wethBnbPrice);
-		
-		await CallAddLiquidity(hre, "PancakeRouter", uniswapV2Router, tokens[chainId].BTC, tokens[chainId].BNB, btcBnbLiq, btcBnbLiq * btcBnbPrice);
+				tokenWithPairs.push({Token: tokens[chainId][baseToken].address, Pairs: pairs} as TokenWithPairs);
+			}	
+		}
+
+		for(let i = 0; i < tokenWithPairs.length; i++)
+		{
+			await CallSetPairs(hre, contract, tokenWithPairs[i].Token, tokenWithPairs[i].Pairs);
+		}
+
+		// Only add liquidity when its testnet
+		if(chainConfig[chainId].isTestnet && chainConfig[chainId].shouldAddLiquidity)
+		{
+			for(let dex = 0; dex < uniswapV2Router.length; dex++)
+			{
+				// Add liquidity for all the token pairs
+				for(const baseToken of baseTokenKeys)
+				{
+					const quoteTokens = tokenPairs[chainId][baseToken];
+					// Exclude WETH when adding liquidity
+					if(baseToken != "WETH")
+					{
+						for( let i = 0; i < quoteTokens.length; i++)
+						{
+							await CallAddLiquidity(hre, 
+								"PancakeRouter", 
+								uniswapV2Router[dex], 
+								"PancakeFactory", 
+								uniswapV2Factory[dex], 
+								tokens[chainId][baseToken], 
+								tokens[chainId][quoteTokens[i]], 
+								baseLiquidity * tokens[chainId][quoteTokens[i]].price, 
+								baseLiquidity * tokens[chainId][baseToken].price
+							);
+						}	
+					} 
+					else 
+					{
+						for( let i = 0; i < quoteTokens.length; i++)
+						{
+							const wethLiq = 1;
+							await CallWethDeposit(hre, tokens[chainId].WETH, wethLiq * tokens[chainId][quoteTokens[i]].price);
+							await CallAddLiquidity(hre, 
+								"PancakeRouter", 
+								uniswapV2Router[dex], 
+								"PancakeFactory", 
+								uniswapV2Factory[dex], 
+								tokens[chainId][baseToken], 
+								tokens[chainId][quoteTokens[i]], 
+								wethLiq * tokens[chainId][quoteTokens[i]].price,  // Add 1ETH base liquidity for WETH in testnet to save precious ETH! 
+								wethLiq * tokens[chainId][baseToken].price
+							);
+						}
+					}
+				}	
+			}
+		}
 	}
 	else
 	{
 		await CallSetIsAmmEnabled(hre, contract, chainConfig[chainId].isAmmEnabled);
 	}
 	await CallSetMaxStrictPriceDeviation(hre, contract, expandDecimals(1, 28)); // 0.01 USD
-	await CallSetPriceSampleSpace(hre, contract, BigNumber.from(1));
+
+	if(chainConfig[chainId].isOracleAvailable)
+	{
+		await CallSetPriceSampleSpace(hre, contract, BigNumber.from(1));
+	}
 	
 	for(const token of tokenNames)
 	{

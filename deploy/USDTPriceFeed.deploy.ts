@@ -9,7 +9,7 @@ const contract = "PriceFeed[USDT]";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(!chainConfig[chainId].isOracleAvailable)
+	if(!chainConfig[chainId].isOracleAvailable && chainConfig[chainId].shouldConfigOracle)
 	{
 		if(tokens[chainId].USDT !== null && tokens[chainId].USDT !== undefined)
 		{

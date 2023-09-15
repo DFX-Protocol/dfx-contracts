@@ -25,7 +25,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Cannot deploy DAI because it's not set in current chain tokens\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Cannot deploy ${contract} because it's not set in current chain tokens\x1B[0m ...`);
 	}
 };
 

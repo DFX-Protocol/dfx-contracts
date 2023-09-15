@@ -9,7 +9,7 @@ const contract = "PriceFeed[LINK]";
 // TODO: Check if this needs to be deployed on mainnet
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	if(!chainConfig[chainId].isOracleAvailable)
+	if(!chainConfig[chainId].isOracleAvailable && chainConfig[chainId].shouldConfigOracle)
 	{
 		if(tokens[chainId].LINK !== null && tokens[chainId].LINK !== undefined)
 		{

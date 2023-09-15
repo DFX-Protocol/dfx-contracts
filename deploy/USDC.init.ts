@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallMockMint } from "../scripts/DeployHelper";
+import { CallMockMint, convertToEther } from "../scripts/DeployHelper";
 import { BigNumber } from "ethers";
 import { tokens } from "../config/Constants";
 
@@ -11,11 +11,11 @@ const contractDependencies =
 	[
 		contract,
 	];
-const amountToMint: BigNumber = BigNumber.from("100000000000000000000000"); // 100,000 USDC
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	if(tokens[chainId].USDC !== null && tokens[chainId].USDC !== undefined)
 	{
+		const amountToMint: BigNumber = convertToEther(tokens[chainId].USDC.mintAmount, tokens[chainId].USDC.decimals);
 		await CallMockMint(hre, contract, tokens[chainId].USDC.address, amountToMint);
 	}
 	else

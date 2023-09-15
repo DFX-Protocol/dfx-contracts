@@ -21,7 +21,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	const tokenNames = Object.keys(tokens[chainId]);
 	// Set Token price through PriceFeed contract
-	if(!chainConfig[chainId].isOracleAvailable)
+	if(!chainConfig[chainId].isOracleAvailable && chainConfig[chainId].shouldConfigOracle)
 	{
 		for(const token of tokenNames)
 		{
