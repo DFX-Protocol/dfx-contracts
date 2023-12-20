@@ -32,7 +32,9 @@
     "deploy:sepolia": "cross-env NETWORK=\"sepolia\" hardhat --network sepolia deploy",
     "verify:sepolia": "cross-env NETWORK=\"sepolia\" hardhat --network sepolia etherscan-verify --solc-input",
     "deploy:baseGoerli": "cross-env NETWORK=\"baseGoerli\" hardhat --network baseGoerli deploy",
-    "verify:baseGoerli": "cross-env NETWORK=\"baseGoerli\" hardhat --network baseGoerli etherscan-verify --solc-input"
+    "verify:baseGoerli": "cross-env NETWORK=\"baseGoerli\" hardhat --network baseGoerli etherscan-verify --solc-input",
+    "deploy:baseSepolia": "cross-env NETWORK=\"baseSepolia\" hardhat --network baseSepolia deploy",
+    "verify:baseSepolia": "cross-env NETWORK=\"baseSepolia\" hardhat --network baseSepolia etherscan-verify  --solc-input"
   },
   "devDependencies": {
     "@hashgraph/sdk": "^2.26.0",

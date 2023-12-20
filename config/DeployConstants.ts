@@ -57,6 +57,7 @@ export function LoadNetworkSpecificValues(): { accounts: string[] | { mnemonic: 
 				if (process.env.BASE_GOERLI_MNEMONIC === undefined) throw Error("Missing environment variable BASE_GOERLI_MNEMONIC");
 				if (process.env.BASE_GOERLI_OWNER === undefined) throw Error("Missing environment variable BASE_GOERLI_OWNER");
 				if (process.env.BASE_GOERLI_DEVELOPER === undefined) throw Error("Missing environment variable BASE_GOERLI_DEVELOPER");
+				if (process.env.BASE_GOERLI_ETHERSCAN_API_KEY === undefined) throw Error("Missing environment variable BASE_GOERLI_ETHERSCAN_API_KEY");
 				return {
 					accounts: {
 						mnemonic: process.env.BASE_GOERLI_MNEMONIC
@@ -64,7 +65,19 @@ export function LoadNetworkSpecificValues(): { accounts: string[] | { mnemonic: 
 					}, deployer: process.env.BASE_GOERLI_OWNER, dev: process.env.BASE_GOERLI_DEVELOPER
 				};
 			}
-	
+			case "baseSepolia":
+				{
+					if (process.env.BASE_SEPOLIA_MNEMONIC === undefined) throw Error("Missing environment variable BASE_SEPOLIA_MNEMONIC");
+					if (process.env.BASE_SEPOLIA_OWNER === undefined) throw Error("Missing environment variable BASE_SEPOLIA_OWNER");
+					if (process.env.BASE_SEPOLIA_DEVELOPER === undefined) throw Error("Missing environment variable BASE_SEPOLIA_DEVELOPER");
+					if (process.env.BASE_SEPOLIA_ETHERSCAN_API_KEY === undefined) throw Error("Missing environment variable BASE_SEPOLIA_ETHERSCAN_API_KEY");
+					return {
+						accounts: {
+							mnemonic: process.env.BASE_SEPOLIA_MNEMONIC
+							// accountsBalance: ethers.utils.parseEther("1");
+						}, deployer: process.env.BASE_SEPOLIA_OWNER, dev: process.env.BASE_SEPOLIA_DEVELOPER
+					};
+				}
 		default:
 			throw Error(`Unknown network ${process.env.NETWORK}`);
 	}
@@ -103,6 +116,14 @@ export async function GetTokenAddress(): Promise<{ nativeToken: string, multical
 				uniswapV2Factory: "0x9323c1d6D800ed51Bd7C6B216cfBec678B7d0BC2" // This is v3, taken from https://docs.base.org/contracts
 
 			};
+		case "baseSepolia":
+				return {
+					nativeToken: tokens["baseSepolia"].WETH.address, // WETH
+					multicall3: "0xcA11bde05977b3631167028862bE2a173976CA11", // https://www.multicall3.com/deployments
+					uniswapV2Router: "0x1B8b57CF7e35375B40E7bc607D48CebdCcDd3102", // Self deployed
+					uniswapV2Factory: "0x598CaDbd4A89E8716D26E8ECbC882fdE6BFa0DDb" // Self deployed
+	
+				};
 		default:
 			throw Error(`Unknown network ${process.env.NETWORK}`);
 	}

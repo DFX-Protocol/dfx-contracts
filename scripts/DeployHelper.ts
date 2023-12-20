@@ -1151,7 +1151,7 @@ export async function CallUpdateLastDistributionTime(hre: HardhatRuntimeEnvironm
 {
 	const depSign = await ethers.getSigner(deployer);
 	const updateContract = await getContract(hre, contract);
-	const lastDistributionTime = await updateContract.updateLastDistributionTime();
+	const lastDistributionTime = await updateContract.lastDistributionTime();
 	if(lastDistributionTime.toString() == "0")
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.updateLastDistributionTime()\x1B[0m ...`);
@@ -1183,13 +1183,15 @@ export async function CallMockMint(hre: HardhatRuntimeEnvironment, contract: str
 {
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
 	const artifactName = getArtifactName(contract);
 	const updateContract = await ethers.getContractAt(artifactName, tokenAddress);
 	const balance = await updateContract.balanceOf(deployer);
 	if(balance.lt(amountToMint))
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.mintMock(${deployer}, ${amountToMint})\x1B[0m ...`);
-		await (await updateContract.mockMint(deployer, amountToMint)).wait();
+		await (await updateContract.connect(depSign).mockMint(deployer, amountToMint)).wait();
 	}
 	else
 	{

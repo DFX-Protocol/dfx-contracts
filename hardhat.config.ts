@@ -53,11 +53,7 @@ const config = {
 		templates: "doctemplates"
 	},
 	etherscan: { 
-		apiKey: {
-			baseGoerli: process.env.BASE_GOERLI_ETHERSCAN_API_KEY,
-			mainnet: process.env.ETHERSCAN_API_KEY,
-			sepolia: process.env.ETHERSCAN_API_KEY
-		},
+		apiKey: process.env.ETHERSCAN_API_KEY, // etherscan-verify only supports on API_KEY has to be replaced with hardhat-verify
 		customChains: [
 			{
 				network: "baseGoerli",
@@ -65,6 +61,14 @@ const config = {
 				urls: {
 					apiURL: "https://api-goerli.basescan.org",
 					browserURL: "https://goerli.basescan.org"
+				}
+			},
+			{
+				network: "baseSepolia",
+				chainId: 84532,
+				urls: {
+					apiURL: "https://api-sepolia.basescan.org",
+					browserURL: "https://sepolia.basescan.org"
 				}
 			}
 		]
@@ -126,6 +130,10 @@ const config = {
 			url: `${process.env.BASE_GOERLI_RPC_URL}`,
 			accounts,
 			gasPrice: 100000000,
+		},
+		baseSepolia: {
+			url: `${process.env.BASE_SEPOLIA_RPC_URL}`,
+			accounts
 		}
 		// ,
 		// hardhat:
@@ -145,7 +153,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -172,7 +179,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -185,7 +191,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -198,7 +203,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -211,7 +215,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -224,7 +227,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -237,7 +239,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -250,7 +251,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -263,7 +263,6 @@ const config = {
 				version: "0.8.20",
 				settings:
 				{
-					evmVersion: 'paris',
 					optimizer:
 					{
 						enabled: true,
@@ -273,7 +272,15 @@ const config = {
 				viaIR: true
 			}
 		}
-	}
+	},
+	sourcify: 
+	{
+		enabled: true,
+		// Optional: specify a different Sourcify server
+		// apiUrl: "https://sourcify.dev/server",
+		// Optional: specify a different Sourcify repository
+		// browserUrl: "https://repo.sourcify.dev",
+	  }
 };
 
 export default config;
