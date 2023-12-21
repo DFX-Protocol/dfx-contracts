@@ -245,7 +245,7 @@ export const tokens = {
 			price: 0.9995,
 			priceDecimals: 8,
 			isStrictStable: true,
-			priceFeed: "0x0",
+			priceFeed: "0x02bF51036A19fFAc355246D557aAF0ddCa3700dd",
 			tokenWeight: 15000,
 			minProfitBps: 0,
 			maxUsdgAmount: 5 * 1000 * 1000,
@@ -257,7 +257,8 @@ export const tokens = {
 			name: "ERC20Mock[USDC]",
 			address: "0x8d1610fC290e84bAb05316E75Fd716dB7f3033e0",
 			decimals: 18,
-			priceFeed: "0x0",
+			priceFeed: "0x53c9473bB1767d9F3049B93DaEA755F782BBAd0E",
+			price: 0.9995,
 			priceDecimals: 8,
 			isStrictStable: true,
 			tokenWeight: 20000,
@@ -271,7 +272,8 @@ export const tokens = {
 			name: "ERC20Mock[DAI]",
 			address: "0xAE7BD344982bD507D3dcAa828706D558cf281F13",
 			decimals: 18,
-			priceFeed: "0x0",
+			priceFeed: "0x0cE9f0DD56F29c7b43478f823301A71b2DB7F29B",
+			price: 14.61,
 			priceDecimals: 8,
 			isStrictStable: true,
 			tokenWeight: 10000,
@@ -285,7 +287,8 @@ export const tokens = {
 			name: "ERC20Mock[LINK]",
 			address: "0xe6cfc709F13C9d04cB27dcf29337BB63a7715e43",
 			decimals: 18,
-			priceFeed: "0x0",
+			price: 0.9995,
+			priceFeed: "0x993a66aF1401057A0Dcfe67021f90B0B5979d1Ac",
 			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
@@ -316,7 +319,7 @@ export const tokens = {
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
-			priceFeed: "0x0",
+			priceFeed: "0x9B2D2ecc7D17Bcb887e4765e7c05d049CfdCD2F8",
 			tokenWeight: 22000, // tokenWeights allows customisation of index composition
 			minProfitBps: 0,
 			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
@@ -345,7 +348,7 @@ export const tokens = {
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,
-			priceFeed: "0x0",
+			priceFeed: "0xbcB7c25A18f12bD3c507B8fB1b52Cb4b06e2102E",
 			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
@@ -383,7 +386,7 @@ export const chainConfig = {
 		isTestnet: true
 	},
 	"baseSepolia": {
-		isOracleAvailable: true,
+		isOracleAvailable: false, //not deployed yet.
 		isAmmEnabled: false,
 		isTestnet: true
 	}

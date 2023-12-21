@@ -462,6 +462,27 @@ export async function CallSetIsAmmEnabled(hre: HardhatRuntimeEnvironment, contra
 
 }
 
+export async function CallSetIsAmmEnabledWithGov(hre: HardhatRuntimeEnvironment, gov: string, contract: string, enabled: boolean)
+{
+	const { getNamedAccounts } = hre;
+	const { deployer } = await getNamedAccounts();
+	const depSign = await ethers.getSigner(deployer);
+
+	const updateContract = await getContract(hre, gov);
+	const checkContract = await getContract(hre, contract);
+	const isEnabled = await checkContract.isAmmEnabled();
+	if(isEnabled != enabled)
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${gov}.setIsAmmEnabled(${checkContract.address}, ${enabled})\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setIsAmmEnabled(checkContract.address, enabled)).wait();
+	}
+	else
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setIsAmmEnabled(${contract}, ${enabled})\x1B[0m ...`);
+	}
+
+}
+
 export async function CallAddLiquidity(hre: HardhatRuntimeEnvironment, contract: string, routerAddress: string, tokenA: any, tokenB: any, tokenAAmount: number, tokenBAmount: number)
 {
 	const { getNamedAccounts } = hre;
@@ -656,17 +677,15 @@ export async function CallSetVaultUtils(hre: HardhatRuntimeEnvironment, contract
 
 	const updateContract = await getContract(hre, contract);
 	const vaultUtilsData = await getContractData(hre, vaultUtils);
-	const vaultData = await getContractData(hre, "Vault");
-	const vaultContract = await getContract(hre, "Vault");
 
-	if ((await vaultContract.vaultUtils()) !== vaultUtilsData.address)
+	if ((await updateContract.vaultUtils()) !== vaultUtilsData.address)
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setVaultUtils(Vault: "${vaultData.address}", VaultUtils: "${vaultUtilsData.address}")\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setVaultUtils(vaultData.address, vaultUtilsData.address)).wait();
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setVaultUtils(VaultUtils: "${vaultUtilsData.address}")\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setVaultUtils(vaultUtilsData.address)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultUtils(Vault: "${vaultData.address}", VaultUtils: "${vaultUtilsData.address}")\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setVaultUtils(VaultUtils: "${vaultUtilsData.address}")\x1B[0m ...`);
 	}
 }
 
@@ -811,22 +830,29 @@ export async function CallAddPlugin(hre: HardhatRuntimeEnvironment, contract: st
 	}
 }
 
-export async function CallSetLiquidator(hre: HardhatRuntimeEnvironment, contract: string, newLiquidatorAddress: string): Promise<void>
+export async function CallSetLiquidator(hre: HardhatRuntimeEnvironment, contract: string, newLiquidator: string): Promise<void>
 {
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
-
-	if (!await updateContract.isLiquidator(newLiquidatorAddress))
+	let liquidatorAddress = newLiquidator;
+	if(!liquidatorAddress.startsWith("0x"))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLiquidator("${newLiquidatorAddress}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setLiquidator(newLiquidatorAddress, true)).wait();
+		const liquidatorContract = await getContract(hre, newLiquidator);
+		liquidatorAddress = liquidatorContract.address;
+	}
+	
+	
+	if (!await updateContract.isLiquidator(liquidatorAddress))
+	{
+		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setLiquidator("${liquidatorAddress}", true)\x1B[0m ...`);
+		await (await updateContract.connect(depSign).setLiquidator(liquidatorAddress, true)).wait();
 	}
 	else
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setLiquidator("${newLiquidatorAddress}", true)\x1B[0m ...`);
+		console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setLiquidator("${liquidatorAddress}", true)\x1B[0m ...`);
 	}
 }
 
@@ -1254,6 +1280,7 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 	const depSign = await ethers.getSigner(deployer);
 
 	const updateContract = await getContract(hre, contract);
+	const govContract = await getContract(hre, "PriceFeedTimelock");
 
 	const gov = await updateContract.gov();
 
@@ -1267,6 +1294,27 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 		{
 			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 			await (await updateContract.connect(depSign).setTokenConfig(configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+		}
+		else
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Already set. Skip \x1B[33m${contract}.setTokenConfig(${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+		}
+	}
+	else if(gov == govContract.address)
+	{
+		const priceFeed = await updateContract.priceFeeds(configParameters[0]);
+		const priceDecimals = await updateContract.priceDecimals(configParameters[0]);
+		const isStrictStable = await updateContract.strictStableTokens(configParameters[0]);
+
+		if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1] || priceDecimals != configParameters[2] || isStrictStable != configParameters[3])
+		{
+			//console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.signalPriceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+			//await (await govContract.connect(depSign).signalPriceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+			// By default Timelock has an 24h wait time....urgs...
+			// TODO: Run again in 24h and comment out signaling -> 22.12.2023 11:25
+			console.log(`Run again in 24h and comment out signaling -> ${configParameters[0]} 22.12.2023 11:25...`);
+			//console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.priceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+			//await (await govContract.connect(depSign).priceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
 		}
 		else
 		{
@@ -1408,12 +1456,12 @@ export async function CallTimelockSetTokenConfig(hre: HardhatRuntimeEnvironment,
 	const timelockData = await getContractData(hre, "Timelock");
 	const timelockContract = await ethers.getContractAt("Timelock", timelockData.address);
 	
-	const nativeToken = await getContractData(hre, configParameters[1]);
+	const nativeTokenAddress = configParameters[1];
 
 	const reader = await getContract(hre, "Reader");
 
-	console.log(`\x1B[32mReader\x1B[0m - Call \x1B[33mReader.getVaultTokenInfoV2(${configParameters[2]}, ${nativeToken.address}, 1, ${configParameters[3]})\x1B[0m ...`);
-	const vaultTokenInfo = await reader.getVaultTokenInfoV2(configParameters[2], nativeToken.address , 1, [configParameters[3]]);
+	console.log(`\x1B[32mReader\x1B[0m - Call \x1B[33mReader.getVaultTokenInfoV2(${configParameters[2]}, ${nativeTokenAddress}, 1, ${configParameters[3]})\x1B[0m ...`);
+	const vaultTokenInfo = await reader.getVaultTokenInfoV2(configParameters[2], nativeTokenAddress , 1, [configParameters[3]]);
 
 	const token: any = {};
 	token.poolAmount = BigNumber.from(vaultTokenInfo[0]);

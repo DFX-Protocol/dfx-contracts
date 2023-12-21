@@ -23,37 +23,37 @@ const contractDependencies = [
 	"Vester[GmxVester]",
 	"Vester[GlpVester]",
 	"RewardTracker[stakedGlpTracker]",
-	"RewardTracker[feeGlpTracker]"
+	"RewardTracker[feeGlpTracker]",
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	// For PositionManager
 	await CallSetContractHandler(hre, contract, "PositionManager");
-	await CallSetLiquidatorTl(hre, contract, "Vault", "PositionManager");
+	//await CallSetLiquidatorTl(hre, contract, "Vault", "PositionManager"); //Moved to Vault_Config
 
 	// For PositionRouter
 	await CallSetContractHandler(hre, contract, "PositionRouter");
 	await CallSignalSetHandlerTl(hre, contract, "ReferralStorage", "PositionRouter", true);
 
 	// For VaultUtils
-	await CallSetVaultUtils(hre, contract, "VaultUtils");
+	//await CallSetVaultUtils(hre, contract, "VaultUtils"); //Moved to Vault_Config
 
 	// For Vault
 	// TODO:[MAINNET] Update following params
 	// Basis point parameters below has a precision of 2. For example: 50 means 0.5%
-	const feeParams = [
-		50, // _taxBasisPoints
-		5, // _stableTaxBasisPoints
-		25, // _mintBurnFeeBasisPoints
-		30, // _swapFeeBasisPoints
-		1, // _stableSwapFeeBasisPoints
-		10, // _marginFeeBasisPoints
-		toUsd(5), // _liquidationFeeUsd
-		3 * 60 * 60, // _minProfitTime
-		true // _hasDynamicFees
-	];
-	await CallSetFees(hre, contract, feeParams);
+	// const feeParams = [
+	// 	50, // _taxBasisPoints
+	// 	5, // _stableTaxBasisPoints
+	// 	25, // _mintBurnFeeBasisPoints
+	// 	30, // _swapFeeBasisPoints
+	// 	1, // _stableSwapFeeBasisPoints
+	// 	10, // _marginFeeBasisPoints
+	// 	toUsd(5), // _liquidationFeeUsd
+	// 	3 * 60 * 60, // _minProfitTime
+	// 	true // _hasDynamicFees
+	// ];
+	// await CallSetFees(hre, contract, feeParams); // Moved to Vault_Config
 
 	// For EsGMX
 	await CallSetGov(hre, "EsGMX", contract);

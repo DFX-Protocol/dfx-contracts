@@ -6,7 +6,9 @@ const contract = "PositionManager";
 const contractDependencies =
 	[
 		contract,
-		"ReferralStorage"
+		"ReferralStorage",
+		"Vault",
+		"ShortsTracker"
 	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>

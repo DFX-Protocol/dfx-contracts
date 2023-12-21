@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetMaxStrictPriceDeviation, CallSetPriceSampleSpace, CallPriceFeedSetTokenConfig, CallSetTokens, CallSetPairs, CallWethDeposit, CallAddLiquidity, CallCreatePair, CallSetIsAmmEnabled, expandDecimals } from "../scripts/DeployHelper";
+import { CallSetMaxStrictPriceDeviation, CallSetPriceSampleSpace, CallPriceFeedSetTokenConfig, CallSetTokens, CallSetPairs, CallWethDeposit, CallAddLiquidity, CallCreatePair, CallSetIsAmmEnabled, expandDecimals, getContractGov, CallSetIsAmmEnabledWithGov } from "../scripts/DeployHelper";
 import { GetTokenAddress } from "../config/DeployConstants";
 import { tokens, chainConfig } from "../config/Constants";
 import { BigNumber } from "ethers";
@@ -63,7 +63,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	}
 	else
 	{
-		await CallSetIsAmmEnabled(hre, contract, chainConfig[chainId].isAmmEnabled);
+		var gov = await getContractGov(hre, contract)
+		const { getNamedAccounts } = hre;
+		const { deployer } = await getNamedAccounts();
+		if(gov === deployer )
+		{
+			await CallSetIsAmmEnabled(hre, contract, chainConfig[chainId].isAmmEnabled);
+		}
+		else
+		{
+			// PriceFeedTimelock is set as governator.
+			await CallSetIsAmmEnabledWithGov(hre, "PriceFeedTimelock", contract, chainConfig[chainId].isAmmEnabled);
+		}
 	}
 	await CallSetMaxStrictPriceDeviation(hre, contract, expandDecimals(1, 28)); // 0.01 USD
 	await CallSetPriceSampleSpace(hre, contract, BigNumber.from(1));
