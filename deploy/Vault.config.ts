@@ -37,11 +37,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	{
 		// TODO: CallVaultSetTokenConfig failes because the VaultPriceFeed.getPrice method called by the Vault expects the Tokens to be set already.
 		// TODO: Run again when set...
-		// await CallVaultSetTokenConfig(
-		// 	hre, 
-		// 	contract, 
-		// 	[tokens[chainId][token]]
-		// );
+		await CallVaultSetTokenConfig(
+			hre, 
+			contract, 
+			[tokens[chainId][token]]
+		);
 	}
 	// Make timelock as gov of vault
 	await CallSetLiquidator(hre, contract, "PositionManager");

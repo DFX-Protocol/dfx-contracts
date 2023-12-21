@@ -1108,8 +1108,21 @@ export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: s
 	
 	if (!await updateContract.isHandler(handler))
 	{
-		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${handler}", true)\x1B[0m ...`);
-		await (await updateContract.connect(depSign).setHandler(handler, true)).wait();
+		const gov = await updateContract.gov();
+		if(deployer == gov)
+		{
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${handler}", true)\x1B[0m ...`);
+			await (await updateContract.connect(depSign).setHandler(handler, true)).wait();
+		}
+		else 
+		{
+			const timelockContract = await getContract(hre, "Timelock");
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mTimelock.signalSetHandler(${updateContract.address}, ${handler},  true)\x1B[0m ...`);
+			await (await timelockContract.connect(depSign).signalSetHandler(updateContract.address, handler, true)).wait();
+			await new Promise(r => setTimeout(r, 60 * 1000));
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mTimelock.setHandler(${updateContract.address}, ${handler},  true)\x1B[0m ...`);
+			await (await timelockContract.connect(depSign).setHandler(updateContract.address, handler, true)).wait();
+		}
 	}
 	else
 	{
@@ -1308,13 +1321,12 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 
 		if(priceFeed === undefined || priceFeed === AddressZero || priceFeed !== configParameters[1] || priceDecimals != configParameters[2] || isStrictStable != configParameters[3])
 		{
-			//console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.signalPriceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
-			//await (await govContract.connect(depSign).signalPriceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.signalPriceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+			await (await govContract.connect(depSign).signalPriceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+			await new Promise(r => setTimeout(r, 60 * 1000));
 			// By default Timelock has an 24h wait time....urgs...
-			// TODO: Run again in 24h and comment out signaling -> 22.12.2023 11:25
-			console.log(`Run again in 24h and comment out signaling -> ${configParameters[0]} 22.12.2023 11:25...`);
-			//console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.priceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
-			//await (await govContract.connect(depSign).priceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
+			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.priceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
+			await (await govContract.connect(depSign).priceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
 		}
 		else
 		{

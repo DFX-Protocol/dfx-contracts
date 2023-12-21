@@ -245,7 +245,7 @@ export const tokens = {
 			price: 0.9995,
 			priceDecimals: 8,
 			isStrictStable: true,
-			priceFeed: "0x02bF51036A19fFAc355246D557aAF0ddCa3700dd",
+			priceFeed: "0xc9b9AebAE769ca56Cd829Afc72397629bb5aA337",
 			tokenWeight: 15000,
 			minProfitBps: 0,
 			maxUsdgAmount: 5 * 1000 * 1000,
@@ -257,7 +257,7 @@ export const tokens = {
 			name: "ERC20Mock[USDC]",
 			address: "0x8d1610fC290e84bAb05316E75Fd716dB7f3033e0",
 			decimals: 18,
-			priceFeed: "0x53c9473bB1767d9F3049B93DaEA755F782BBAd0E",
+			priceFeed: "0xB79Cc5F35fB463d14A33dD0099B2AD25deB0de07",
 			price: 0.9995,
 			priceDecimals: 8,
 			isStrictStable: true,
@@ -272,7 +272,7 @@ export const tokens = {
 			name: "ERC20Mock[DAI]",
 			address: "0xAE7BD344982bD507D3dcAa828706D558cf281F13",
 			decimals: 18,
-			priceFeed: "0x0cE9f0DD56F29c7b43478f823301A71b2DB7F29B",
+			priceFeed: "0xD61bF34BbF29EDF6f2698fF80908012Df50cc883",
 			price: 14.61,
 			priceDecimals: 8,
 			isStrictStable: true,
@@ -288,7 +288,7 @@ export const tokens = {
 			address: "0xe6cfc709F13C9d04cB27dcf29337BB63a7715e43",
 			decimals: 18,
 			price: 0.9995,
-			priceFeed: "0x993a66aF1401057A0Dcfe67021f90B0B5979d1Ac",
+			priceFeed: "0xB4308B7645FefD9E70cd2D497ae7a4Fc806faD39",
 			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%
@@ -319,7 +319,7 @@ export const tokens = {
 			decimals: 18,
 			isStrictStable: false,
 			price: 30443.90,
-			priceFeed: "0x9B2D2ecc7D17Bcb887e4765e7c05d049CfdCD2F8",
+			priceFeed: "0xC2c2519b2f765442006b450629F4706DD2a995C8",
 			tokenWeight: 22000, // tokenWeights allows customisation of index composition
 			minProfitBps: 0,
 			maxUsdgAmount: 115 * 1000 * 1000, // Total pool capacity
@@ -348,7 +348,7 @@ export const tokens = {
 			decimals: 18,
 			isStrictStable: false,
 			price: 1911.08,
-			priceFeed: "0xbcB7c25A18f12bD3c507B8fB1b52Cb4b06e2102E",
+			priceFeed: "0x4f4e33D2EBFC14Ca75292b94689b22ca70a33bB5",
 			priceDecimals: 8,
 			fastPricePrecision: 1000,
 			maxCumulativeDeltaDiff: 0.1 * 10 * 1000 * 1000, // 10%

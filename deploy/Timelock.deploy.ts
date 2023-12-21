@@ -10,7 +10,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	const { getNamedAccounts } = hre;
 	const { deployer } = await getNamedAccounts();
-	const buffer = 24 * 60 * 60;
+	const buffer = 60 //24 * 60 * 60;
 	
 	const maxTokenSupply = BigNumber.from(13250000).mul(BigNumber.from(10).pow(18));
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);

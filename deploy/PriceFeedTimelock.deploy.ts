@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const { deployer } = await getNamedAccounts();
 	
 	// TODO:[MAINNET] Update following params
-	const buffer = 24 * 60 * 60;
+	const buffer = 60; // 24 * 60 * 60;
 
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 
