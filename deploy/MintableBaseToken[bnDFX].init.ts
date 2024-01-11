@@ -2,17 +2,17 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallSetHandler, CallSetMinter } from "../scripts/DeployHelper";
 
-const contract = "MintableBaseToken[bnGMX]";
+const contract = "MintableBaseToken[bnDFX]";
 const contractDependencies =
 	[
 		contract,
 		"RewardRouterV2",
-		"RewardTracker[feeGmxTracker]"
+		"RewardTracker[feeDfxTracker]"
 	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	await CallSetHandler(hre, contract, "RewardTracker[feeGmxTracker]");
+	await CallSetHandler(hre, contract, "RewardTracker[feeDfxTracker]");
 	await CallSetMinter(hre, contract, "RewardRouterV2");
 };
 

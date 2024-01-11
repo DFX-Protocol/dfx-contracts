@@ -2,7 +2,7 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
 
-const contract = "EsGMX";
+const contract = "DFX";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {

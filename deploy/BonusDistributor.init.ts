@@ -6,8 +6,8 @@ import { CallUpdateLastDistributionTime, CallSetBonusMultiplier, CallSetMinter, 
 const contract = "BonusDistributor";
 const contractDependencies = [
 	contract,
-	"RewardTracker[bonusGmxTracker]_Init",
-	"MintableBaseToken[bnGMX]"
+	"RewardTracker[bonusDfxTracker]_Init",
+	"MintableBaseToken[bnDFX]"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -17,10 +17,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	await CallUpdateLastDistributionTime(hre, contract, deployer);
 	await CallSetBonusMultiplier(hre, contract, BigNumber.from(10000));
-	// mint bnGmx for distributor
-	await CallSetMinter(hre, "MintableBaseToken[bnGMX]", deployer, false);
+	// mint bnDfx for distributor
+	await CallSetMinter(hre, "MintableBaseToken[bnDFX]", deployer, false);
 	// TODO: Change minting value on mainnet
-	await CallMint(hre, "MintableBaseToken[bnGMX]", dependencies[contract].address, expandDecimals(15 * 1000 * 1000, 18));
+	await CallMint(hre, "MintableBaseToken[bnDFX]", dependencies[contract].address, expandDecimals(15 * 1000 * 1000, 18));
 };
 
 export default func;

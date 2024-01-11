@@ -81,7 +81,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	await CallSetSpreadBasisPointsIfChainError(hre, contract, 500);
 	await CallSetMaxCumulativeDeltaDiffs(hre, contract, tokensArr, maxCumulativeDeltaDiffArr);
 	await CallSetPriceDataInterval(hre, contract, 1 * 60);
-	// TODO: GMX has 2 position keepers. Why? Investigate
+	// TODO: DFX has 2 position keepers. Why? Investigate
 	await CallSetPositionKeeper(hre, "PositionRouter", dependencies[contract].address, true);
 	await CallSetIsPriceFeed(hre, "FastPriceEvents", dependencies[contract].address,true);
 	await CallSetFastPriceEvents(hre, contract, dependencies["FastPriceEvents"].address);

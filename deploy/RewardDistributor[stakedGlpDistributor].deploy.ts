@@ -3,12 +3,12 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
 
 const contract = "RewardDistributor[stakedGlpDistributor]";
-const contractDependencies = [ "EsGMX", "RewardTracker[stakedGlpTracker]"];
+const contractDependencies = [ "EsDFX", "RewardTracker[stakedGlpTracker]"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
-	const constructorParameters = [dependencies["EsGMX"].address, dependencies["RewardTracker[stakedGlpTracker]"].address];
+	const constructorParameters = [dependencies["EsDFX"].address, dependencies["RewardTracker[stakedGlpTracker]"].address];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 };
 

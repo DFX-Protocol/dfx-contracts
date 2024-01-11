@@ -25,7 +25,7 @@ interface IPositionRouter {
 }
 
 interface IPositionRouterCallbackReceiver {
-    function gmxPositionCallback(bytes32 positionKey, bool isExecuted, bool isIncrease) external;
+    function dfxPositionCallback(bytes32 positionKey, bool isExecuted, bool isIncrease) external;
 }
 
 contract PositionRouter is BasePositionManager, IPositionRouter {
@@ -799,7 +799,7 @@ contract PositionRouter is BasePositionManager, IPositionRouter {
         }
 
         bool success;
-        try IPositionRouterCallbackReceiver(_callbackTarget).gmxPositionCallback{ gas: _gasLimit }(_key, _wasExecuted, _isIncrease) {
+        try IPositionRouterCallbackReceiver(_callbackTarget).dfxPositionCallback{ gas: _gasLimit }(_key, _wasExecuted, _isIncrease) {
             success = true;
         } catch {}
 

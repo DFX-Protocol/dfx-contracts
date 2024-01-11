@@ -1,17 +1,21 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CallSetGov } from "../scripts/DeployHelper";
+import { CallSetHandler } from "../scripts/DeployHelper";
 
-const contract = "GmxTimelock";
-const contractDependencies = [contract, "GMX"];
+const contract = "Vester[DfxVester]";
+const contractDependencies =
+	[
+		contract,
+		"RewardRouterV2"
+	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	await CallSetGov(hre, "GMX", contract);
+	await CallSetHandler(hre, contract, "RewardRouterV2");
 };
 
 export default func;
 
 func.id = `Deploy_${contract}_Init`; // id required to prevent reexecution
-func.tags = [`${contract}_Init`, "mainnet", "timelocks"];
+func.tags = [`${contract}_Init`, "testnet", "mainnet"];
 func.dependencies = [...contractDependencies];

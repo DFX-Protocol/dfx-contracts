@@ -5,17 +5,17 @@ import { GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper
 const contract = "RewardRouterV2";
 const contractDependencies = [
 	contract,
-	"GMX",
-	"EsGMX",
-	"MintableBaseToken[bnGMX]",
+	"DFX",
+	"EsDFX",
+	"MintableBaseToken[bnDFX]",
 	"GLP",
-	"RewardTracker[stakedGmxTracker]",
+	"RewardTracker[stakedDfxTracker]",
 	"RewardTracker[stakedGlpTracker]",
-	"RewardTracker[bonusGmxTracker]",
-	"RewardTracker[feeGmxTracker]",
+	"RewardTracker[bonusDfxTracker]",
+	"RewardTracker[feeDfxTracker]",
 	"RewardTracker[feeGlpTracker]",
 	"GlpManager",
-	"Vester[GmxVester]",
+	"Vester[DfxVester]",
 	"Vester[GlpVester]"
 ];
 
@@ -24,20 +24,20 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	await UnifiedInitialize(hre, contract,
 		[
-			dependencies["GMX"].address,
-			dependencies["EsGMX"].address,
-			dependencies["MintableBaseToken[bnGMX]"].address,
+			dependencies["DFX"].address,
+			dependencies["EsDFX"].address,
+			dependencies["MintableBaseToken[bnDFX]"].address,
 			dependencies["GLP"].address,
 			dependencies["GlpManager"].address,
 			[
-				dependencies["RewardTracker[stakedGmxTracker]"].address,
+				dependencies["RewardTracker[stakedDfxTracker]"].address,
 				dependencies["RewardTracker[stakedGlpTracker]"].address,
-				dependencies["RewardTracker[feeGmxTracker]"].address,
+				dependencies["RewardTracker[feeDfxTracker]"].address,
 				dependencies["RewardTracker[feeGlpTracker]"].address,
-				dependencies["RewardTracker[bonusGmxTracker]"].address
+				dependencies["RewardTracker[bonusDfxTracker]"].address
 			],
 			[
-				dependencies["Vester[GmxVester]"].address,
+				dependencies["Vester[DfxVester]"].address,
 				dependencies["Vester[GlpVester]"].address
 			]
 		]);

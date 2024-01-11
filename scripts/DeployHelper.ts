@@ -1117,9 +1117,26 @@ export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: s
 		else 
 		{
 			const timelockContract = await getContract(hre, "Timelock");
-			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mTimelock.signalSetHandler(${updateContract.address}, ${handler},  true)\x1B[0m ...`);
-			await (await timelockContract.connect(depSign).signalSetHandler(updateContract.address, handler, true)).wait();
-			await new Promise(r => setTimeout(r, 60 * 1000));
+			const hash = getKeccak256(
+				[
+					"string",
+					"address",
+					"address",
+					"bool"
+				],[
+					"setHandler",
+					updateContract.address,
+					handler,
+					true
+				]
+			);
+			const alreadyPending = await timelockContract.pendingActions(hash);
+			if (!alreadyPending)
+			{
+				console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mTimelock.signalSetHandler(${updateContract.address}, ${handler},  true)\x1B[0m ...`);
+				await (await timelockContract.connect(depSign).signalSetHandler(updateContract.address, handler, true)).wait();
+				await new Promise(r => setTimeout(r, 120 * 1000));
+			}
 			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mTimelock.setHandler(${updateContract.address}, ${handler},  true)\x1B[0m ...`);
 			await (await timelockContract.connect(depSign).setHandler(updateContract.address, handler, true)).wait();
 		}
@@ -1323,7 +1340,7 @@ export async function CallPriceFeedSetTokenConfig(hre: HardhatRuntimeEnvironment
 		{
 			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.signalPriceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 			await (await govContract.connect(depSign).signalPriceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
-			await new Promise(r => setTimeout(r, 60 * 1000));
+			await new Promise(r => setTimeout(r, 120 * 1000));
 			// By default Timelock has an 24h wait time....urgs...
 			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mPriceFeedTimelock.priceFeedSetTokenConfig(${updateContract.address}, ${configParameters[0].toString()}, ${configParameters[1].toString()}, ${configParameters[2].toString()}, ${configParameters[3].toString()})\x1B[0m ...`);
 			await (await govContract.connect(depSign).priceFeedSetTokenConfig(updateContract.address, configParameters[0], configParameters[1], configParameters[2], configParameters[3])).wait();
@@ -1557,11 +1574,11 @@ export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network:
 	const data = {
 		"Vault": "Vault", "Router": "Router", "VaultReader": "VaultReader", "Reader": "Reader", "GlpManager": "GlpManager",
 		"RewardRouterV2": "RewardRouter", "RewardRouterV2[GLP]": "GlpRewardRouter", "RewardReader": "RewardReader", "GLP": "GLP", 
-		"GMX": "GMX", "EsGMX": "ES_GMX", "MintableBaseToken[bnGMX]": "BN_GMX", "USDG": "USDG", "MintableBaseToken[esGMX_IOU]": "ES_GMX_IOU",
-		"RewardTracker[stakedGmxTracker]": "StakedGmxTracker", "RewardTracker[bonusGmxTracker]": "BonusGmxTracker", 
-		"RewardTracker[feeGmxTracker]": "FeeGmxTracker", "RewardTracker[stakedGlpTracker]": "StakedGlpTracker",
-		"RewardTracker[feeGlpTracker]": "FeeGlpTracker", "RewardDistributor[stakedGmxDistributor]": "StakedGmxDistributor", 
-		"RewardDistributor[stakedGlpDistributor]": "StakedGlpDistributor", "Vester[GmxVester]": "GmxVester", "Vester[GlpVester]": "GlpVester",
+		"DFX": "DFX", "EsDFX": "ES_DFX", "MintableBaseToken[bnDFX]": "BN_DFX", "USDG": "USDG", "MintableBaseToken[esDFX_IOU]": "ES_DFX_IOU",
+		"RewardTracker[stakedDfxTracker]": "StakedDfxTracker", "RewardTracker[bonusDfxTracker]": "BonusDfxTracker", 
+		"RewardTracker[feeDfxTracker]": "FeeDfxTracker", "RewardTracker[stakedGlpTracker]": "StakedGlpTracker",
+		"RewardTracker[feeGlpTracker]": "FeeGlpTracker", "RewardDistributor[stakedDfxDistributor]": "StakedDfxDistributor", 
+		"RewardDistributor[stakedGlpDistributor]": "StakedGlpDistributor", "Vester[DfxVester]": "DfxVester", "Vester[GlpVester]": "GlpVester",
 		"OrderBook": "OrderBook", "OrderExecutor": "OrderExecutor", "OrderBookReader": "OrderBookReader", "PositionRouter": "PositionRouter", 
 		"PositionManager": "PositionManager", "ReferralStorage": "ReferralStorage", "ReferralReader": "ReferralReader", "Timelock": "Timelock"
 	};
