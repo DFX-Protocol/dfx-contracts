@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 const { AddressZero } = ethers.constants;
 
-const contract = "GmxTimelock";
+const contract = "DfxTimelock";
 const contractDependencies = ["TokenManager"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>

@@ -19,20 +19,20 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	await UnifiedInitialize(hre, contract,
 		[
-			AddressZero, // GMX
-			AddressZero, // EsGMX
-			AddressZero, // BnGMX
+			AddressZero, // DFX
+			AddressZero, // EsDFX
+			AddressZero, // BnDFX
 			dependencies["GLP"].address,
 			dependencies["GlpManager"].address,
 			[
 				AddressZero, // RewardTracker[StakedGlpTracker]
 				dependencies["RewardTracker[stakedGlpTracker]"].address,
-				AddressZero, // RewardTracker[feeGmxTracker]
+				AddressZero, // RewardTracker[feeDfxTracker]
 				dependencies["RewardTracker[feeGlpTracker]"].address,
-				AddressZero // RewardTracker[bonusGmxTracker]
+				AddressZero // RewardTracker[bonusDfxTracker]
 			],
 			[
-				AddressZero, // Vester[GmxVester]
+				AddressZero, // Vester[DfxVester]
 				AddressZero //Vester[GlpVester]
 			]
 		]);

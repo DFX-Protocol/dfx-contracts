@@ -1,14 +1,16 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
+import { GetTokenAddress } from "../config/DeployConstants";
 
-const contract = "RewardDistributor[stakedGmxDistributor]";
-const contractDependencies = ["EsGMX", "RewardTracker[stakedGmxTracker]"];
+const contract = "RewardDistributor[feeDfxDistributor]";
+const contractDependencies = ["RewardTracker[feeDfxTracker]"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
-	const constructorParameters = [dependencies["EsGMX"].address, dependencies["RewardTracker[stakedGmxTracker]"].address];
+	const { nativeToken } = await GetTokenAddress();
+	const constructorParameters = [nativeToken, dependencies["RewardTracker[feeDfxTracker]"].address];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 };
 

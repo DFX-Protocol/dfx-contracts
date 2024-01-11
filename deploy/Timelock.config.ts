@@ -19,8 +19,8 @@ const contractDependencies = [
 	"PositionRouter", 
 	"ReferralStorage", 
 	"VaultUtils",
-	"EsGMX",
-	"Vester[GmxVester]",
+	"EsDFX",
+	"Vester[DfxVester]",
 	"Vester[GlpVester]",
 	"RewardTracker[stakedGlpTracker]",
 	"RewardTracker[feeGlpTracker]",
@@ -55,11 +55,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	// ];
 	// await CallSetFees(hre, contract, feeParams); // Moved to Vault_Config
 
-	// For EsGMX
-	await CallSetGov(hre, "EsGMX", contract);
+	// For EsDFX
+	await CallSetGov(hre, "EsDFX", contract);
 
-	// For GmxVester
-	await CallSetGov(hre, "Vester[GmxVester]", contract);
+	// For DfxVester
+	await CallSetGov(hre, "Vester[DfxVester]", contract);
 
 	// For GlpVester
 	await CallSetGov(hre, "Vester[GlpVester]", contract);

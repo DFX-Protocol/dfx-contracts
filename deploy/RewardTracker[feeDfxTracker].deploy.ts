@@ -2,11 +2,11 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
 
-const contract = "RewardTracker[bonusGmxTracker]";
+const contract = "RewardTracker[feeDfxTracker]";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	const constructorParameters = ["Staked + Bonus GMX", "sbGMX"];
+	const constructorParameters = ["Staked + Bonus + Fee DFX", "sbfDFX"];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 };
 

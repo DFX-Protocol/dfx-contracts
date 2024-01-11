@@ -2,8 +2,8 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
 
-const contract = "Vester[GmxVester]";
-const contractDependencies = ["EsGMX", "RewardTracker[feeGmxTracker]", "GMX", "RewardTracker[stakedGmxTracker]"];
+const contract = "Vester[DfxVester]";
+const contractDependencies = ["EsDFX", "RewardTracker[feeDfxTracker]", "DFX", "RewardTracker[stakedDfxTracker]"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
@@ -12,13 +12,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 
 	const constructorParameters =
 	[
-		"Vested GMX",
-		"vGMX",
+		"Vested DFX",
+		"vDFX",
 		vestingDuration, // _vestingDuration
-		dependencies["EsGMX"].address, // _esToken
-		dependencies["RewardTracker[feeGmxTracker]"].address, // _pairToken
-		dependencies["GMX"].address, // _claimableToken
-		dependencies["RewardTracker[stakedGmxTracker]"].address, // _rewardTracker
+		dependencies["EsDFX"].address, // _esToken
+		dependencies["RewardTracker[feeDfxTracker]"].address, // _pairToken
+		dependencies["DFX"].address, // _claimableToken
+		dependencies["RewardTracker[stakedDfxTracker]"].address, // _rewardTracker
 	];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 };
