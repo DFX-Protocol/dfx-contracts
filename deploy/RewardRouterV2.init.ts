@@ -8,15 +8,15 @@ const contractDependencies = [
 	"DFX",
 	"EsDFX",
 	"MintableBaseToken[bnDFX]",
-	"GLP",
+	"DLP",
 	"RewardTracker[stakedDfxTracker]",
-	"RewardTracker[stakedGlpTracker]",
+	"RewardTracker[stakedDlpTracker]",
 	"RewardTracker[bonusDfxTracker]",
 	"RewardTracker[feeDfxTracker]",
-	"RewardTracker[feeGlpTracker]",
-	"GlpManager",
+	"RewardTracker[feeDlpTracker]",
+	"DlpManager",
 	"Vester[DfxVester]",
-	"Vester[GlpVester]"
+	"Vester[DlpVester]"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -27,18 +27,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			dependencies["DFX"].address,
 			dependencies["EsDFX"].address,
 			dependencies["MintableBaseToken[bnDFX]"].address,
-			dependencies["GLP"].address,
-			dependencies["GlpManager"].address,
+			dependencies["DLP"].address,
+			dependencies["DlpManager"].address,
 			[
 				dependencies["RewardTracker[stakedDfxTracker]"].address,
-				dependencies["RewardTracker[stakedGlpTracker]"].address,
+				dependencies["RewardTracker[stakedDlpTracker]"].address,
 				dependencies["RewardTracker[feeDfxTracker]"].address,
-				dependencies["RewardTracker[feeGlpTracker]"].address,
+				dependencies["RewardTracker[feeDlpTracker]"].address,
 				dependencies["RewardTracker[bonusDfxTracker]"].address
 			],
 			[
 				dependencies["Vester[DfxVester]"].address,
-				dependencies["Vester[GlpVester]"].address
+				dependencies["Vester[DlpVester]"].address
 			]
 		]);
 };

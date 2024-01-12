@@ -9,11 +9,11 @@ const contractDependencies =
 		contract,
 		"RewardRouterV2",
 		"RewardTracker[stakedDfxTracker]",
-		"RewardTracker[stakedGlpTracker]",
+		"RewardTracker[stakedDlpTracker]",
 		"RewardDistributor[stakedDfxDistributor]",
-		"RewardDistributor[stakedGlpDistributor]",
+		"RewardDistributor[stakedDlpDistributor]",
 		"Vester[DfxVester]",
-		"Vester[GlpVester]"
+		"Vester[DlpVester]"
 	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -24,14 +24,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 
 	await CallSetHandler(hre, contract, "RewardRouterV2");
 	await CallSetHandler(hre, contract, "RewardTracker[stakedDfxTracker]");
-	await CallSetHandler(hre, contract, "RewardTracker[stakedGlpTracker]");
+	await CallSetHandler(hre, contract, "RewardTracker[stakedDlpTracker]");
 	await CallSetHandler(hre, contract, "RewardDistributor[stakedDfxDistributor]");
-	await CallSetHandler(hre, contract, "RewardDistributor[stakedGlpDistributor]");
+	await CallSetHandler(hre, contract, "RewardDistributor[stakedDlpDistributor]");
 	await CallSetHandler(hre, contract, "Vester[DfxVester]");
-	await CallSetHandler(hre, contract, "Vester[GlpVester]");
+	await CallSetHandler(hre, contract, "Vester[DlpVester]");
 
 	await CallSetMinter(hre, contract, "Vester[DfxVester]");
-	await CallSetMinter(hre, contract, "Vester[GlpVester]");
+	await CallSetMinter(hre, contract, "Vester[DlpVester]");
 
 	// mint esDfx for distributors
 	await CallSetMinter(hre, contract, deployer, false);

@@ -21,9 +21,9 @@ const contractDependencies = [
 	"VaultUtils",
 	"EsDFX",
 	"Vester[DfxVester]",
-	"Vester[GlpVester]",
-	"RewardTracker[stakedGlpTracker]",
-	"RewardTracker[feeGlpTracker]",
+	"Vester[DlpVester]",
+	"RewardTracker[stakedDlpTracker]",
+	"RewardTracker[feeDlpTracker]",
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -61,14 +61,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 	// For DfxVester
 	await CallSetGov(hre, "Vester[DfxVester]", contract);
 
-	// For GlpVester
-	await CallSetGov(hre, "Vester[GlpVester]", contract);
+	// For DlpVester
+	await CallSetGov(hre, "Vester[DlpVester]", contract);
 
-	// For StakedGlpTracker
-	await CallSetGov(hre, "RewardTracker[stakedGlpTracker]", contract);
+	// For StakedDlpTracker
+	await CallSetGov(hre, "RewardTracker[stakedDlpTracker]", contract);
 
-	// For FeeGlpTracker
-	await CallSetGov(hre, "RewardTracker[feeGlpTracker]", contract);
+	// For FeeDlpTracker
+	await CallSetGov(hre, "RewardTracker[feeDlpTracker]", contract);
 
 };
 

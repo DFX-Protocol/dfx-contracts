@@ -2,11 +2,11 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
 
-const contract = "RewardTracker[feeGlpTracker]";
+const contract = "RewardTracker[stakedDlpTracker]";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	const constructorParameters = ["Fee GLP", "fGLP"];
+	const constructorParameters = ["Fee + Staked DLP", "fsDLP"];
 	await UnifiedDeploy(hre, contract, constructorParameters);
 };
 

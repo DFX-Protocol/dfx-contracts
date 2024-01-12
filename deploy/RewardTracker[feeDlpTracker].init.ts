@@ -2,24 +2,24 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallSetHandler, CallUpdateLastDistributionTime, GetDeployedContracts, UnifiedInitialize } from "../scripts/DeployHelper";
 
-const contract = "RewardTracker[feeGlpTracker]";
-const contractDependencies = [contract, "GLP", "RewardDistributor[feeGlpDistributor]", "RewardRouterV2", "RewardRouterV2[GLP]", "RewardTracker[stakedGlpTracker]"];
+const contract = "RewardTracker[feeDlpTracker]";
+const contractDependencies = [contract, "DLP", "RewardDistributor[feeDlpDistributor]", "RewardRouterV2", "RewardRouterV2[DLP]", "RewardTracker[stakedDlpTracker]"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
 	const dependencies = await GetDeployedContracts(hre, contractDependencies);
 	await UnifiedInitialize(hre, contract,
 		[
-			[dependencies["GLP"].address],
-			dependencies["RewardDistributor[feeGlpDistributor]"].address
+			[dependencies["DLP"].address],
+			dependencies["RewardDistributor[feeDlpDistributor]"].address
 		],
 		async (deployer) =>
 		{
-			await CallUpdateLastDistributionTime(hre, "RewardDistributor[feeGlpDistributor]", deployer);
+			await CallUpdateLastDistributionTime(hre, "RewardDistributor[feeDlpDistributor]", deployer);
 		});
 	await CallSetHandler(hre, contract, "RewardRouterV2");
-	await CallSetHandler(hre, contract, "RewardRouterV2[GLP]");
-	await CallSetHandler(hre, contract, "RewardTracker[stakedGlpTracker]");
+	await CallSetHandler(hre, contract, "RewardRouterV2[DLP]");
+	await CallSetHandler(hre, contract, "RewardTracker[stakedDlpTracker]");
 };
 
 export default func;

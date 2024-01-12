@@ -1041,7 +1041,7 @@ export async function CallSignalSetHandlerTl(hre: HardhatRuntimeEnvironment, con
 		]
 	);
 	const alreadyPending = await updateContract.pendingActions(hash);
-	if (!alreadyPending)
+	if (alreadyPending == 0)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.signalSetHandler("${targetContractData.address}", "${newHandlerContractData.address}", true)\x1B[0m ...`);
 		await (await updateContract.connect(depSign).signalSetHandler(targetContractData.address, newHandlerContractData.address, true)).wait();
@@ -1077,7 +1077,7 @@ export async function CallSetHandlerTl(hre: HardhatRuntimeEnvironment, contract:
 		]
 	);
 	const alreadyPending = await updateContract.pendingActions(hash);
-	if (alreadyPending)
+	if (alreadyPending != 0)
 	{
 		console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${targetContractData.address}", "${newHandlerContractData.address}", ${isActive})\x1B[0m ...`);
 		await (await updateContract.connect(depSign).setHandler(targetContractData.address, newHandlerContractData.address, isActive)).wait();
@@ -1111,11 +1111,13 @@ export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: s
 		const gov = await updateContract.gov();
 		if(deployer == gov)
 		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Deployer is Govenor ...`);
 			console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33m${contract}.setHandler("${handler}", true)\x1B[0m ...`);
 			await (await updateContract.connect(depSign).setHandler(handler, true)).wait();
 		}
 		else 
 		{
+			console.log(`\x1B[32m${contract}\x1B[0m - Timelock is Govenor ...`);
 			const timelockContract = await getContract(hre, "Timelock");
 			const hash = getKeccak256(
 				[
@@ -1130,8 +1132,10 @@ export async function CallSetHandler(hre: HardhatRuntimeEnvironment, contract: s
 					true
 				]
 			);
+			console.log(`\x1B[32m${contract}\x1B[0m - Action hash: ${hash}`);
 			const alreadyPending = await timelockContract.pendingActions(hash);
-			if (!alreadyPending)
+			console.log(`\x1B[32m${contract}\x1B[0m - Action already pending: ${alreadyPending}`);
+			if (alreadyPending == 0)
 			{
 				console.log(`\x1B[32m${contract}\x1B[0m - ✅ Call \x1B[33mTimelock.signalSetHandler(${updateContract.address}, ${handler},  true)\x1B[0m ...`);
 				await (await timelockContract.connect(depSign).signalSetHandler(updateContract.address, handler, true)).wait();
@@ -1572,13 +1576,13 @@ export async function PrintAllAddresses(hre: HardhatRuntimeEnvironment, network:
 {
 	// ContractName: UIContractName
 	const data = {
-		"Vault": "Vault", "Router": "Router", "VaultReader": "VaultReader", "Reader": "Reader", "GlpManager": "GlpManager",
-		"RewardRouterV2": "RewardRouter", "RewardRouterV2[GLP]": "GlpRewardRouter", "RewardReader": "RewardReader", "GLP": "GLP", 
+		"Vault": "Vault", "Router": "Router", "VaultReader": "VaultReader", "Reader": "Reader", "DlpManager": "DlpManager",
+		"RewardRouterV2": "RewardRouter", "RewardRouterV2[DLP]": "DlpRewardRouter", "RewardReader": "RewardReader", "DLP": "DLP", 
 		"DFX": "DFX", "EsDFX": "ES_DFX", "MintableBaseToken[bnDFX]": "BN_DFX", "USDG": "USDG", "MintableBaseToken[esDFX_IOU]": "ES_DFX_IOU",
 		"RewardTracker[stakedDfxTracker]": "StakedDfxTracker", "RewardTracker[bonusDfxTracker]": "BonusDfxTracker", 
-		"RewardTracker[feeDfxTracker]": "FeeDfxTracker", "RewardTracker[stakedGlpTracker]": "StakedGlpTracker",
-		"RewardTracker[feeGlpTracker]": "FeeGlpTracker", "RewardDistributor[stakedDfxDistributor]": "StakedDfxDistributor", 
-		"RewardDistributor[stakedGlpDistributor]": "StakedGlpDistributor", "Vester[DfxVester]": "DfxVester", "Vester[GlpVester]": "GlpVester",
+		"RewardTracker[feeDfxTracker]": "FeeDfxTracker", "RewardTracker[stakedDlpTracker]": "StakedDlpTracker",
+		"RewardTracker[feeDlpTracker]": "FeeDlpTracker", "RewardDistributor[stakedDfxDistributor]": "StakedDfxDistributor", 
+		"RewardDistributor[stakedDlpDistributor]": "StakedDlpDistributor", "Vester[DfxVester]": "DfxVester", "Vester[DlpVester]": "DlpVester",
 		"OrderBook": "OrderBook", "OrderExecutor": "OrderExecutor", "OrderBookReader": "OrderBookReader", "PositionRouter": "PositionRouter", 
 		"PositionManager": "PositionManager", "ReferralStorage": "ReferralStorage", "ReferralReader": "ReferralReader", "Timelock": "Timelock"
 	};

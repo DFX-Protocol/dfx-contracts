@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import { IAdmin} from "../access/Admin.sol";
 import { IVault } from "../core/Vault.sol";
 import { IVaultUtils } from "../core/VaultUtils.sol";
-import { IGlpManager } from "../core/GlpManager.sol";
+import { IDlpManager } from "../core/DlpManager.sol";
 import { IReferralStorage } from "../referrals/ReferralStorage.sol";
 import { IYieldToken } from "../tokens/YieldToken.sol";
 import { IBaseToken } from "../tokens/BaseToken.sol";
@@ -47,7 +47,7 @@ contract Timelock is ITimelock {
 
     address public tokenManager;
     address public mintReceiver;
-    address public glpManager;
+    address public dlpManager;
     address public rewardRouter;
     uint256 public maxTokenSupply;
 
@@ -105,7 +105,7 @@ contract Timelock is ITimelock {
         uint256 _buffer,
         address _tokenManager,
         address _mintReceiver,
-        address _glpManager,
+        address _dlpManager,
         address _rewardRouter,
         uint256 _maxTokenSupply,
         uint256 _marginFeeBasisPoints,
@@ -116,7 +116,7 @@ contract Timelock is ITimelock {
         buffer = _buffer;
         tokenManager = _tokenManager;
         mintReceiver = _mintReceiver;
-        glpManager = _glpManager;
+        dlpManager = _dlpManager;
         rewardRouter = _rewardRouter;
         maxTokenSupply = _maxTokenSupply;
 
@@ -137,25 +137,25 @@ contract Timelock is ITimelock {
         isHandler[_handler] = _isActive;
     }
 
-    function initGlpManager() external onlyAdmin {
-        IGlpManager _glpManager = IGlpManager(glpManager);
+    function initDlpManager() external onlyAdmin {
+        IDlpManager _dlpManager = IDlpManager(dlpManager);
 
-        IMintable glp = IMintable(_glpManager.glp());
-        glp.setMinter(glpManager, true);
+        IMintable dlp = IMintable(_dlpManager.dlp());
+        dlp.setMinter(dlpManager, true);
 
-        IUSDG usdg = IUSDG(_glpManager.usdg());
-        usdg.addVault(glpManager);
+        IUSDG usdg = IUSDG(_dlpManager.usdg());
+        usdg.addVault(dlpManager);
 
-        IVault vault = _glpManager.vault();
-        vault.setManager(glpManager, true);
+        IVault vault = _dlpManager.vault();
+        vault.setManager(dlpManager, true);
     }
 
     function initRewardRouter() external onlyAdmin {
         IRewardRouterV2 _rewardRouter = IRewardRouterV2(rewardRouter);
 
-        IHandlerTarget(_rewardRouter.feeGlpTracker()).setHandler(rewardRouter, true);
-        IHandlerTarget(_rewardRouter.stakedGlpTracker()).setHandler(rewardRouter, true);
-        IHandlerTarget(glpManager).setHandler(rewardRouter, true);
+        IHandlerTarget(_rewardRouter.feeDlpTracker()).setHandler(rewardRouter, true);
+        IHandlerTarget(_rewardRouter.stakedDlpTracker()).setHandler(rewardRouter, true);
+        IHandlerTarget(dlpManager).setHandler(rewardRouter, true);
     }
 
     function setKeeper(address _keeper, bool _isActive) external onlyAdmin {
@@ -325,29 +325,29 @@ contract Timelock is ITimelock {
     }
 
     function updateUsdgSupply(uint256 usdgAmount) external onlyKeeperAndAbove {
-        address usdg = IGlpManager(glpManager).usdg();
-        uint256 balance = IERC20(usdg).balanceOf(glpManager);
+        address usdg = IDlpManager(dlpManager).usdg();
+        uint256 balance = IERC20(usdg).balanceOf(dlpManager);
 
         IUSDG(usdg).addVault(address(this));
 
         if (usdgAmount > balance) {
             uint256 mintAmount = usdgAmount-(balance);
-            IUSDG(usdg).mint(glpManager, mintAmount);
+            IUSDG(usdg).mint(dlpManager, mintAmount);
         } else {
             uint256 burnAmount = balance-(usdgAmount);
-            IUSDG(usdg).burn(glpManager, burnAmount);
+            IUSDG(usdg).burn(dlpManager, burnAmount);
         }
 
         IUSDG(usdg).removeVault(address(this));
     }
 
     function setShortsTrackerAveragePriceWeight(uint256 _shortsTrackerAveragePriceWeight) external onlyAdmin {
-        IGlpManager(glpManager).setShortsTrackerAveragePriceWeight(_shortsTrackerAveragePriceWeight);
+        IDlpManager(dlpManager).setShortsTrackerAveragePriceWeight(_shortsTrackerAveragePriceWeight);
     }
 
-    function setGlpCooldownDuration(uint256 _cooldownDuration) external onlyAdmin {
+    function setDlpCooldownDuration(uint256 _cooldownDuration) external onlyAdmin {
         require(_cooldownDuration < 2 hours, "Timelock: invalid _cooldownDuration");
-        IGlpManager(glpManager).setCooldownDuration(_cooldownDuration);
+        IDlpManager(dlpManager).setCooldownDuration(_cooldownDuration);
     }
 
     function setMaxGlobalShortSize(address _vault, address _token, uint256 _amount) external onlyAdmin {
