@@ -2,16 +2,16 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { CallSetHandler } from "../scripts/DeployHelper";
 
-const contract = "Vester[GlpVester]";
+const contract = "DLP";
 const contractDependencies =
 	[
 		contract,
-		"RewardRouterV2"
+		"RewardTracker[feeDlpTracker]"
 	];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	await CallSetHandler(hre, contract, "RewardRouterV2");
+	await CallSetHandler(hre, contract, "RewardTracker[feeDlpTracker]");
 };
 
 export default func;

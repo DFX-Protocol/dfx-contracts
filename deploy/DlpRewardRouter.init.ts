@@ -3,15 +3,15 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedInitialize, CallSetHandler } from "../scripts/DeployHelper";
 import { ethers } from "hardhat";
 
-const contract = "RewardRouterV2[GLP]";
+const contract = "RewardRouterV2[DLP]";
 const { AddressZero } = ethers.constants;
 
 const contractDependencies = [
 	contract,
-	"GLP",
-	"RewardTracker[stakedGlpTracker]",
-	"RewardTracker[feeGlpTracker]",
-	"GlpManager"
+	"DLP",
+	"RewardTracker[stakedDlpTracker]",
+	"RewardTracker[feeDlpTracker]",
+	"DlpManager"
 ];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
@@ -22,18 +22,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 			AddressZero, // DFX
 			AddressZero, // EsDFX
 			AddressZero, // BnDFX
-			dependencies["GLP"].address,
-			dependencies["GlpManager"].address,
+			dependencies["DLP"].address,
+			dependencies["DlpManager"].address,
 			[
-				AddressZero, // RewardTracker[StakedGlpTracker]
-				dependencies["RewardTracker[stakedGlpTracker]"].address,
+				AddressZero, // RewardTracker[StakedDlpTracker]
+				dependencies["RewardTracker[stakedDlpTracker]"].address,
 				AddressZero, // RewardTracker[feeDfxTracker]
-				dependencies["RewardTracker[feeGlpTracker]"].address,
+				dependencies["RewardTracker[feeDlpTracker]"].address,
 				AddressZero // RewardTracker[bonusDfxTracker]
 			],
 			[
 				AddressZero, // Vester[DfxVester]
-				AddressZero //Vester[GlpVester]
+				AddressZero //Vester[DlpVester]
 			]
 		]);
 };

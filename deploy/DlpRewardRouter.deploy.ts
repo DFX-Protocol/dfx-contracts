@@ -1,12 +1,15 @@
 import { DeployFunction } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { UnifiedDeploy } from "../scripts/DeployHelper";
+import { GetTokenAddress } from "../config/DeployConstants";
 
-const contract = "GLP";
+const contract = "RewardRouterV2[DLP]";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
-	await UnifiedDeploy(hre, contract);
+	const { nativeToken } = await GetTokenAddress();
+	const constructorParameters = [nativeToken];
+	await UnifiedDeploy(hre, contract, constructorParameters);
 };
 
 export default func;

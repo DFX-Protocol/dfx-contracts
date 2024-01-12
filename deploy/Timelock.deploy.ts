@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GetDeployedContracts, UnifiedDeploy } from "../scripts/DeployHelper";
 
 const contract = "Timelock";
-const contractDependencies = ["TokenManager", "GlpManager", "RewardRouterV2"];
+const contractDependencies = ["TokenManager", "DlpManager", "RewardRouterV2"];
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 {
@@ -20,7 +20,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) =>
 		buffer,
 		dependencies["TokenManager"].address,
 		dependencies["TokenManager"].address,
-		dependencies["GlpManager"].address,
+		dependencies["DlpManager"].address,
 		dependencies["RewardRouterV2"].address,
 		maxTokenSupply,
 		10, // marginFeeBasisPoints 0.1%

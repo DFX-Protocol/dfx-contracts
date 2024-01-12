@@ -11,34 +11,34 @@ import { IUSDG } from "../tokens/USDG.sol";
 import { IMintable } from "../tokens/MintableBaseToken.sol";
 import { Governable } from "../access/Governable.sol";
 
-interface IGlpManager {
-    function glp() external view returns (address);
+interface IDlpManager {
+    function dlp() external view returns (address);
     function usdg() external view returns (address);
     function vault() external view returns (IVault);
     function cooldownDuration() external returns (uint256);
     function getAumInUsdg(bool maximise) external view returns (uint256);
     function lastAddedAt(address _account) external returns (uint256);
-    function addLiquidity(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp) external returns (uint256);
-    function addLiquidityForAccount(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp) external returns (uint256);
-    function removeLiquidity(address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver) external returns (uint256);
-    function removeLiquidityForAccount(address _account, address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver) external returns (uint256);
+    function addLiquidity(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minDlp) external returns (uint256);
+    function addLiquidityForAccount(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minDlp) external returns (uint256);
+    function removeLiquidity(address _tokenOut, uint256 _dlpAmount, uint256 _minOut, address _receiver) external returns (uint256);
+    function removeLiquidityForAccount(address _account, address _tokenOut, uint256 _dlpAmount, uint256 _minOut, address _receiver) external returns (uint256);
     function setShortsTrackerAveragePriceWeight(uint256 _shortsTrackerAveragePriceWeight) external;
     function setCooldownDuration(uint256 _cooldownDuration) external;
 }
 
-contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
+contract DlpManager is ReentrancyGuard, Governable, IDlpManager {
     using SafeERC20 for IERC20;
 
     uint256 public constant PRICE_PRECISION = 10 ** 30;
     uint256 public constant USDG_DECIMALS = 18;
-    uint256 public constant GLP_PRECISION = 10 ** 18;
+    uint256 public constant DLP_PRECISION = 10 ** 18;
     uint256 public constant MAX_COOLDOWN_DURATION = 48 hours;
     uint256 public constant BASIS_POINTS_DIVISOR = 10000;
 
     IVault public override vault;
     IShortsTracker public shortsTracker;
     address public override usdg;
-    address public override glp;
+    address public override dlp;
 
     uint256 public override cooldownDuration;
     mapping (address => uint256) public override lastAddedAt;
@@ -55,7 +55,7 @@ contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
         address token,
         uint256 amount,
         uint256 aumInUsdg,
-        uint256 glpSupply,
+        uint256 dlpSupply,
         uint256 usdgAmount,
         uint256 mintAmount
     );
@@ -63,18 +63,18 @@ contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
     event RemoveLiquidity(
         address account,
         address token,
-        uint256 glpAmount,
+        uint256 dlpAmount,
         uint256 aumInUsdg,
-        uint256 glpSupply,
+        uint256 dlpSupply,
         uint256 usdgAmount,
         uint256 amountOut
     );
 
-    constructor(address _vault, address _usdg, address _glp, address _shortsTracker, uint256 _cooldownDuration) {
+    constructor(address _vault, address _usdg, address _dlp, address _shortsTracker, uint256 _cooldownDuration) {
         gov = msg.sender;
         vault = IVault(_vault);
         usdg = _usdg;
-        glp = _glp;
+        dlp = _dlp;
         shortsTracker = IShortsTracker(_shortsTracker);
         cooldownDuration = _cooldownDuration;
     }
@@ -88,7 +88,7 @@ contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
     }
 
     function setShortsTrackerAveragePriceWeight(uint256 _shortsTrackerAveragePriceWeight) external override onlyGov {
-        require(shortsTrackerAveragePriceWeight <= BASIS_POINTS_DIVISOR, "GlpManager: invalid weight");
+        require(shortsTrackerAveragePriceWeight <= BASIS_POINTS_DIVISOR, "DlpManager: invalid weight");
         shortsTrackerAveragePriceWeight = _shortsTrackerAveragePriceWeight;
     }
 
@@ -97,7 +97,7 @@ contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
     }
 
     function setCooldownDuration(uint256 _cooldownDuration) external override onlyGov {
-        require(_cooldownDuration <= MAX_COOLDOWN_DURATION, "GlpManager: invalid _cooldownDuration");
+        require(_cooldownDuration <= MAX_COOLDOWN_DURATION, "DlpManager: invalid _cooldownDuration");
         cooldownDuration = _cooldownDuration;
     }
 
@@ -106,30 +106,30 @@ contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
         aumDeduction = _aumDeduction;
     }
 
-    function addLiquidity(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp) external override nonReentrant returns (uint256) {
-        if (inPrivateMode) { revert("GlpManager: action not enabled"); }
-        return _addLiquidity(msg.sender, msg.sender, _token, _amount, _minUsdg, _minGlp);
+    function addLiquidity(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minDlp) external override nonReentrant returns (uint256) {
+        if (inPrivateMode) { revert("DlpManager: action not enabled"); }
+        return _addLiquidity(msg.sender, msg.sender, _token, _amount, _minUsdg, _minDlp);
     }
 
-    function addLiquidityForAccount(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp) external override nonReentrant returns (uint256) {
+    function addLiquidityForAccount(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minDlp) external override nonReentrant returns (uint256) {
         _validateHandler();
-        return _addLiquidity(_fundingAccount, _account, _token, _amount, _minUsdg, _minGlp);
+        return _addLiquidity(_fundingAccount, _account, _token, _amount, _minUsdg, _minDlp);
     }
 
-    function removeLiquidity(address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver) external override nonReentrant returns (uint256) {
-        if (inPrivateMode) { revert("GlpManager: action not enabled"); }
-        return _removeLiquidity(msg.sender, _tokenOut, _glpAmount, _minOut, _receiver);
+    function removeLiquidity(address _tokenOut, uint256 _dlpAmount, uint256 _minOut, address _receiver) external override nonReentrant returns (uint256) {
+        if (inPrivateMode) { revert("DlpManager: action not enabled"); }
+        return _removeLiquidity(msg.sender, _tokenOut, _dlpAmount, _minOut, _receiver);
     }
 
-    function removeLiquidityForAccount(address _account, address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver) external override nonReentrant returns (uint256) {
+    function removeLiquidityForAccount(address _account, address _tokenOut, uint256 _dlpAmount, uint256 _minOut, address _receiver) external override nonReentrant returns (uint256) {
         _validateHandler();
-        return _removeLiquidity(_account, _tokenOut, _glpAmount, _minOut, _receiver);
+        return _removeLiquidity(_account, _tokenOut, _dlpAmount, _minOut, _receiver);
     }
 
     function getPrice(bool _maximise) external view returns (uint256) {
         uint256 aum = getAum(_maximise);
-        uint256 supply = IERC20(glp).totalSupply();
-        return (aum*(GLP_PRECISION))/(supply);
+        uint256 supply = IERC20(dlp).totalSupply();
+        return (aum*(DLP_PRECISION))/(supply);
     }
 
     function getAums() public view returns (uint256[] memory) {
@@ -217,55 +217,55 @@ contract GlpManager is ReentrancyGuard, Governable, IGlpManager {
             /(BASIS_POINTS_DIVISOR);
     }
 
-    function _addLiquidity(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp) private returns (uint256) {
-        require(_amount > 0, "GlpManager: invalid _amount");
+    function _addLiquidity(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minDlp) private returns (uint256) {
+        require(_amount > 0, "DlpManager: invalid _amount");
 
         // calculate aum before buyUSDG
         uint256 aumInUsdg = getAumInUsdg(true);
-        uint256 glpSupply = IERC20(glp).totalSupply();
+        uint256 dlpSupply = IERC20(dlp).totalSupply();
 
         IERC20(_token).safeTransferFrom(_fundingAccount, address(vault), _amount);
         uint256 usdgAmount = vault.buyUSDG(_token, address(this));
-        require(usdgAmount >= _minUsdg, "GlpManager: insufficient USDG output");
+        require(usdgAmount >= _minUsdg, "DlpManager: insufficient USDG output");
 
-        uint256 mintAmount = aumInUsdg == 0 ? usdgAmount : (usdgAmount*(glpSupply))/(aumInUsdg);
-        require(mintAmount >= _minGlp, "GlpManager: insufficient GLP output");
+        uint256 mintAmount = aumInUsdg == 0 ? usdgAmount : (usdgAmount*(dlpSupply))/(aumInUsdg);
+        require(mintAmount >= _minDlp, "DlpManager: insufficient DLP output");
 
-        IMintable(glp).mint(_account, mintAmount);
+        IMintable(dlp).mint(_account, mintAmount);
 
         lastAddedAt[_account] = block.timestamp;
 
-        emit AddLiquidity(_account, _token, _amount, aumInUsdg, glpSupply, usdgAmount, mintAmount);
+        emit AddLiquidity(_account, _token, _amount, aumInUsdg, dlpSupply, usdgAmount, mintAmount);
 
         return mintAmount;
     }
 
-    function _removeLiquidity(address _account, address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver) private returns (uint256) {
-        require(_glpAmount > 0, "GlpManager: invalid _glpAmount");
-        require(lastAddedAt[_account]+(cooldownDuration) <= block.timestamp, "GlpManager: cooldown duration not yet passed");
+    function _removeLiquidity(address _account, address _tokenOut, uint256 _dlpAmount, uint256 _minOut, address _receiver) private returns (uint256) {
+        require(_dlpAmount > 0, "DlpManager: invalid _dlpAmount");
+        require(lastAddedAt[_account]+(cooldownDuration) <= block.timestamp, "DlpManager: cooldown duration not yet passed");
 
         // calculate aum before sellUSDG
         uint256 aumInUsdg = getAumInUsdg(false);
-        uint256 glpSupply = IERC20(glp).totalSupply();
+        uint256 dlpSupply = IERC20(dlp).totalSupply();
 
-        uint256 usdgAmount = (_glpAmount*(aumInUsdg))/(glpSupply);
+        uint256 usdgAmount = (_dlpAmount*(aumInUsdg))/(dlpSupply);
         uint256 usdgBalance = IERC20(usdg).balanceOf(address(this));
         if (usdgAmount > usdgBalance) {
             IUSDG(usdg).mint(address(this), usdgAmount-(usdgBalance));
         }
 
-        IMintable(glp).burn(_account, _glpAmount);
+        IMintable(dlp).burn(_account, _dlpAmount);
 
         IERC20(usdg).transfer(address(vault), usdgAmount);
         uint256 amountOut = vault.sellUSDG(_tokenOut, _receiver);
-        require(amountOut >= _minOut, "GlpManager: insufficient output");
+        require(amountOut >= _minOut, "DlpManager: insufficient output");
 
-        emit RemoveLiquidity(_account, _tokenOut, _glpAmount, aumInUsdg, glpSupply, usdgAmount, amountOut);
+        emit RemoveLiquidity(_account, _tokenOut, _dlpAmount, aumInUsdg, dlpSupply, usdgAmount, amountOut);
 
         return amountOut;
     }
 
     function _validateHandler() private view {
-        require(isHandler[msg.sender], "GlpManager: forbidden");
+        require(isHandler[msg.sender], "DlpManager: forbidden");
     }
 }
