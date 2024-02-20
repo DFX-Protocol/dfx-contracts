@@ -269,18 +269,19 @@ contract FastPriceFeed is ISecondaryPriceFeed, IFastPriceFeed, Governable {
     }
 
     function setPricesWithBitsAndExecute(
-        address _positionRouter,
-        uint256 _priceBits,
-        uint256 _timestamp,
-        uint256 _endIndexForIncreasePositions,
-        uint256 _endIndexForDecreasePositions,
-        uint256 _maxIncreasePositions,
-        uint256 _maxDecreasePositions
+        address _positionRouter, // OK
+        uint256 _priceBits, // OK
+        uint256 _timestamp, // OK
+        uint256 _endIndexForIncreasePositions, // positionRouter.increasePositionRequestKeysStart() <- Read once and then handled by the PositionKeeper
+        uint256 _endIndexForDecreasePositions, // same for Decrese
+        uint256 _maxIncreasePositions, // ???   = 1 // Max Amount of Positions to process
+        uint256 _maxDecreasePositions // ??? = 10000 // Max Amount of Positions to process
     ) external onlyUpdater {
         _setPricesWithBits(_priceBits, _timestamp);
 
+        // positionRouter.increasePositionRequestKeysStart() = 6
         IPositionRouter positionRouter = IPositionRouter(_positionRouter);
-        uint256 maxEndIndexForIncrease = positionRouter.increasePositionRequestKeysStart()+(_maxIncreasePositions);
+        uint256 maxEndIndexForIncrease = positionRouter.increasePositionRequestKeysStart()+(_maxIncreasePositions); // = 7
         uint256 maxEndIndexForDecrease = positionRouter.decreasePositionRequestKeysStart()+(_maxDecreasePositions);
 
         if (_endIndexForIncreasePositions > maxEndIndexForIncrease) {
@@ -291,7 +292,7 @@ contract FastPriceFeed is ISecondaryPriceFeed, IFastPriceFeed, Governable {
             _endIndexForDecreasePositions = maxEndIndexForDecrease;
         }
 
-        positionRouter.executeIncreasePositions(_endIndexForIncreasePositions, payable(msg.sender));
+        positionRouter.executeIncreasePositions(_endIndexForIncreasePositions, payable(msg.sender)); // 506
         positionRouter.executeDecreasePositions(_endIndexForDecreasePositions, payable(msg.sender));
     }
 

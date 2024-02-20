@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@solidstate/hardhat-bytecode-exporter";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
@@ -27,22 +28,29 @@ const pa: PageAssigner = (item, file, config) =>
 
 const config = {
 	abiExporter:
-		[
-			{
-				runOnCompile: true,
-				path: "./abi/json",
-				clear: true,
-				flat: false,
-				format: "json"
-			},
-			{
-				runOnCompile: true,
-				path: "./abi/compact",
-				clear: true,
-				flat: false,
-				format: "fullName"
-			}
-		],
+	[
+		{
+			runOnCompile: true,
+			path: "./abi/json",
+			clear: true,
+			flat: false,
+			format: "json"
+		},
+		{
+			runOnCompile: true,
+			path: "./abi/compact",
+			clear: true,
+			flat: false,
+			format: "fullName"
+		}
+	],
+	bytecodeExporter:
+	{
+		runOnCompile: true,
+		path: "./bytecode",
+		clear: true,
+		flat: false
+	},
 	contractSizer:
 	{
 		runOnCompile: true,
@@ -67,7 +75,7 @@ const config = {
 				network: "baseSepolia",
 				chainId: 84532,
 				urls: {
-					apiURL: "https://api-sepolia.basescan.org",
+					apiURL: "https://api-sepolia.basescan.org/api",
 					browserURL: "https://sepolia.basescan.org"
 				}
 			}

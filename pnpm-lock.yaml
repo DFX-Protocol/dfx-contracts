@@ -19,6 +19,9 @@ devDependencies:
   '@nomicfoundation/hardhat-toolbox':
     specifier: ^2.0.2
     version: 2.0.2(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.10)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.8)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.11)(@types/mocha@10.0.6)(@types/node@20.10.5)(chai@4.3.10)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.19.3)(solidity-coverage@0.8.5)(ts-node@10.9.2)(typechain@8.3.2)(typescript@5.3.3)
+  '@solidstate/hardhat-bytecode-exporter':
+    specifier: ^1.1.1
+    version: 1.1.1(hardhat@2.19.3)
   '@typescript-eslint/eslint-plugin':
     specifier: ^5.59.11
     version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.56.0)(typescript@5.3.3)
@@ -1216,6 +1219,16 @@ packages:
     resolution: {integrity: sha512-PI9NfoA3P8XK2VBkK5oIfRgKDsicwDZfkVq9ZTBCQYGOP1N2owgY2dyLGyU5/J/hQs8KRk55kdmvTLjy3Mu3vg==}
     dependencies:
       antlr4ts: 0.5.0-alpha.4
+    dev: true
+
+  /@solidstate/hardhat-bytecode-exporter@1.1.1(hardhat@2.19.3):
+    resolution: {integrity: sha512-/gJevnOMXSoVLMeUifqgUFDQ1mFIcr4BYrmZ4KrpMGc2Ynv2Q5TZcgDvkkzEe4Ub15c/TkCqZBrMPaC0P5LHAQ==}
+    engines: {node: '>=14.14.0'}
+    peerDependencies:
+      hardhat: ^2.0.0
+    dependencies:
+      delete-empty: 3.0.0
+      hardhat: 2.19.3(ts-node@10.9.2)(typescript@5.3.3)
     dev: true
 
   /@tsconfig/node10@1.0.9:
